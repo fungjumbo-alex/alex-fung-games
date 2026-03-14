@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bubble Shooter</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; background: linear-gradient(180deg, #1a1a3e 0%, #0f0f23 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; color: #fff; }
+        h1 { margin: 10px 0; }
+        .info { margin-bottom: 10px; font-size: 1.2em; }
+        canvas { border-radius: 10px; background: linear-gradient(180deg, #2a2a5a 0%, #1a1a3e 100%); }
+        button { margin-top: 15px; padding: 10px 25px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; background: #e74c3c; color: white; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <h1>🫧 Bubble Shooter</h1>
+    <div class="info">Score: <b id="score">0</b></div>
+    <canvas id="game" width="320" height="480"></canvas>
+    <button onclick="init()">🔄 New Game</button>
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const R = 18, COLS = 8, ROWS = 10;
+        const COLORS = ['#e74c3c', '#3498db', '#27ae60', '#f1c40f', '#9b59b6'];
+        let grid, shooter, nextColor, score, over;
+
+        function init() {
+            grid = [];
+            for (let r = 0; r < 5; r++) {
+                grid[r] = [];
+                for (let c = 0; c < COLS; c++) {
+                    grid[r][c] = Math.random() < 0.7 ? COLORS[Math.floor(Math.random() * COLORS.length)] : null;
+                }
+            }
+            for (let r = 5; r < ROWS + 5; r++) grid[r] = Array(COLS).fill(null);
+            
+            shooter = { x: canvas.width / 2, y: canvas.height - 40, angle: -Math.PI / 2 };
+            nextColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+            score = 0;
+            over = false;
+            document.getElementById('score').textContent = 0;
+            draw();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Grid bubbles
+            for (let r = 0; r < ROWS + 5; r++) {
+                const offset = r % 2 === 0 ? 0 : R;
+                for (let c = 0; c < COLS; c++) {
+                    if (grid[r] && grid[r][c]) {
+                        ctx.beginPath();
+                        ctx.arc(offset + c * R * 2 + R, r * R * 1.7 + R, R - 2, 0, Math.PI * 2);
+                        ctx.fillStyle = grid[r][c];
+                        ctx.fill();
+                    }
+                }
+            }
+            
+            // Shooter
+            ctx.beginPath();
+            ctx.arc(shooter.x, shooter.y, R, 0, Math.PI * 2);
+            ctx.fillStyle = nextColor;
+            ctx.fill();
+            
+            // Aim line
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.beginPath();
+            ctx.moveTo(shooter.x, shooter.y);
+            ctx.lineTo(shooter.x + Math.cos(shooter.angle) * 100, shooter.y + Math.sin(shooter.angle) * 100);
+            ctx.stroke();
+        }
+
+        function shoot(tx, ty) {
+            if (over) return;
+            const angle = Math.atan2(ty - shooter.y, tx - shooter.x);
+            let x = shooter.x, y = shooter.y;
+            const dx = Math.cos(angle) * 8, dy = Math.sin(angle) * 8;
+            
+            function animate() {
+                x += dx;
+                y += dy;
+                
+                // Bounce off walls
+                if (x < R || x > canvas.width - R) return;
+                
+                // Hit top
+                if (y < R) {
+                    placeBubble(x, y);
+                    return;
+                }
+                
+                // Check collision
+                for (let r = 0; r < ROWS + 5; r++) {
+                    const offset = r % 2 === 0 ? 0 : R;
+                    for (let c = 0; c < COLS; c++) {
+                        if (grid[r] && grid[r][c]) {
+                            const bx = offset + c * R * 2 + R;
+                            const by = r * R * 1.7 + R;
+                            const dist = Math.hypot(x - bx, y - by);
+                            if (dist < R * 2) {
+                                placeBubble(x, y);
+                                return;
+                            }
+                        }
+                    }
+                }
+                
+                ctx.beginPath();
+                ctx.arc(x, y, R, 0, Math.PI * 2);
+                ctx.fillStyle = nextColor;
+                ctx.fill();
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        function placeBubble(x, y) {
+            const r = Math.floor(y / (R * 1.7));
+            const offset = r % 2 === 0 ? 0 : R;
+            const c = Math.floor((x - offset) / (R * 2));
+            
+            if (r >= 0 && r < ROWS + 5 && c >= 0 && c < COLS) {
+                if (!grid[r]) grid[r] = Array(COLS).fill(null);
+                grid[r][c] = nextColor;
+                checkMatches(r, c);
+            }
+            
+            nextColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+            draw();
+        }
+
+        function checkMatches(r, c) {
+            const color = grid[r][c];
+            if (!color) return;
+            
+            const matches = [];
+            function flood(rr, cc) {
+                if (rr < 0 || rr >= ROWS + 5 || cc < 0 || cc >= COLS) return;
+                if (!grid[rr] || grid[rr][cc] !== color) return;
+                if (matches.some(m => m.r === rr && m.c === cc)) return;
+                matches.push({ r: rr, c: cc });
+                const offset = rr % 2 === 0 ? -1 : 0;
+                flood(rr - 1, cc + offset);
+                flood(rr - 1, cc + offset + 1);
+                flood(rr + 1, cc + offset);
+                flood(rr + 1, cc + offset + 1);
+                flood(rr, cc - 1);
+                flood(rr, cc + 1);
+            }
+            flood(r, c);
+            
+            if (matches.length >= 3) {
+                matches.forEach(m => grid[m.r][m.c] = null);
+                score += matches.length * 10;
+                document.getElementById('score').textContent = score;
+            }
+        }
+
+        canvas.addEventListener('click', e => {
+            const rect = canvas.getBoundingClientRect();
+            shoot(e.clientX - rect.left, e.clientY - rect.top);
+        });
+
+        canvas.addEventListener('mousemove', e => {
+            const rect = canvas.getBoundingClientRect();
+            shooter.angle = Math.atan2(e.clientY - rect.top - shooter.y, e.clientX - rect.left - shooter.x);
+            draw();
+        });
+
+        init();
+    </script>
+</body>
+</html>

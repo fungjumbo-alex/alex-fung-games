@@ -1,0 +1,5 @@
+# Allow only game files - exclude everything else
+/*
+!.gitignore
+!*.html
+!README.md

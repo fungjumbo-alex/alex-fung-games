@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mastermind</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; color: #fff; }
+        h1 { margin: 10px 0; }
+        .info { margin-bottom: 10px; font-size: 1.1em; }
+        .board { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
+        .row { display: flex; gap: 10px; align-items: center; }
+        .peg { width: 35px; height: 35px; border-radius: 50%; background: #333; border: 2px solid #555; }
+        .peg.filled { box-shadow: inset 0 -3px 8px rgba(0,0,0,0.4); }
+        .feedback { display: flex; gap: 3px; flex-wrap: wrap; width: 35px; }
+        .fb { width: 14px; height: 14px; border-radius: 50%; background: #333; }
+        .fb.black { background: #111; }
+        .fb.white { background: #fff; }
+        .colors { display: flex; gap: 8px; margin: 15px 0; }
+        .color { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; }
+        .color:hover { transform: scale(1.1); }
+        .color.selected { border-color: #fff; }
+        button { margin-top: 10px; padding: 10px 25px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #e74c3c; color: white; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <h1>🔐 Mastermind</h1>
+    <div class="info">Guess the 4-color code in 10 tries</div>
+    <div class="board" id="board"></div>
+    <div class="colors" id="colors"></div>
+    <button onclick="check()">✓ Check</button>
+    <button onclick="init()">🔄 New</button>
+
+    <script>
+        const COLORS = ['#e74c3c', '#3498db', '#27ae60', '#f1c40f', '#9b59b6', '#e67e22'];
+        let secret, guesses, current, selectedColor, over;
+
+        function init() {
+            secret = [];
+            for (let i = 0; i < 4; i++) secret.push(Math.floor(Math.random() * COLORS.length));
+            guesses = [];
+            current = [null, null, null, null];
+            selectedColor = 0;
+            over = false;
+            render();
+        }
+
+        function render() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            
+            // Past guesses
+            guesses.forEach(g => {
+                const row = document.createElement('div');
+                row.className = 'row';
+                g.guess.forEach(c => {
+                    const peg = document.createElement('div');
+                    peg.className = 'peg filled';
+                    peg.style.background = COLORS[c];
+                    row.appendChild(peg);
+                });
+                const fb = document.createElement('div');
+                fb.className = 'feedback';
+                for (let i = 0; i < g.black; i++) fb.innerHTML += '<div class="fb black"></div>';
+                for (let i = 0; i < g.white; i++) fb.innerHTML += '<div class="fb white"></div>';
+                row.appendChild(fb);
+                board.appendChild(row);
+            });
+            
+            // Current guess
+            if (!over && guesses.length < 10) {
+                const row = document.createElement('div');
+                row.className = 'row';
+                current.forEach((c, i) => {
+                    const peg = document.createElement('div');
+                    peg.className = 'peg' + (c !== null ? ' filled' : '');
+                    if (c !== null) peg.style.background = COLORS[c];
+                    peg.onclick = () => { current[i] = selectedColor; render(); };
+                    row.appendChild(peg);
+                });
+                row.appendChild(document.createElement('div')).className = 'feedback';
+                board.appendChild(row);
+            }
+
+            // Color picker
+            const colorsEl = document.getElementById('colors');
+            colorsEl.innerHTML = '';
+            COLORS.forEach((c, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'color' + (i === selectedColor ? ' selected' : '');
+                btn.style.background = c;
+                btn.onclick = () => { selectedColor = i; render(); };
+                colorsEl.appendChild(btn);
+            });
+        }
+
+        function check() {
+            if (over || current.includes(null)) return;
+            
+            const guess = [...current];
+            let black = 0, white = 0;
+            const sCopy = [...secret];
+            const gCopy = [...guess];
+            
+            // Count black (correct position)
+            for (let i = 0; i < 4; i++) {
+                if (gCopy[i] === sCopy[i]) {
+                    black++;
+                    sCopy[i] = gCopy[i] = null;
+                }
+            }
+            
+            // Count white (wrong position)
+            for (let i = 0; i < 4; i++) {
+                if (gCopy[i] !== null) {
+                    const idx = sCopy.indexOf(gCopy[i]);
+                    if (idx !== -1) {
+                        white++;
+                        sCopy[idx] = null;
+                    }
+                }
+            }
+            
+            guesses.push({ guess, black, white });
+            
+            if (black === 4) {
+                over = true;
+                setTimeout(() => alert('🎉 You cracked the code!'), 100);
+            } else if (guesses.length >= 10) {
+                over = true;
+                setTimeout(() => alert('💀 Game Over! Code was: ' + secret.map(i => COLORS[i]).join(' ')), 100);
+            }
+            
+            current = [null, null, null, null];
+            render();
+        }
+
+        init();
+    </script>
+</body>
+</html>

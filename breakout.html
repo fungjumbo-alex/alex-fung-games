@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Breakout</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; color: #fff; }
+        h1 { margin: 10px 0; font-size: 1.5em; }
+        .info { display: flex; gap: 20px; margin-bottom: 10px; }
+        canvas { border-radius: 10px; background: #0a0a1a; touch-action: none; }
+        .controls { display: flex; gap: 10px; margin-top: 10px; }
+        button { padding: 10px 20px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #e74c3c; color: white; font-weight: bold; }
+        .touch-btns { display: flex; gap: 10px; margin-top: 10px; }
+        .touch-btn { width: 60px; height: 60px; font-size: 24px; background: rgba(255,255,255,0.2); border: none; border-radius: 10px; color: #fff; }
+    </style>
+</head>
+<body>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <h1>🧱 Breakout</h1>
+    <div class="info"><span>Score: <b id="score">0</b></span><span>Lives: <b id="lives">3</b></span></div>
+    <canvas id="game" width="360" height="480"></canvas>
+    <div class="controls"><button onclick="startGame()">Start</button></div>
+    <div class="touch-btns"><button class="touch-btn" id="left">⬅️</button><button class="touch-btn" id="right">➡️</button></div>
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        let paddle, ball, bricks, score, lives, gameLoop, running;
+        const brickRows = 5, brickCols = 8;
+        const brickW = 40, brickH = 15, brickPad = 4;
+        const colors = ['#e74c3c','#e67e22','#f1c40f','#27ae60','#3498db'];
+
+        function init() {
+            paddle = { x: 155, y: 460, w: 70, h: 10, speed: 8 };
+            ball = { x: 190, y: 300, r: 6, dx: 4, dy: -4 };
+            bricks = [];
+            for (let r = 0; r < brickRows; r++) {
+                bricks[r] = [];
+                for (let c = 0; c < brickCols; c++) {
+                    bricks[r][c] = { x: 10 + c * (brickW + brickPad), y: 50 + r * (brickH + brickPad), alive: true, color: colors[r] };
+                }
+            }
+            score = 0; lives = 3; running = false;
+            document.getElementById('score').textContent = score;
+            document.getElementById('lives').textContent = lives;
+            draw();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Bricks
+            for (let r = 0; r < brickRows; r++) {
+                for (let c = 0; c < brickCols; c++) {
+                    if (bricks[r][c].alive) {
+                        ctx.fillStyle = bricks[r][c].color;
+                        ctx.fillRect(bricks[r][c].x, bricks[r][c].y, brickW, brickH);
+                    }
+                }
+            }
+            // Paddle
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(paddle.x, paddle.y, paddle.w, paddle.h);
+            // Ball
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+        }
+
+        function update() {
+            if (!running) return;
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+
+            // Wall collision
+            if (ball.x - ball.r < 0 || ball.x + ball.r > canvas.width) ball.dx = -ball.dx;
+            if (ball.y - ball.r < 0) ball.dy = -ball.dy;
+
+            // Paddle collision
+            if (ball.y + ball.r > paddle.y && ball.x > paddle.x && ball.x < paddle.x + paddle.w) {
+                ball.dy = -Math.abs(ball.dy);
+                ball.dx = (ball.x - (paddle.x + paddle.w / 2)) / 10 * 4;
+            }
+
+            // Bottom - lose life
+            if (ball.y + ball.r > canvas.height) {
+                lives--;
+                document.getElementById('lives').textContent = lives;
+                if (lives <= 0) { running = false; alert('Game Over! Score: ' + score); return; }
+                ball.x = paddle.x + paddle.w / 2;
+                ball.y = paddle.y - 20;
+            }
+
+            // Brick collision
+            for (let r = 0; r < brickRows; r++) {
+                for (let c = 0; c < brickCols; c++) {
+                    const b = bricks[r][c];
+                    if (b.alive && ball.x > b.x && ball.x < b.x + brickW && ball.y > b.y && ball.y < b.y + brickH) {
+                        ball.dy = -ball.dy;
+                        b.alive = false;
+                        score += 10;
+                        document.getElementById('score').textContent = score;
+                    }
+                }
+            }
+            draw();
+            if (running) requestAnimationFrame(update);
+        }
+
+        function startGame() {
+            init();
+            running = true;
+            update();
+        }
+
+        // Keyboard
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft' && paddle.x > 0) paddle.x -= paddle.speed;
+            if (e.key === 'ArrowRight' && paddle.x < canvas.width - paddle.w) paddle.x += paddle.speed;
+        });
+
+        // Touch
+        document.getElementById('left').addEventListener('touchstart', () => { if (paddle.x > 0) paddle.x -= paddle.speed * 3; });
+        document.getElementById('right').addEventListener('touchstart', () => { if (paddle.x < canvas.width - paddle.w) paddle.x += paddle.speed * 3; });
+
+        init();
+    </script>
+</body>
+</html>

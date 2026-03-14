@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Simon Says</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; color: #fff; }
+        h1 { margin-bottom: 15px; text-shadow: 0 0 20px rgba(255,255,255,0.3); }
+        .info { margin-bottom: 15px; font-size: 1.3em; background: rgba(255,255,255,0.1); padding: 8px 25px; border-radius: 20px; }
+        .game { display: grid; grid-template-columns: repeat(2, 110px); gap: 12px; padding: 20px; background: #111; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.5); }
+        .btn { width: 110px; height: 110px; border: none; border-radius: 12px; cursor: pointer; opacity: 0.5; transition: all 0.1s; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .btn.active { opacity: 1; transform: scale(0.95); box-shadow: 0 0 30px currentColor; }
+        .btn:active { opacity: 1; transform: scale(0.95); }
+        #btn0 { background: radial-gradient(circle at 30% 30%, #2ecc71, #27ae60); color: #27ae60; }
+        #btn1 { background: radial-gradient(circle at 30% 30%, #e74c3c, #c0392b); color: #e74c3c; }
+        #btn2 { background: radial-gradient(circle at 30% 30%, #f1c40f, #f39c12); color: #f1c40f; }
+        #btn3 { background: radial-gradient(circle at 30% 30%, #3498db, #2980b9); color: #3498db; }
+        .controls { margin-top: 15px; }
+        button { padding: 12px 30px; font-size: 16px; border: none; border-radius: 10px; cursor: pointer; background: linear-gradient(145deg, #fff, #eee); color: #1a1a2e; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        #message { margin-top: 10px; min-height: 24px; font-size: 1.1em; }
+    </style>
+</head>
+<body>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <h1>🎵 Simon Says</h1>
+    <div class="info">Level: <b id="level">0</b></div>
+    <div class="game">
+        <button class="btn" id="btn0"></button>
+        <button class="btn" id="btn1"></button>
+        <button class="btn" id="btn2"></button>
+        <button class="btn" id="btn3"></button>
+    </div>
+    <div id="message">Press Start to play</div>
+    <div class="controls"><button onclick="startGame()">▶️ Start</button></div>
+    <script>
+        let sequence = [], playerSeq = [], level = 0, playing = false, canClick = false;
+        const btns = ['btn0', 'btn1', 'btn2', 'btn3'];
+        const freqs = [329.63, 261.63, 220, 164.81]; // E4, C4, A3, E3
+
+        // Web Audio API
+        let audioCtx;
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function playSound(btnIndex, duration = 300) {
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.value = freqs[btnIndex];
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration / 1000);
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + duration / 1000);
+        }
+
+        function playError() {
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.value = 100;
+            osc.type = 'sawtooth';
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.5);
+        }
+
+        function flash(i, dur = 300) {
+            const btn = document.getElementById(btns[i]);
+            btn.classList.add('active');
+            playSound(i, dur);
+            setTimeout(() => btn.classList.remove('active'), dur);
+        }
+
+        async function playSequence() {
+            canClick = false;
+            document.getElementById('message').textContent = '👀 Watch...';
+            await new Promise(r => setTimeout(r, 600));
+            for (const i of sequence) {
+                flash(i, 400);
+                await new Promise(r => setTimeout(r, 500));
+            }
+            canClick = true;
+            playerSeq = [];
+            document.getElementById('message').textContent = '👆 Your turn!';
+        }
+
+        function handleClick(i) {
+            if (!canClick) return;
+            flash(i, 150);
+            playerSeq.push(i);
+
+            if (playerSeq[playerSeq.length - 1] !== sequence[playerSeq.length - 1]) {
+                playError();
+                document.getElementById('message').textContent = `💀 Game Over! Score: ${level}`;
+                playing = false;
+                return;
+            }
+
+            if (playerSeq.length === sequence.length) {
+                level++;
+                document.getElementById('level').textContent = level;
+                document.getElementById('message').textContent = '✅ Correct!';
+                setTimeout(() => {
+                    sequence.push(Math.floor(Math.random() * 4));
+                    playSequence();
+                }, 1000);
+            }
+        }
+
+        function startGame() {
+            sequence = [Math.floor(Math.random() * 4)];
+            playerSeq = [];
+            level = 1;
+            playing = true;
+            document.getElementById('level').textContent = level;
+            initAudio();
+            playSequence();
+        }
+
+        btns.forEach((id, i) => {
+            document.getElementById(id).addEventListener('click', () => handleClick(i));
+        });
+
+        // Init audio on first user interaction
+        document.addEventListener('click', initAudio, { once: true });
+    </script>
+</body>
+</html>

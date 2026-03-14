@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Yahtzee</title>
+    <style>
+        * { margin: 0; padding:0; box-sizing:border-box; }
+        body { font-family: sans-serif; background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:10px; color:#fff; }
+        h1 { margin:10px 0; }
+        .dice { display:flex; gap:10px; margin:15px 0; }
+        .die { width:60px; height:60px; background:#fff; border-radius:10px; display:flex; justify-content:center; align-items:center; font-size:28px; font-weight:bold; cursor:pointer; color:#333; box-shadow:0 3px 10px rgba(0,0,0,0.3); }
+        .die.held { background:#f1c40f; }
+        .die.rolled { animation:shake 0.3s; }
+        @keyframes shake { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-10deg)} 75%{transform:rotate(10deg)} }
+        .info { margin:10px 0; font-size:1.1em; }
+        .controls { display:flex; gap:10px; margin:10px 0; }
+        button { padding:12px 25px; font-size:16px; border:none; border-radius:8px; cursor:pointer; background:#e74c3c; color:#fff; font-weight:bold; }
+        button:disabled { background:#666; cursor:not-allowed; }
+        .scores { display:grid; grid-template-columns:repeat(2,1fr); gap:5px; max-width:320px; margin-top:10px; }
+        .score-btn { padding:8px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:5px; cursor:pointer; font-size:12px; }
+        .score-btn:hover { background:rgba(255,255,255,0.2); }
+        .score-btn.used { background:#27ae60; cursor:default; }
+        .total { margin-top:15px; font-size:1.5em; font-weight:bold; }
+    </style>
+</head>
+<body>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <h1>🎲 Yahtzee</h1>
+    <div class="dice" id="dice"></div>
+    <div class="info">Rolls left: <b id="rolls">3</b></div>
+    <div class="controls"><button id="rollBtn" onclick="roll()">🎲 Roll</button></div>
+    <div class="scores" id="scores"></div>
+    <div class="total">Total: <b id="total">0</b></div>
+
+    <script>
+        let dice = [0,0,0,0,0], held = [false,false,false,false,false], rollsLeft = 3;
+        let scores = {};
+        const CATEGORIES = [
+            {id:'ones',name:'Ones',fn:ds=>ds.filter(d=>d===1).length*1},
+            {id:'twos',name:'Twos',fn:ds=>ds.filter(d=>d===2).length*2},
+            {id:'threes',name:'Threes',fn:ds=>ds.filter(d=>d===3).length*3},
+            {id:'fours',name:'Fours',fn:ds=>ds.filter(d=>d===4).length*4},
+            {id:'fives',name:'Fives',fn:ds=>ds.filter(d=>d===5).length*5},
+            {id:'sixes',name:'Sixes',fn:ds=>ds.filter(d=>d===6).length*6},
+            {id:'3kind',name:'3 of Kind',fn:ds=>Object.values(count(ds)).some(c=>c>=3)?sum(ds):0},
+            {id:'4kind',name:'4 of Kind',fn:ds=>Object.values(count(ds)).some(c=>c>=4)?sum(ds):0},
+            {id:'fh',name:'Full House',fn:ds=>{const c=Object.values(count(ds));return c.includes(3)&&c.includes(2)?25:0}},
+            {id:'ss',name:'Sm Straight',fn:ds=>hasSeq(ds,4)?30:0},
+            {id:'ls',name:'Lg Straight',fn:ds=>hasSeq(ds,5)?40:0},
+            {id:'yahtzee',name:'Yahtzee',fn:ds=>Object.values(count(ds)).includes(5)?50:0},
+            {id:'chance',name:'Chance',fn:ds=>sum(ds)}
+        ];
+
+        function count(ds) { const c={}; ds.forEach(d=>c[d]=(c[d]||0)+1); return c; }
+        function sum(ds) { return ds.reduce((a,b)=>a+b,0); }
+        function hasSeq(ds, len) {
+            const u = [...new Set(ds)].sort((a,b)=>a-b);
+            for (let i = 0; i <= u.length - len; i++) {
+                let seq = true;
+                for (let j = 1; j < len; j++) if (u[i+j] !== u[i] + j) seq = false;
+                if (seq) return true;
+            }
+            return false;
+        }
+
+        function init() {
+            dice = [1,2,3,4,5];
+            held = [false,false,false,false,false];
+            rollsLeft = 3;
+            scores = {};
+            CATEGORIES.forEach(c => scores[c.id] = null);
+            render();
+        }
+
+        function render() {
+            const diceEl = document.getElementById('dice');
+            diceEl.innerHTML = '';
+            dice.forEach((d, i) => {
+                const el = document.createElement('div');
+                el.className = 'die' + (held[i] ? ' held' : '');
+                el.textContent = d;
+                el.onclick = () => { if (rollsLeft < 3) { held[i] = !held[i]; render(); } };
+                diceEl.appendChild(el);
+            });
+
+            const scoresEl = document.getElementById('scores');
+            scoresEl.innerHTML = '';
+            let total = 0;
+            CATEGORIES.forEach(c => {
+                const el = document.createElement('div');
+                el.className = 'score-btn' + (scores[c.id] !== null ? ' used' : '');
+                const val = scores[c.id] !== null ? scores[c.id] : (rollsLeft < 3 ? c.fn(dice) : '-');
+                el.innerHTML = `<b>${c.name}</b><br>${val}`;
+                if (scores[c.id] === null && rollsLeft < 3) {
+                    el.onclick = () => { scores[c.id] = c.fn(dice); totalUp(); nextTurn(); };
+                }
+                scoresEl.appendChild(el);
+                if (scores[c.id] !== null) total += scores[c.id];
+            });
+
+            document.getElementById('rolls').textContent = rollsLeft;
+            document.getElementById('rollBtn').disabled = rollsLeft === 0;
+            document.getElementById('total').textContent = total;
+        }
+
+        function totalUp() {
+            let t = 0;
+            Object.values(scores).forEach(v => { if (v !== null) t += v; });
+            document.getElementById('total').textContent = t;
+        }
+
+        function roll() {
+            if (rollsLeft <= 0) return;
+            for (let i = 0; i < 5; i++) {
+                if (!held[i]) dice[i] = Math.floor(Math.random() * 6) + 1;
+            }
+            rollsLeft--;
+            render();
+        }
+
+        function nextTurn() {
+            dice = [1,2,3,4,5];
+            held = [false,false,false,false,false];
+            rollsLeft = 3;
+            render();
+            
+            if (Object.values(scores).every(v => v !== null)) {
+                let t = 0;
+                Object.values(scores).forEach(v => t += v);
+                setTimeout(() => alert(`🎉 Game Over! Final Score: ${t}`), 100);
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>

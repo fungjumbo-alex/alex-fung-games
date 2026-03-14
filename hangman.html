@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hangman</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; background: linear-gradient(135deg, #f5f5dc 0%, #deb887 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; color: #333; }
+        h1 { margin: 10px 0; }
+        .info { margin-bottom: 15px; font-size: 1.1em; }
+        .word { font-size: 2.5em; letter-spacing: 10px; margin: 20px 0; font-family: monospace; }
+        .keyboard { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; max-width: 350px; }
+        .key { width: 32px; height: 40px; border: 2px solid #333; background: #fff; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .key:hover { background: #eee; }
+        .key.used { background: #ccc; color: #999; cursor: not-allowed; }
+        .key.correct { background: #27ae60; color: #fff; border-color: #27ae60; }
+        .key.wrong { background: #e74c3c; color: #fff; border-color: #e74c3c; }
+        .hangman { font-size: 1.5em; font-family: monospace; white-space: pre; margin: 15px 0; }
+        button { margin-top: 15px; padding: 10px 25px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; background: #8b4513; color: white; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <h1>🎯 Hangman</h1>
+    <div class="info">Wrong guesses: <b id="wrong">0</b>/6</div>
+    <div class="hangman" id="hangman"></div>
+    <div class="word" id="word">_ _ _ _ _</div>
+    <div class="keyboard" id="keyboard"></div>
+    <button onclick="init()">🔄 New Game</button>
+
+    <script>
+        const WORDS = ['APPLE', 'BRAVE', 'CRANE', 'DREAM', 'EAGLE', 'FLAME', 'GRAPE', 'HOUSE', 'IMAGE', 'JUICE', 'KNIFE', 'LEMON', 'MANGO', 'NIGHT', 'OCEAN', 'PIANO', 'QUEEN', 'RIVER', 'STORM', 'TIGER', 'ULTRA', 'VOICE', 'WATER', 'YOUTH', 'ZEBRA', 'BRAIN', 'CLOUD', 'DANCE', 'EARTH', 'FROST'];
+        let word, guessed, wrong, over;
+        const STAGES = [
+            '  +---+\n  |   |\n      |\n      |\n      |\n      |\n=========',
+            '  +---+\n  |   |\n  O   |\n      |\n      |\n      |\n=========',
+            '  +---+\n  |   |\n  O   |\n  |   |\n      |\n      |\n=========',
+            '  +---+\n  |   |\n  O   |\n /|   |\n      |\n      |\n=========',
+            '  +---+\n  |   |\n  O   |\n /|\\  |\n      |\n      |\n=========',
+            '  +---+\n  |   |\n  O   |\n /|\\  |\n /    |\n      |\n=========',
+            '  +---+\n  |   |\n  O   |\n /|\\  |\n / \\  |\n      |\n========='
+        ];
+
+        function init() {
+            word = WORDS[Math.floor(Math.random() * WORDS.length)];
+            guessed = new Set();
+            wrong = 0;
+            over = false;
+            document.getElementById('wrong').textContent = '0';
+            renderKeyboard();
+            render();
+        }
+
+        function render() {
+            let display = word.split('').map(c => guessed.has(c) ? c : '_').join(' ');
+            document.getElementById('word').textContent = display;
+            document.getElementById('hangman').textContent = STAGES[wrong];
+            
+            if (!display.includes('_')) {
+                over = true;
+                setTimeout(() => alert('🎉 You won!'), 100);
+            } else if (wrong >= 6) {
+                over = true;
+                document.getElementById('word').textContent = word.split('').join(' ');
+                setTimeout(() => alert('💀 Game Over! Word was: ' + word), 100);
+            }
+        }
+
+        function guess(letter) {
+            if (over || guessed.has(letter)) return;
+            guessed.add(letter);
+            
+            if (word.includes(letter)) {
+                // Correct
+            } else {
+                wrong++;
+                document.getElementById('wrong').textContent = wrong;
+            }
+            
+            renderKeyboard();
+            render();
+        }
+
+        function renderKeyboard() {
+            const el = document.getElementById('keyboard');
+            el.innerHTML = '';
+            for (let i = 65; i <= 90; i++) {
+                const letter = String.fromCharCode(i);
+                const key = document.createElement('button');
+                key.className = 'key';
+                if (guessed.has(letter)) {
+                    key.classList.add(word.includes(letter) ? 'correct' : 'wrong');
+                }
+                key.textContent = letter;
+                key.onclick = () => guess(letter);
+                el.appendChild(key);
+            }
+        }
+
+        document.addEventListener('keydown', e => {
+            const letter = e.key.toUpperCase();
+            if (letter >= 'A' && letter <= 'Z') guess(letter);
+        });
+
+        init();
+    </script>
+</body>
+</html>

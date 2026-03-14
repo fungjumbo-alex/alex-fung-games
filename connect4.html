@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Connect Four</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; color: #fff; }
+        h1 { margin-bottom: 10px; }
+        .info { font-size: 1.2em; margin-bottom: 10px; }
+        .board-container { background: linear-gradient(145deg, #2980b9, #1a5276); padding: 15px; border-radius: 15px; box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
+        .board { display: grid; grid-template-columns: repeat(7, 50px); gap: 6px; }
+        .cell { width: 50px; height: 50px; background: radial-gradient(circle at 30% 30%, #1a3a5c, #0d1f30); border-radius: 50%; cursor: pointer; }
+        .cell:hover { background: radial-gradient(circle at 30% 30%, #2a4a6c, #1d2f40); }
+        .cell.red { background: radial-gradient(circle at 30% 30%, #ff6b6b, #c0392b); }
+        .cell.yellow { background: radial-gradient(circle at 30% 30%, #ffe66d, #f39c12); }
+        .cell.winning { animation: pulse 0.5s infinite alternate; }
+        @keyframes pulse { to { transform: scale(1.1); box-shadow: 0 0 20px #fff; } }
+        button { margin-top: 15px; padding: 10px 20px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #4a90d9; color: white; font-weight: bold; }
+        .score { margin-top: 10px; gap: 20px; font-size: 1em; }
+    </style>
+</head>
+<body>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <h1>🔴 Connect Four 🟡</h1>
+    <div class="info" id="info">Your turn</div>
+    <div class="board-container"><div class="board" id="board"></div></div>
+    <button onclick="init()">🔄 New Game</button>
+
+    <script>
+        const ROWS = 6, COLS = 7;
+        let board, turn, over, wins;
+        let scores = { red: 0, yellow: 0 };
+
+        function init() {
+            board = Array(ROWS).fill().map(() => Array(COLS).fill(null));
+            turn = 'red';
+            over = false;
+            wins = [];
+            document.getElementById('info').textContent = 'Your turn';
+            render();
+        }
+
+        function render() {
+            const el = document.getElementById('board');
+            el.innerHTML = '';
+            for (let c = 0; c < COLS; c++) {
+                const col = document.createElement('div');
+                col.style.display = 'flex';
+                col.style.flexDirection = 'column';
+                col.style.gap = '6px';
+                for (let r = 0; r < ROWS; r++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell' + (board[r][c] ? ' ' + board[r][c] : '');
+                    if (wins.some(([wr, wc]) => wr === r && wc === c)) cell.classList.add('winning');
+                    col.appendChild(cell);
+                }
+                col.onclick = () => playerMove(c);
+                el.appendChild(col);
+            }
+        }
+
+        function getRow(col) {
+            for (let r = ROWS - 1; r >= 0; r--) if (!board[r][col]) return r;
+            return -1;
+        }
+
+        function checkWin(row, col, player) {
+            const dirs = [[[0,1],[0,-1]], [[1,0],[-1,0]], [[1,1],[-1,-1]], [[1,-1],[-1,1]]];
+            for (const [[d1r,d1c],[d2r,d2c]] of dirs) {
+                let cells = [[row, col]];
+                for (const [dr, dc] of [[d1r,d1c],[d2r,d2c]]) {
+                    let r = row + dr, c = col + dc;
+                    while (r >= 0 && r < ROWS && c >= 0 && c < COLS && board[r][c] === player) {
+                        cells.push([r, c]);
+                        r += dr; c += dc;
+                    }
+                }
+                if (cells.length >= 4) { wins = cells; return true; }
+            }
+            return false;
+        }
+
+        function playerMove(col) {
+            if (over || turn !== 'red') return;
+            const row = getRow(col);
+            if (row < 0) return;
+            
+            board[row][col] = 'red';
+            if (checkWin(row, col, 'red')) {
+                over = true;
+                scores.red++;
+                render();
+                document.getElementById('info').textContent = '🎉 You win!';
+                return;
+            }
+            if (board[0].every(c => c)) { over = true; document.getElementById('info').textContent = '🤝 Draw!'; return; }
+            
+            turn = 'yellow';
+            document.getElementById('info').textContent = 'AI...';
+            render();
+            setTimeout(aiMove, 100);
+        }
+
+        function aiMove() {
+            // Simple AI: try center, then random valid column
+            let col = 3;
+            if (getRow(col) < 0) {
+                const valid = [...Array(COLS).keys()].filter(c => getRow(c) >= 0);
+                col = valid[Math.floor(Math.random() * valid.length)];
+            }
+            
+            const row = getRow(col);
+            board[row][col] = 'yellow';
+            
+            if (checkWin(row, col, 'yellow')) {
+                over = true;
+                scores.yellow++;
+                render();
+                document.getElementById('info').textContent = '🤖 AI wins!';
+                return;
+            }
+            if (board[0].every(c => c)) { over = true; document.getElementById('info').textContent = '🤝 Draw!'; return; }
+            
+            turn = 'red';
+            document.getElementById('info').textContent = 'Your turn';
+            render();
+        }
+
+        init();
+    </script>
+</body>
+</html>

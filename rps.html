@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rock Paper Scissors</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; color: #fff; }
+        h1 { margin-bottom: 20px; }
+        .score { font-size: 1.3em; margin-bottom: 20px; }
+        .choices { display: flex; gap: 15px; margin-bottom: 20px; }
+        .choice { width: 80px; height: 80px; font-size: 2.5em; background: rgba(255,255,255,0.2); border: none; border-radius: 50%; cursor: pointer; transition: all 0.2s; }
+        .choice:hover { transform: scale(1.1); background: rgba(255,255,255,0.3); }
+        .result { font-size: 1.5em; text-align: center; min-height: 60px; }
+        .vs { font-size: 1.2em; margin: 10px 0; }
+        button { margin-top: 15px; padding: 10px 25px; font-size: 14px; border: none; border-radius: 8px; background: #fff; color: #f5576c; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <h1>✊ Rock Paper Scissors</h1>
+    <div class="score">You: <b id="you">0</b> | Computer: <b id="cpu">0</b></div>
+    <div class="choices">
+        <button class="choice" onclick="play('✊')">✊</button>
+        <button class="choice" onclick="play('✋')">✋</button>
+        <button class="choice" onclick="play('✌️')">✌️</button>
+    </div>
+    <div class="vs" id="vs"></div>
+    <div class="result" id="result"></div>
+    <button onclick="reset()">Reset Score</button>
+    <script>
+        const choices = ['✊', '✋', '✌️'];
+        let you = 0, cpu = 0;
+
+        function play(choice) {
+            const cpuChoice = choices[Math.floor(Math.random() * 3)];
+            document.getElementById('vs').textContent = `${choice} vs ${cpuChoice}`;
+
+            let result;
+            if (choice === cpuChoice) {
+                result = "It's a tie! 🤝";
+            } else if (
+                (choice === '✊' && cpuChoice === '✌️') ||
+                (choice === '✋' && cpuChoice === '✊') ||
+                (choice === '✌️' && cpuChoice === '✋')
+            ) {
+                result = 'You win! 🎉';
+                you++;
+            } else {
+                result = 'Computer wins! 🤖';
+                cpu++;
+            }
+
+            document.getElementById('result').textContent = result;
+            document.getElementById('you').textContent = you;
+            document.getElementById('cpu').textContent = cpu;
+        }
+
+        function reset() {
+            you = 0; cpu = 0;
+            document.getElementById('you').textContent = 0;
+            document.getElementById('cpu').textContent = 0;
+            document.getElementById('vs').textContent = '';
+            document.getElementById('result').textContent = '';
+        }
+    </script>
+</body>
+</html>

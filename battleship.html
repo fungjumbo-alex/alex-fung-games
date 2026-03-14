@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Battleship</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; background: linear-gradient(135deg, #1a3a5c 0%, #0d1f30 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; color: #fff; }
+        h1 { margin: 10px 0; }
+        .info { margin-bottom: 10px; font-size: 1.1em; }
+        .boards { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        .board-container { text-align: center; }
+        .board { display: grid; grid-template-columns: repeat(8, 32px); gap: 2px; background: #1a5276; padding: 5px; border-radius: 5px; }
+        .cell { width: 32px; height: 32px; background: #2980b9; border-radius: 3px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 18px; }
+        .cell:hover { background: #3498db; }
+        .cell.hit { background: #e74c3c; }
+        .cell.miss { background: #7f8c8d; }
+        .cell.ship { background: #2c3e50; }
+        button { margin-top: 15px; padding: 10px 25px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #e74c3c; color: white; font-weight: bold; }
+        .status { margin-top: 10px; font-size: 1.1em; }
+    </style>
+</head>
+<body>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <h1>🚢 Battleship</h1>
+    <div class="info">Your fleet: <b id="yourShips">5</b> | AI fleet: <b id="aiShips">5</b></div>
+    <div class="status" id="status">Your turn - Click enemy board to fire!</div>
+    <div class="boards">
+        <div class="board-container"><div>Your Ships</div><div class="board" id="playerBoard"></div></div>
+        <div class="board-container"><div>Enemy (Click to fire)</div><div class="board" id="enemyBoard"></div></div>
+    </div>
+    <button onclick="init()">🔄 New Game</button>
+
+    <script>
+        const SIZE = 8;
+        let playerBoard, enemyBoard, playerShips, enemyShips, turn;
+
+        function init() {
+            playerBoard = createBoard();
+            enemyBoard = createBoard();
+            playerShips = 5;
+            enemyShips = 5;
+            turn = 'player';
+            document.getElementById('status').textContent = 'Your turn - Click enemy board to fire!';
+            document.getElementById('yourShips').textContent = 5;
+            document.getElementById('aiShips').textContent = 5;
+            
+            placeShips(playerBoard);
+            placeShips(enemyBoard);
+            render();
+        }
+
+        function createBoard() {
+            return Array(SIZE).fill().map(() => Array(SIZE).fill(0));
+        }
+
+        function placeShips(board) {
+            const ships = [3, 3, 2, 2, 2]; // 5 ships
+            ships.forEach(len => {
+                let placed = false;
+                while (!placed) {
+                    const horiz = Math.random() < 0.5;
+                    const r = Math.floor(Math.random() * (horiz ? SIZE : SIZE - len + 1));
+                    const c = Math.floor(Math.random() * (horiz ? SIZE - len + 1 : SIZE));
+                    let ok = true;
+                    for (let i = 0; i < len; i++) {
+                        const rr = horiz ? r : r + i;
+                        const cc = horiz ? c + i : c;
+                        if (board[rr][cc]) ok = false;
+                    }
+                    if (ok) {
+                        for (let i = 0; i < len; i++) {
+                            const rr = horiz ? r : r + i;
+                            const cc = horiz ? c + i : c;
+                            board[rr][cc] = 1;
+                        }
+                        placed = true;
+                    }
+                }
+            });
+        }
+
+        function render() {
+            renderBoard('playerBoard', playerBoard, true);
+            renderBoard('enemyBoard', enemyBoard, false);
+        }
+
+        function renderBoard(id, board, showShips) {
+            const el = document.getElementById(id);
+            el.innerHTML = '';
+            for (let r = 0; r < SIZE; r++) {
+                for (let c = 0; c < SIZE; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    if (board[r][c] === 2) cell.classList.add('hit');
+                    else if (board[r][c] === 3) cell.classList.add('miss');
+                    else if (showShips && board[r][c] === 1) cell.classList.add('ship');
+                    
+                    if (!showShips && board[r][c] < 2) {
+                        cell.onclick = () => fire(r, c);
+                    }
+                    el.appendChild(cell);
+                }
+            }
+        }
+
+        function fire(r, c) {
+            if (turn !== 'player' || enemyBoard[r][c] >= 2) return;
+            
+            if (enemyBoard[r][c] === 1) {
+                enemyBoard[r][c] = 2;
+                enemyShips--;
+                document.getElementById('aiShips').textContent = enemyShips;
+                if (enemyShips === 0) {
+                    document.getElementById('status').textContent = '🎉 You win!';
+                    render();
+                    return;
+                }
+            } else {
+                enemyBoard[r][c] = 3;
+            }
+            
+            turn = 'ai';
+            document.getElementById('status').textContent = 'AI firing...';
+            render();
+            setTimeout(aiFire, 500);
+        }
+
+        function aiFire() {
+            let r, c;
+            do {
+                r = Math.floor(Math.random() * SIZE);
+                c = Math.floor(Math.random() * SIZE);
+            } while (playerBoard[r][c] >= 2);
+            
+            if (playerBoard[r][c] === 1) {
+                playerBoard[r][c] = 2;
+                playerShips--;
+                document.getElementById('yourShips').textContent = playerShips;
+                if (playerShips === 0) {
+                    document.getElementById('status').textContent = '💀 AI wins!';
+                    render();
+                    return;
+                }
+            } else {
+                playerBoard[r][c] = 3;
+            }
+            
+            turn = 'player';
+            document.getElementById('status').textContent = 'Your turn';
+            render();
+        }
+
+        init();
+    </script>
+</body>
+</html>

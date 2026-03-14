@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>鋤大D (Big 2)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; background: #0d4f2c; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; color: #fff; }
+        .container { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 400px; }
+        h1 { margin: 10px 0; font-size: 1.4em; }
+        .info { display: flex; gap: 10px; margin-bottom: 10px; font-size: 0.85em; }
+        .info span { background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 4px; }
+        #message { font-size: 1em; margin: 8px 0; min-height: 24px; }
+        .hand { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; padding: 8px; min-height: 70px; width: 100%; max-width: 380px; }
+        .played { background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; min-height: 80px; display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; align-items: center; margin: 8px 0; width: 100%; max-width: 350px; }
+        .card { width: 44px; height: 62px; background: linear-gradient(145deg, #fff, #eee); border-radius: 5px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 0.8em; font-weight: bold; cursor: pointer; box-shadow: 2px 2px 5px rgba(0,0,0,0.3); user-select: none; }
+        .card.red { color: #c0392b; }
+        .card.black { color: #2c3e50; }
+        .card.selected { transform: translateY(-15px); box-shadow: 0 0 12px #f1c40f; background: #fffacd; }
+        .card.back { background: linear-gradient(135deg, #2c3e50, #34495e); }
+        .card.back::after { content: '🂠'; font-size: 1.5em; color: #5a7a9a; }
+        .label { font-size: 0.8em; color: rgba(255,255,255,0.6); margin: 5px 0 3px; }
+        .controls { display: flex; gap: 8px; margin-top: 10px; }
+        button { padding: 10px 18px; font-size: 14px; border: none; border-radius: 6px; cursor: pointer; background: #d4af37; color: #1a1a1a; font-weight: bold; }
+        button:disabled { background: #666; color: #999; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <h1>🃏 鋤大D</h1>
+    <div class="info">
+        <span>回合: <b id="round">1</b></span>
+        <span>你: <b id="wins">0</b>勝</span>
+        <span>電腦: <b id="losses">0</b>勝</span>
+    </div>
+    <div class="label">電腦 (<b id="cpu-count">13</b>張)</div>
+    <div class="hand" id="cpu-hand"></div>
+    <div id="message">點擊卡牌選擇，然後出牌</div>
+    <div class="played" id="played">等你出牌</div>
+    <div class="label">你的手牌 (<b id="player-count">13</b>張)</div>
+    <div class="hand" id="player-hand"></div>
+    <div class="controls">
+        <button id="btn-play" onclick="playCards()">出牌</button>
+        <button id="btn-pass" onclick="pass()">過</button>
+        <button onclick="newGame()">新局</button>
+    </div>
+
+    <script>
+        const SUITS = ['♣','♦','♥','♠'];
+        const VALUES = ['3','4','5','6','7','8','9','10','J','Q','K','A','2'];
+        const SR = {'♣':0,'♦':1,'♥':2,'♠':3};
+        const TR = {single:1,pair:2,triple:3,straight:4,flush:5,fullhouse:6,four:7,sflush:8};
+        
+        let deck, pHand, cHand, last, lastBy, turn, over, round=0, wins=0, losses=0;
+        
+        function rank(c){ return VALUES.indexOf(c.value)*4+SR[c.suit]; }
+        function sort(h){ h.sort((a,b)=>rank(a)-rank(b)); }
+        
+        function newGame(){
+            deck=[]; SUITS.forEach(s=>VALUES.forEach(v=>deck.push({suit:s,value:v})));
+            for(let i=deck.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
+            pHand=deck.slice(0,13); cHand=deck.slice(13,26);
+            sort(pHand); sort(cHand);
+            last=null; lastBy=null; over=false; round++;
+            turn = pHand.some(c=>c.suit==='♣'&&c.value==='3') ? 'p' : 'c';
+            render();
+            msg(turn==='p'?'你有♣3，點牌選擇後出牌':'電腦先出牌');
+            if(turn==='c') setTimeout(cpuPlay,800);
+        }
+        
+        function render(){
+            const pe=document.getElementById('player-hand'), ce=document.getElementById('cpu-hand');
+            pe.innerHTML=''; ce.innerHTML='';
+            pHand.forEach((c,i)=>{
+                const d=document.createElement('div');
+                d.className='card '+(['♥','♦'].includes(c.suit)?'red':'black');
+                d.innerHTML='<b>'+c.value+'</b><span style="font-size:1.2em">'+c.suit+'</span>';
+                d.dataset.idx=i;
+                d.onclick=()=>toggle(i);
+                pe.appendChild(d);
+            });
+            cHand.forEach(()=>{
+                const d=document.createElement('div');
+                d.className='card back';
+                ce.appendChild(d);
+            });
+            document.getElementById('cpu-count').textContent=cHand.length;
+            document.getElementById('player-count').textContent=pHand.length;
+            document.getElementById('round').textContent=round;
+            document.getElementById('btn-play').disabled=turn!=='p'||over;
+            document.getElementById('btn-pass').disabled=turn!=='p'||over||!last||lastBy==='p';
+        }
+        
+        function toggle(i){
+            if(over||turn!=='p') return;
+            const cards=document.querySelectorAll('#player-hand .card');
+            cards[i].classList.toggle('selected');
+        }
+        
+        function getSelected(){
+            const sel=[];
+            document.querySelectorAll('#player-hand .card.selected').forEach(el=>{
+                sel.push(parseInt(el.dataset.idx));
+            });
+            return sel;
+        }
+        
+        function getCombo(cards){
+            if(!cards||!cards.length) return null;
+            const n=cards.length, sorted=[...cards].sort((a,b)=>rank(a)-rank(b));
+            const rv=sorted.map(c=>VALUES.indexOf(c.value)), sv=sorted.map(c=>c.suit);
+            if(n===1) return {type:'single',rank:rank(cards[0]),cards};
+            if(n===2&&sorted[0].value===sorted[1].value) return {type:'pair',rank:rv[1]*4+Math.max(...sv.map(s=>SR[s])),cards};
+            if(n===3&&sorted[0].value===sorted[1].value&&sorted[1].value===sorted[2].value) return {type:'triple',rank:rv[0],cards};
+            if(n===5){
+                const rc={}; cards.forEach(c=>rc[c.value]=(rc[c.value]||0)+1);
+                const cnt=Object.values(rc).sort((a,b)=>b-a);
+                const flush=sv.every(s=>s===sv[0]);
+                const ur=[...new Set(rv)].sort((a,b)=>a-b);
+                const straight=ur.length===5&&!rv.includes(12)&&ur.every((r,i)=>i===0||r===ur[i-1]+1);
+                if(flush&&straight) return {type:'sflush',rank:Math.max(...rv)*4+Math.max(...sv.map(s=>SR[s])),cards};
+                if(cnt[0]===4){const qv=Object.keys(rc).find(k=>rc[k]===4);return{type:'four',rank:VALUES.indexOf(qv),cards};}
+                if(cnt[0]===3&&cnt[1]===2){const tv=Object.keys(rc).find(k=>rc[k]===3);return{type:'fullhouse',rank:VALUES.indexOf(tv),cards};}
+                if(flush) return{type:'flush',rank:Math.max(...rv)*4+Math.max(...sv.map(s=>SR[s])),cards};
+                if(straight) return{type:'straight',rank:Math.max(...rv),cards};
+            }
+            return null;
+        }
+        
+        function canBeat(c,l){
+            if(!l) return true;
+            if(TR[c.type]!==TR[l.type]) return TR[c.type]>TR[l.type];
+            return c.rank>l.rank;
+        }
+        
+        function playCards(){
+            if(over||turn!=='p') return msg('還沒輪到你');
+            const sel=getSelected();
+            if(!sel.length) return msg('請先點選卡牌');
+            const cards=sel.map(i=>pHand[i]);
+            const combo=getCombo(cards);
+            if(!combo) return msg('無效牌型');
+            if(last&&lastBy!=='p'&&!canBeat(combo,last)) return msg('牌不夠大');
+            sel.sort((a,b)=>b-a).forEach(i=>pHand.splice(i,1));
+            last=combo; lastBy='p';
+            showPlayed(combo); render();
+            if(!pHand.length) return end('p');
+            turn='c'; msg('電腦思考中...');
+            setTimeout(cpuPlay,800);
+        }
+        
+        function cpuPlay(){
+            if(over) return;
+            let found=null, idx=null;
+            for(let i=0;i<cHand.length;i++){
+                const cb=getCombo([cHand[i]]);
+                if(cb&&(!last||lastBy==='c'||canBeat(cb,last))&&(!found||cb.rank<found.rank)){found=cb;idx=[i];}
+            }
+            for(let i=0;i<cHand.length-1;i++){
+                if(cHand[i].value===cHand[i+1].value){
+                    const cb=getCombo([cHand[i],cHand[i+1]]);
+                    if(cb&&(!last||lastBy==='c'||canBeat(cb,last))&&(!found||TR[cb.type]<TR[found.type]||(TR[cb.type]===TR[found.type]&&cb.rank<found.rank))){found=cb;idx=[i,i+1];}
+                }
+            }
+            if(found&&(lastBy==='c'||Math.random()>0.3)){
+                idx.sort((a,b)=>b-a).forEach(i=>cHand.splice(i,1));
+                last=found; lastBy='c';
+                showPlayed(found); render(); msg('電腦出牌');
+                if(!cHand.length) return end('c');
+            }else{last=null;showPlayed(null);msg('電腦過，你出牌');}
+            turn='p'; render();
+        }
+        
+        function pass(){
+            if(over||turn!=='p') return;
+            if(!last||lastBy==='p') return msg('你必須出牌');
+            last=null; showPlayed(null); turn='c'; render(); msg('你過');
+            setTimeout(cpuPlay,800);
+        }
+        
+        function showPlayed(cb){
+            const el=document.getElementById('played');
+            if(!cb){el.innerHTML='<span style="color:rgba(255,255,255,0.5)">新回合</span>';}
+            else{el.innerHTML='';cb.cards.forEach(c=>{const d=document.createElement('div');d.className='card '+(['♥','♦'].includes(c.suit)?'red':'black');d.innerHTML='<b>'+c.value+'</b><span style="font-size:1.2em">'+c.suit+'</span>';el.appendChild(d);});}
+        }
+        
+        function msg(m){document.getElementById('message').textContent=m;}
+        function end(w){over=true;if(w==='p'){wins++;document.getElementById('wins').textContent=wins;msg('🎉你贏了！');}else{losses++;document.getElementById('losses').textContent=losses;msg('😢電腦贏了');}render();}
+        
+        newGame();
+    </script>
+<a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a></body>
+</html>

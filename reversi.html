@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Reversi / Othello</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; color: #fff; }
+        h1 { margin-bottom: 10px; }
+        .info { margin-bottom: 10px; display: flex; gap: 20px; align-items: center; }
+        .piece-sm { width: 20px; height: 20px; border-radius: 50%; display: inline-block; }
+        .black-sm { background: linear-gradient(145deg, #444, #111); }
+        .white-sm { background: linear-gradient(145deg, #fff, #ccc); }
+        .board { display: grid; grid-template-columns: repeat(8, 40px); gap: 2px; background: linear-gradient(145deg, #27ae60, #1e8449); padding: 8px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+        .cell { width: 40px; height: 40px; background: linear-gradient(145deg, #2ecc71, #27ae60); border-radius: 3px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        .cell.valid::after { content: ''; width: 12px; height: 12px; background: rgba(255,255,255,0.3); border-radius: 50%; }
+        .piece { width: 34px; height: 34px; border-radius: 50%; box-shadow: 0 3px 8px rgba(0,0,0,0.4); }
+        .black { background: radial-gradient(circle at 30% 30%, #555, #111); }
+        .white { background: radial-gradient(circle at 30% 30%, #fff, #bbb); }
+        button { margin-top: 15px; padding: 10px 25px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #fff; color: #1a1a2e; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <h1>⚫ Reversi ⚪</h1>
+    <div class="info">
+        <span><span class="piece-sm black-sm"></span> <b id="black">2</b></span>
+        <span><span class="piece-sm white-sm"></span> <b id="white">2</b></span>
+        <span id="turn">Your turn</span>
+    </div>
+    <div class="board" id="board"></div>
+    <button onclick="init()">New Game</button>
+    <script>
+        let board, turn;
+        const BLACK = 1, WHITE = 2;
+        const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+
+        function init() {
+            board = Array(8).fill().map(() => Array(8).fill(0));
+            board[3][3] = WHITE; board[3][4] = BLACK;
+            board[4][3] = BLACK; board[4][4] = WHITE;
+            turn = BLACK;
+            render();
+        }
+
+        function getFlips(r, c, player) {
+            if (board[r][c]) return [];
+            const opp = player === BLACK ? WHITE : BLACK;
+            const all = [];
+            for (const [dr, dc] of DIRS) {
+                let nr = r + dr, nc = c + dc, flips = [];
+                while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && board[nr][nc] === opp) {
+                    flips.push({r: nr, c: nc});
+                    nr += dr; nc += dc;
+                }
+                if (flips.length && nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && board[nr][nc] === player) {
+                    all.push(...flips);
+                }
+            }
+            return all;
+        }
+
+        function getValidMoves(player) {
+            const moves = [];
+            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                if (getFlips(r, c, player).length) moves.push({r, c});
+            }
+            return moves;
+        }
+
+        function makeMove(r, c, player) {
+            const flips = getFlips(r, c, player);
+            if (!flips.length) return false;
+            board[r][c] = player;
+            flips.forEach(f => board[f.r][f.c] = player);
+            return true;
+        }
+
+        function handleClick(r, c) {
+            if (turn !== BLACK) return; // Only human plays BLACK
+            if (!makeMove(r, c, BLACK)) return;
+            
+            turn = WHITE;
+            if (!getValidMoves(WHITE).length) turn = BLACK;
+            render();
+            
+            if (checkGameOver()) return;
+            if (turn === WHITE) setTimeout(aiMove, 100);
+        }
+
+        function aiMove() {
+            const moves = getValidMoves(WHITE);
+            if (!moves.length) { turn = BLACK; render(); return; }
+            
+            // Simple: pick first valid move
+            const m = moves[0];
+            makeMove(m.r, m.c, WHITE);
+            
+            turn = BLACK;
+            if (!getValidMoves(BLACK).length) turn = WHITE;
+            render();
+            
+            if (checkGameOver()) return;
+            if (turn === WHITE) setTimeout(aiMove, 100);
+        }
+
+        function checkGameOver() {
+            if (getValidMoves(BLACK).length || getValidMoves(WHITE).length) return false;
+            const b = board.flat().filter(x => x === BLACK).length;
+            const w = board.flat().filter(x => x === WHITE).length;
+            setTimeout(() => alert(b > w ? '🎉 You win!' : w > b ? '🤖 AI wins!' : "🤝 Tie!"), 50);
+            return true;
+        }
+
+        function render() {
+            const el = document.getElementById('board');
+            el.innerHTML = '';
+            const valid = getValidMoves(turn);
+            let b = 0, w = 0;
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    if (board[r][c] === BLACK) { cell.innerHTML = '<div class="piece black"></div>'; b++; }
+                    else if (board[r][c] === WHITE) { cell.innerHTML = '<div class="piece white"></div>'; w++; }
+                    else if (valid.some(m => m.r === r && m.c === c)) cell.classList.add('valid');
+                    cell.onclick = () => handleClick(r, c);
+                    el.appendChild(cell);
+                }
+            }
+            document.getElementById('black').textContent = b;
+            document.getElementById('white').textContent = w;
+            document.getElementById('turn').textContent = turn === BLACK ? 'Your turn' : 'AI';
+        }
+
+        init();
+    </script>
+</body>
+</html>

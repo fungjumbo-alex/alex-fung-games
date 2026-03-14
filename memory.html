@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Memory Match</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; color: #fff; }
+        h1 { margin: 10px 0; }
+        .info { margin-bottom: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(4, 70px); gap: 8px; }
+        .card { width: 70px; height: 70px; background: #fff; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 2em; cursor: pointer; transition: all 0.3s; }
+        .card.flipped, .card.matched { background: #a8e6cf; }
+        .card.matched { opacity: 0.6; }
+        button { margin-top: 15px; padding: 10px 25px; font-size: 16px; border: none; border-radius: 8px; background: #fff; color: #764ba2; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <h1>🃏 Memory Match</h1>
+    <div class="info">Moves: <b id="moves">0</b> | Pairs: <b id="pairs">0</b>/8</div>
+    <div class="grid" id="grid"></div>
+    <button onclick="init()">New Game</button>
+    <script>
+        const emojis = ['🍎','🍊','🍋','🍇','🍓','🍒','🥝','🍑'];
+        let cards, flipped, matched, moves;
+        let lockBoard = false;
+
+        function init() {
+            const deck = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+            cards = deck.map((emoji, i) => ({ emoji, flipped: false, matched: false }));
+            flipped = [];
+            matched = 0;
+            moves = 0;
+            lockBoard = false;
+            document.getElementById('moves').textContent = 0;
+            document.getElementById('pairs').textContent = 0;
+            render();
+        }
+
+        function render() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            cards.forEach((card, i) => {
+                const el = document.createElement('div');
+                el.className = 'card';
+                if (card.flipped || card.matched) {
+                    el.classList.add('flipped');
+                    if (card.matched) el.classList.add('matched');
+                    el.textContent = card.emoji;
+                } else {
+                    el.textContent = '❓';
+                }
+                el.onclick = () => flip(i);
+                grid.appendChild(el);
+            });
+        }
+
+        function flip(i) {
+            if (lockBoard || cards[i].flipped || cards[i].matched) return;
+            cards[i].flipped = true;
+            flipped.push(i);
+            render();
+
+            if (flipped.length === 2) {
+                moves++;
+                document.getElementById('moves').textContent = moves;
+                lockBoard = true;
+
+                const [a, b] = flipped;
+                if (cards[a].emoji === cards[b].emoji) {
+                    cards[a].matched = true;
+                    cards[b].matched = true;
+                    matched++;
+                    document.getElementById('pairs').textContent = matched;
+                    flipped = [];
+                    lockBoard = false;
+                    render();
+                    if (matched === 8) setTimeout(() => alert(`🎉 You won in ${moves} moves!`), 300);
+                } else {
+                    setTimeout(() => {
+                        cards[a].flipped = false;
+                        cards[b].flipped = false;
+                        flipped = [];
+                        lockBoard = false;
+                        render();
+                    }, 800);
+                }
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>

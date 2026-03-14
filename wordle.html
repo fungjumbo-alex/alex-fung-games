@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordle</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+        }
+        h1 { margin-bottom: 20px; font-size: 2.5em; letter-spacing: 5px; }
+        .board {
+            display: grid;
+            grid-template-rows: repeat(6, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+        .cell {
+            width: 60px;
+            height: 60px;
+            border: 3px solid #3a3a5a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+        .cell.filled { border-color: #5a5a7a; animation: pop 0.1s; }
+        .cell.correct { background: #27ae60; border-color: #27ae60; }
+        .cell.present { background: #f39c12; border-color: #f39c12; }
+        .cell.absent { background: #3a3a5a; border-color: #3a3a5a; }
+        @keyframes pop { 50% { transform: scale(1.1); } }
+        @keyframes shake { 
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .row.shake { animation: shake 0.3s; }
+        .keyboard {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+        .key-row {
+            display: flex;
+            gap: 6px;
+        }
+        .key {
+            min-width: 35px;
+            height: 50px;
+            background: #4a4a6a;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0 10px;
+            transition: all 0.1s;
+        }
+        .key:hover { background: #5a5a7a; }
+        .key:active { transform: scale(0.95); }
+        .key.wide { min-width: 65px; }
+        .key.correct { background: #27ae60; }
+        .key.present { background: #f39c12; }
+        .key.absent { background: #2a2a4a; }
+        .message {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            min-height: 30px;
+        }
+        .controls { margin-top: 15px; }
+        button {
+            padding: 12px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #4a90d9;
+            color: white;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        button:hover { background: #357abd; }
+    </style>
+</head>
+<body>
+    <h1>WORDLE</h1>
+    <div class="message" id="message"></div>
+    <div class="board" id="board"></div>
+    <div class="keyboard" id="keyboard"></div>
+    <div class="controls">
+        <button onclick="newGame()">🔄 New Game</button>
+    </div>
+
+    <script>
+        const words = [
+            'APPLE', 'BEACH', 'CRANE', 'DREAM', 'EAGLE', 'FLAME', 'GRAPE', 'HOUSE', 'IMAGE', 'JUICE',
+            'KNIFE', 'LEMON', 'MANGO', 'NIGHT', 'OCEAN', 'PIANO', 'QUEEN', 'RIVER', 'STORM', 'TIGER',
+            'ULTRA', 'VOICE', 'WATER', 'YOUTH', 'ZEBRA', 'BRAIN', 'CLOUD', 'DANCE', 'EARTH', 'FROST',
+            'GHOST', 'HEART', 'IVORY', 'JOKER', 'KARMA', 'LIGHT', 'MAGIC', 'NINJA', 'OLIVE', 'PEACE',
+            'QUEST', 'ROYAL', 'SMILE', 'THINK', 'UNITY', 'VIVID', 'WORLD', 'XENON', 'YACHT', 'ZONES',
+            'ANGEL', 'BLEND', 'CROWN', 'DRIFT', 'EMBER', 'FLORA', 'GRILL', 'HYDRO', 'INPUT', 'JOINT',
+            'KAYAK', 'LUNAR', 'METRO', 'NEXUS', 'ORBIT', 'PIXEL', 'QUIRK', 'RADAR', 'SOLAR', 'TOPIC'
+        ];
+        let targetWord, guesses, currentRow, currentCol, gameOver, keyStates;
+
+        function init() {
+            targetWord = words[Math.floor(Math.random() * words.length)];
+            guesses = Array(6).fill().map(() => Array(5).fill(''));
+            currentRow = 0;
+            currentCol = 0;
+            gameOver = false;
+            keyStates = {};
+            document.getElementById('message').textContent = '';
+            renderBoard();
+            renderKeyboard();
+        }
+
+        function renderBoard() {
+            const boardEl = document.getElementById('board');
+            boardEl.innerHTML = '';
+            for (let r = 0; r < 6; r++) {
+                const row = document.createElement('div');
+                row.className = 'row';
+                row.id = `row-${r}`;
+                for (let c = 0; c < 5; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.id = `cell-${r}-${c}`;
+                    if (guesses[r][c]) {
+                        cell.textContent = guesses[r][c];
+                        cell.classList.add('filled');
+                    }
+                    row.appendChild(cell);
+                }
+                boardEl.appendChild(row);
+            }
+        }
+
+        function renderKeyboard() {
+            const rows = [
+                ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+                ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+                ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫']
+            ];
+            const keyboardEl = document.getElementById('keyboard');
+            keyboardEl.innerHTML = '';
+            rows.forEach(row => {
+                const keyRow = document.createElement('div');
+                keyRow.className = 'key-row';
+                row.forEach(key => {
+                    const keyEl = document.createElement('button');
+                    keyEl.className = 'key';
+                    if (key === 'ENTER' || key === '⌫') keyEl.classList.add('wide');
+                    if (keyStates[key]) keyEl.classList.add(keyStates[key]);
+                    keyEl.textContent = key;
+                    keyEl.addEventListener('click', () => handleKey(key));
+                    keyRow.appendChild(keyEl);
+                });
+                keyboardEl.appendChild(keyRow);
+            });
+        }
+
+        function handleKey(key) {
+            if (gameOver) return;
+            if (key === '⌫') {
+                if (currentCol > 0) {
+                    currentCol--;
+                    guesses[currentRow][currentCol] = '';
+                    const cell = document.getElementById(`cell-${currentRow}-${currentCol}`);
+                    cell.textContent = '';
+                    cell.classList.remove('filled');
+                }
+            } else if (key === 'ENTER') {
+                if (currentCol === 5) {
+                    checkGuess();
+                } else {
+                    shakeRow();
+                }
+            } else if (currentCol < 5) {
+                guesses[currentRow][currentCol] = key;
+                const cell = document.getElementById(`cell-${currentRow}-${currentCol}`);
+                cell.textContent = key;
+                cell.classList.add('filled');
+                currentCol++;
+            }
+        }
+
+        function shakeRow() {
+            const row = document.getElementById(`row-${currentRow}`);
+            row.classList.add('shake');
+            setTimeout(() => row.classList.remove('shake'), 300);
+        }
+
+        function checkGuess() {
+            const guess = guesses[currentRow];
+            const result = Array(5).fill('absent');
+            const targetChars = targetWord.split('');
+            const guessChars = guess.slice();
+
+            // First pass: correct
+            for (let i = 0; i < 5; i++) {
+                if (guessChars[i] === targetChars[i]) {
+                    result[i] = 'correct';
+                    targetChars[i] = null;
+                    guessChars[i] = null;
+                }
+            }
+
+            // Second pass: present
+            for (let i = 0; i < 5; i++) {
+                if (guessChars[i]) {
+                    const idx = targetChars.indexOf(guessChars[i]);
+                    if (idx !== -1) {
+                        result[i] = 'present';
+                        targetChars[idx] = null;
+                    }
+                }
+            }
+
+            // Animate reveal
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const cell = document.getElementById(`cell-${currentRow}-${i}`);
+                    cell.classList.add(result[i]);
+                    updateKeyState(guess[i], result[i]);
+                }, i * 200);
+            }
+
+            setTimeout(() => {
+                if (guess.join('') === targetWord) {
+                    gameOver = true;
+                    document.getElementById('message').textContent = `🎉 Correct! The word was ${targetWord}`;
+                } else if (currentRow === 5) {
+                    gameOver = true;
+                    document.getElementById('message').textContent = `😢 The word was ${targetWord}`;
+                } else {
+                    currentRow++;
+                    currentCol = 0;
+                }
+                renderKeyboard();
+            }, 1200);
+        }
+
+        function updateKeyState(key, state) {
+            const priority = { correct: 3, present: 2, absent: 1 };
+            if (!keyStates[key] || priority[state] > priority[keyStates[key]]) {
+                keyStates[key] = state;
+            }
+        }
+
+        function newGame() {
+            init();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleKey('ENTER');
+            else if (e.key === 'Backspace') handleKey('⌫');
+            else if (/^[a-zA-Z]$/.test(e.key)) handleKey(e.key.toUpperCase());
+        });
+
+        init();
+    </script>
+<a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a></body>
+</html>

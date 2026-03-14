@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Checkers</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; color: #fff; }
+        h1 { margin-bottom: 10px; }
+        .info { margin-bottom: 10px; padding: 8px 20px; background: rgba(255,255,255,0.1); border-radius: 20px; }
+        .board { display: grid; grid-template-columns: repeat(8, 45px); gap: 0; border: 6px solid #5D4037; border-radius: 5px; }
+        .cell { width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        .dark { background: #5D4037; }
+        .light { background: #D7CCC8; }
+        .piece { width: 38px; height: 38px; border-radius: 50%; }
+        .red { background: radial-gradient(circle at 30% 30%, #ff7043, #c62828); border: 2px solid #b71c1c; }
+        .black-piece { background: radial-gradient(circle at 30% 30%, #616161, #212121); border: 2px solid #111; }
+        .piece.king::after { content: '👑'; font-size: 18px; position: absolute; margin-top: -5px; }
+        .selected { box-shadow: 0 0 0 4px #f1c40f; }
+        .valid::after { content: ''; position: absolute; width: 15px; height: 15px; background: rgba(46, 204, 113, 0.6); border-radius: 50%; }
+        button { margin-top: 15px; padding: 10px 25px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #fff; color: #2c3e50; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <h1>⚫ Checkers 🔴</h1>
+    <div class="info" id="info">Your turn (Red)</div>
+    <div class="board" id="board"></div>
+    <button onclick="init()">New Game</button>
+    <script>
+        let board, turn, sel, valid;
+        const RED = 1, BLACK = 2;
+
+        function init() {
+            board = [];
+            for (let r = 0; r < 8; r++) {
+                board[r] = [];
+                for (let c = 0; c < 8; c++) {
+                    if ((r + c) % 2 === 1 && r < 3) board[r][c] = { type: BLACK, king: false };
+                    else if ((r + c) % 2 === 1 && r > 4) board[r][c] = { type: RED, king: false };
+                    else board[r][c] = null;
+                }
+            }
+            turn = RED;
+            sel = null;
+            valid = [];
+            render();
+        }
+
+        function getMoves(r, c) {
+            const moves = [], p = board[r][c];
+            if (!p) return moves;
+            const dirs = p.king ? [[-1,-1],[-1,1],[1,-1],[1,1]] : p.type === RED ? [[-1,-1],[-1,1]] : [[1,-1],[1,1]];
+            for (const [dr, dc] of dirs) {
+                const nr = r + dr, nc = c + dc;
+                if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+                    if (!board[nr][nc]) moves.push({r: nr, c: nc});
+                    else if (board[nr][nc].type !== p.type) {
+                        const jr = nr + dr, jc = nc + dc;
+                        if (jr >= 0 && jr < 8 && jc >= 0 && jc < 8 && !board[jr][jc]) {
+                            moves.push({r: jr, c: jc, jump: {r: nr, c: nc}});
+                        }
+                    }
+                }
+            }
+            return moves;
+        }
+
+        function handleClick(r, c) {
+            if (turn !== RED) return;
+            
+            if (sel) {
+                const m = valid.find(v => v.r === r && v.c === c);
+                if (m) {
+                    board[r][c] = board[sel.r][sel.c];
+                    board[sel.r][sel.c] = null;
+                    if (m.jump) board[m.jump.r][m.jump.c] = null;
+                    if ((r === 0 && board[r][c].type === RED) || (r === 7 && board[r][c].type === BLACK)) board[r][c].king = true;
+                    sel = null; valid = [];
+                    turn = BLACK;
+                    render();
+                    setTimeout(aiMove, 100);
+                    return;
+                }
+            }
+            
+            if (board[r][c] && board[r][c].type === RED) {
+                sel = {r, c};
+                valid = getMoves(r, c);
+            } else {
+                sel = null; valid = [];
+            }
+            render();
+        }
+
+        function aiMove() {
+            // Find all black moves
+            const allMoves = [];
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    if (board[r][c] && board[r][c].type === BLACK) {
+                        getMoves(r, c).forEach(m => allMoves.push({from: {r, c}, to: m}));
+                    }
+                }
+            }
+            
+            if (!allMoves.length) { document.getElementById('info').textContent = '🎉 You win!'; return; }
+            
+            // Prefer jumps
+            const jumps = allMoves.filter(m => m.to.jump);
+            const move = jumps.length ? jumps[0] : allMoves[0];
+            
+            // Execute move
+            const {from, to} = move;
+            board[to.r][to.c] = board[from.r][from.c];
+            board[from.r][from.c] = null;
+            if (to.jump) board[to.jump.r][to.jump.c] = null;
+            if (to.r === 7) board[to.r][to.c].king = true;
+            
+            turn = RED;
+            document.getElementById('info').textContent = 'Your turn (Red)';
+            render();
+        }
+
+        function render() {
+            const el = document.getElementById('board');
+            el.innerHTML = '';
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell ' + ((r + c) % 2 === 0 ? 'light' : 'dark');
+                    if (valid.some(v => v.r === r && v.c === c)) cell.classList.add('valid');
+                    if (board[r][c]) {
+                        const piece = document.createElement('div');
+                        piece.className = 'piece ' + (board[r][c].type === RED ? 'red' : 'black-piece');
+                        if (board[r][c].king) piece.classList.add('king');
+                        if (sel && sel.r === r && sel.c === c) piece.classList.add('selected');
+                        cell.appendChild(piece);
+                    }
+                    cell.onclick = () => handleClick(r, c);
+                    el.appendChild(cell);
+                }
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>

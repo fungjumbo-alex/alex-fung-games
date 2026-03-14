@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dots & Boxes</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; background: linear-gradient(135deg, #fff8dc 0%, #f5deb3 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; color: #333; }
+        h1 { margin: 10px 0; }
+        .info { margin-bottom: 10px; font-size: 1.2em; }
+        .info span { margin: 0 10px; }
+        .game { display: flex; flex-direction: column; align-items: center; }
+        .row { display: flex; }
+        .dot { width: 15px; height: 15px; background: #333; border-radius: 50%; }
+        .h-line { width: 45px; height: 15px; background: transparent; cursor: pointer; }
+        .h-line.taken { background: #e74c3c; cursor: default; }
+        .h-line:hover:not(.taken) { background: rgba(231,76,60,0.3); }
+        .v-row { display: flex; }
+        .v-line { width: 15px; height: 45px; background: transparent; cursor: pointer; }
+        .v-line.taken { background: #3498db; cursor: default; }
+        .v-line:hover:not(.taken) { background: rgba(52,152,219,0.3); }
+        .box { width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; }
+        .box.p1 { background: rgba(231,76,60,0.3); color: #e74c3c; }
+        .box.p2 { background: rgba(52,152,219,0.3); color: #3498db; }
+        button { margin-top: 15px; padding: 10px 25px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #8b4513; color: white; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <h1>📦 Dots & Boxes</h1>
+    <div class="info">
+        <span style="color:#e74c3c">You: <b id="p1">0</b></span>
+        <span style="color:#3498db">AI: <b id="p2">0</b></span>
+    </div>
+    <div class="game" id="game"></div>
+    <button onclick="init()">🔄 New Game</button>
+
+    <script>
+        const SIZE = 5;
+        let hLines, vLines, boxes, turn, scores, over;
+
+        function init() {
+            hLines = Array(SIZE).fill().map(() => Array(SIZE - 1).fill(false));
+            vLines = Array(SIZE - 1).fill().map(() => Array(SIZE).fill(false));
+            boxes = Array(SIZE - 1).fill().map(() => Array(SIZE - 1).fill(0));
+            turn = 1;
+            scores = { 1: 0, 2: 0 };
+            over = false;
+            document.getElementById('p1').textContent = 0;
+            document.getElementById('p2').textContent = 0;
+            render();
+        }
+
+        function render() {
+            const el = document.getElementById('game');
+            el.innerHTML = '';
+            
+            for (let r = 0; r < SIZE; r++) {
+                // Dots and horizontal lines
+                const row = document.createElement('div');
+                row.className = 'row';
+                for (let c = 0; c < SIZE; c++) {
+                    row.appendChild(create('div', 'dot'));
+                    if (c < SIZE - 1) {
+                        const line = create('div', 'h-line' + (hLines[r][c] ? ' taken' : ''));
+                        line.onclick = () => playH(r, c);
+                        row.appendChild(line);
+                    }
+                }
+                el.appendChild(row);
+                
+                // Vertical lines and boxes
+                if (r < SIZE - 1) {
+                    const vRow = document.createElement('div');
+                    vRow.className = 'v-row';
+                    for (let c = 0; c < SIZE; c++) {
+                        const line = create('div', 'v-line' + (vLines[r][c] ? ' taken' : ''));
+                        line.onclick = () => playV(r, c);
+                        vRow.appendChild(line);
+                        if (c < SIZE - 1) {
+                            const box = create('div', 'box' + (boxes[r][c] ? (boxes[r][c] === 1 ? ' p1' : ' p2') : ''));
+                            box.textContent = boxes[r][c] ? '●' : '';
+                            vRow.appendChild(box);
+                        }
+                    }
+                    el.appendChild(vRow);
+                }
+            }
+        }
+
+        function create(tag, cls) {
+            const el = document.createElement(tag);
+            el.className = cls;
+            return el;
+        }
+
+        function playH(r, c) {
+            if (over || turn !== 1 || hLines[r][c]) return;
+            hLines[r][c] = true;
+            if (!checkBoxes()) turn = 2;
+            render();
+            if (!over && turn === 2) setTimeout(aiMove, 300);
+        }
+
+        function playV(r, c) {
+            if (over || turn !== 1 || vLines[r][c]) return;
+            vLines[r][c] = true;
+            if (!checkBoxes()) turn = 2;
+            render();
+            if (!over && turn === 2) setTimeout(aiMove, 300);
+        }
+
+        function checkBoxes() {
+            let scored = false;
+            for (let r = 0; r < SIZE - 1; r++) {
+                for (let c = 0; c < SIZE - 1; c++) {
+                    if (!boxes[r][c] && hLines[r][c] && hLines[r+1][c] && vLines[r][c] && vLines[r][c+1]) {
+                        boxes[r][c] = turn;
+                        scores[turn]++;
+                        document.getElementById(turn === 1 ? 'p1' : 'p2').textContent = scores[turn];
+                        scored = true;
+                    }
+                }
+            }
+            
+            const total = scores[1] + scores[2];
+            if (total === (SIZE - 1) * (SIZE - 1)) {
+                over = true;
+                setTimeout(() => alert(scores[1] > scores[2] ? '🎉 You win!' : scores[2] > scores[1] ? '🤖 AI wins!' : "🤝 It's a tie!"), 100);
+            }
+            
+            return scored;
+        }
+
+        function aiMove() {
+            // Simple AI: random available line
+            const available = [];
+            for (let r = 0; r < SIZE; r++) {
+                for (let c = 0; c < SIZE - 1; c++) {
+                    if (!hLines[r][c]) available.push(['h', r, c]);
+                }
+            }
+            for (let r = 0; r < SIZE - 1; r++) {
+                for (let c = 0; c < SIZE; c++) {
+                    if (!vLines[r][c]) available.push(['v', r, c]);
+                }
+            }
+            
+            if (available.length === 0) return;
+            
+            const [type, r, c] = available[Math.floor(Math.random() * available.length)];
+            if (type === 'h') hLines[r][c] = true;
+            else vLines[r][c] = true;
+            
+            if (!checkBoxes()) turn = 1;
+            render();
+        }
+
+        init();
+    </script>
+</body>
+</html>

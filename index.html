@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Alex's Games</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; padding: 15px; color: #fff; }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { text-align: center; font-size: 2em; margin-bottom: 5px; }
+        .stats { text-align: center; margin-bottom: 20px; font-size: 0.9em; color: #888; }
+        .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+        .game-card { background: rgba(255,255,255,0.05); border-radius: 10px; padding: 10px; transition: all 0.2s; text-decoration: none; color: #fff; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .game-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-3px); }
+        .game-icon { font-size: 1.8em; margin-bottom: 4px; }
+        .game-title { font-size: 0.8em; font-weight: bold; }
+        .category { margin-top: 18px; margin-bottom: 8px; font-size: 1em; color: #4a90d9; border-bottom: 2px solid #4a90d9; padding-bottom: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Alex's Games</h1>
+        <div class="stats">30 games</div>
+        
+        <div class="category">🎯 Arcade</div>
+        <div class="games-grid">
+            <a href="snake.html" class="game-card"><div class="game-icon">🐍</div><div class="game-title">Snake</div></a>
+            <a href="tetris.html" class="game-card"><div class="game-icon">🧱</div><div class="game-title">Tetris</div></a>
+            <a href="breakout.html" class="game-card"><div class="game-icon">💥</div><div class="game-title">Breakout</div></a>
+            <a href="pong.html" class="game-card"><div class="game-icon">🏓</div><div class="game-title">Pong</div></a>
+            <a href="flappy.html" class="game-card"><div class="game-icon">🐦</div><div class="game-title">Flappy</div></a>
+            <a href="whack.html" class="game-card"><div class="game-icon">🔨</div><div class="game-title">Whack</div></a>
+            <a href="invaders.html" class="game-card"><div class="game-icon">👾</div><div class="game-title">Invaders</div></a>
+            <a href="frogger.html" class="game-card"><div class="game-icon">🐸</div><div class="game-title">Frogger</div></a>
+        </div>
+
+        <div class="category">🧩 Puzzle</div>
+        <div class="games-grid">
+            <a href="2048.html" class="game-card"><div class="game-icon">🔢</div><div class="game-title">2048</div></a>
+            <a href="minesweeper.html" class="game-card"><div class="game-icon">💣</div><div class="game-title">Minesweeper</div></a>
+            <a href="sudoku.html" class="game-card"><div class="game-icon">🧩</div><div class="game-title">Sudoku</div></a>
+            <a href="wordle.html" class="game-card"><div class="game-icon">📝</div><div class="game-title">Wordle</div></a>
+            <a href="puzzle15.html" class="game-card"><div class="game-icon">🔲</div><div class="game-title">15 Puzzle</div></a>
+            <a href="memory.html" class="game-card"><div class="game-icon">🃏</div><div class="game-title">Memory</div></a>
+            <a href="simon.html" class="game-card"><div class="game-icon">🎵</div><div class="game-title">Simon</div></a>
+            <a href="bubble.html" class="game-card"><div class="game-icon">🫧</div><div class="game-title">Bubble</div></a>
+            <a href="mastermind.html" class="game-card"><div class="game-icon">🔐</div><div class="game-title">Mastermind</div></a>
+        </div>
+
+        <div class="category">🎴 Cards</div>
+        <div class="games-grid">
+            <a href="blackjack.html" class="game-card"><div class="game-icon">🃏</div><div class="game-title">Blackjack</div></a>
+            <a href="big2.html" class="game-card"><div class="game-icon">🎴</div><div class="game-title">鋤大D</div></a>
+            <a href="yahtzee.html" class="game-card"><div class="game-icon">🎲</div><div class="game-title">Yahtzee</div></a>
+            <a href="solitaire.html" class="game-card"><div class="game-icon">♠️</div><div class="game-title">Solitaire</div></a>
+        </div>
+
+        <div class="category">🎮 Board</div>
+        <div class="games-grid">
+            <a href="tictactoe.html" class="game-card"><div class="game-icon">⭕</div><div class="game-title">Tic-Tac-Toe</div></a>
+            <a href="connect4.html" class="game-card"><div class="game-icon">🔴</div><div class="game-title">Connect 4</div></a>
+            <a href="chinese-chess.html" class="game-card"><div class="game-icon">🏯</div><div class="game-title">象棋</div></a>
+            <a href="checkers.html" class="game-card"><div class="game-icon">⚫</div><div class="game-title">Checkers</div></a>
+            <a href="reversi.html" class="game-card"><div class="game-icon">⚪</div><div class="game-title">Reversi</div></a>
+            <a href="rps.html" class="game-card"><div class="game-icon">✊</div><div class="game-title">RPS</div></a>
+            <a href="hangman.html" class="game-card"><div class="game-icon">🎯</div><div class="game-title">Hangman</div></a>
+            <a href="battleship.html" class="game-card"><div class="game-icon">🚢</div><div class="game-title">Battleship</div></a>
+            <a href="dotsboxes.html" class="game-card"><div class="game-icon">📦</div><div class="game-title">Dots Boxes</div></a>
+        </div>
+    </div>
+</body>
+</html>

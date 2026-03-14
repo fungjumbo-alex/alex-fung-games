@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tic-Tac-Toe</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; padding: 10px; }
+        h1 { margin-bottom: 15px; }
+        .info { font-size: 1.2em; margin-bottom: 15px; background: rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 20px; }
+        .board { display: grid; grid-template-columns: repeat(3, 90px); gap: 10px; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; }
+        .cell { width: 90px; height: 90px; background: rgba(255,255,255,0.2); border: none; border-radius: 10px; font-size: 2.5em; font-weight: bold; cursor: pointer; color: #fff; transition: all 0.15s; }
+        .cell:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); }
+        .cell.x { color: #e74c3c; }
+        .cell.o { color: #3498db; }
+        .cell.winning { background: #27ae60; animation: pulse 0.5s infinite alternate; }
+        @keyframes pulse { to { transform: scale(1.1); } }
+        button { margin-top: 15px; padding: 10px 25px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #fff; color: #764ba2; font-weight: bold; }
+        .score { margin-top: 15px; display: flex; gap: 20px; font-size: 1em; }
+        .score span { padding: 8px 15px; background: rgba(255,255,255,0.1); border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <h1>⭕ Tic-Tac-Toe ❌</h1>
+    <div class="info" id="info">Your turn (X)</div>
+    <div class="board" id="board"></div>
+    <button onclick="resetGame()">🔄 New Game</button>
+    <div class="score">
+        <span>You (X): <b id="score-x">0</b></span>
+        <span>AI (O): <b id="score-o">0</b></span>
+        <span>Draw: <b id="score-draw">0</b></span>
+    </div>
+
+    <script>
+        let board, gameOver, winningCells;
+        let scores = { x: 0, o: 0, draw: 0 };
+        const WIN_PATTERNS = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+
+        function init() {
+            board = Array(9).fill(null);
+            gameOver = false;
+            winningCells = [];
+            render();
+        }
+
+        function render() {
+            const el = document.getElementById('board');
+            el.innerHTML = '';
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('button');
+                cell.className = 'cell' + (board[i] ? ' ' + board[i].toLowerCase() : '');
+                if (winningCells.includes(i)) cell.classList.add('winning');
+                cell.textContent = board[i] || '';
+                cell.onclick = () => playerMove(i);
+                el.appendChild(cell);
+            }
+        }
+
+        function checkWin(player) {
+            for (const [a, b, c] of WIN_PATTERNS) {
+                if (board[a] === player && board[b] === player && board[c] === player) {
+                    winningCells = [a, b, c];
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function getEmpty() {
+            return [...Array(9).keys()].filter(i => !board[i]);
+        }
+
+        function playerMove(i) {
+            if (gameOver || board[i]) return;
+            board[i] = 'X';
+            render();
+
+            if (checkWin('X')) {
+                gameOver = true;
+                scores.x++;
+                updateScores();
+                document.getElementById('info').textContent = '🎉 You win!';
+                return;
+            }
+            if (!getEmpty().length) {
+                gameOver = true;
+                scores.draw++;
+                updateScores();
+                document.getElementById('info').textContent = "🤝 Draw!";
+                return;
+            }
+
+            document.getElementById('info').textContent = 'AI thinking...';
+            setTimeout(aiMove, 200);
+        }
+
+        function aiMove() {
+            const empty = getEmpty();
+            if (!empty.length) return;
+
+            let move = -1;
+
+            // 1. Try to win
+            for (const i of empty) {
+                board[i] = 'O';
+                if (checkWin('O')) { board[i] = null; move = i; break; }
+                board[i] = null;
+            }
+
+            // 2. Block player
+            if (move < 0) {
+                for (const i of empty) {
+                    board[i] = 'X';
+                    if (checkWin('X')) { board[i] = null; move = i; break; }
+                    board[i] = null;
+                }
+            }
+
+            // 3. Take center
+            if (move < 0 && !board[4]) move = 4;
+
+            // 4. Take corner
+            if (move < 0) {
+                const corners = [0, 2, 6, 8].filter(i => !board[i]);
+                if (corners.length) move = corners[Math.floor(Math.random() * corners.length)];
+            }
+
+            // 5. Take any
+            if (move < 0) move = empty[Math.floor(Math.random() * empty.length)];
+
+            board[move] = 'O';
+            render();
+
+            if (checkWin('O')) {
+                gameOver = true;
+                scores.o++;
+                updateScores();
+                document.getElementById('info').textContent = '🤖 AI wins!';
+                return;
+            }
+            if (!getEmpty().length) {
+                gameOver = true;
+                scores.draw++;
+                updateScores();
+                document.getElementById('info').textContent = "🤝 Draw!";
+                return;
+            }
+
+            document.getElementById('info').textContent = 'Your turn (X)';
+        }
+
+        function updateScores() {
+            document.getElementById('score-x').textContent = scores.x;
+            document.getElementById('score-o').textContent = scores.o;
+            document.getElementById('score-draw').textContent = scores.draw;
+        }
+
+        function resetGame() { init(); document.getElementById('info').textContent = 'Your turn (X)'; }
+
+        init();
+    </script>
+</body>
+</html>

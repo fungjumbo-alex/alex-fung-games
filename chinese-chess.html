@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中國象棋</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #8B4513 0%, #654321 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+        }
+        h1 { margin-bottom: 15px; font-size: 2em; }
+        .info { font-size: 1.2em; margin-bottom: 15px; background: rgba(0,0,0,0.3); padding: 10px 20px; border-radius: 10px; }
+        .board-container {
+            background: #f4d03f;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(9, 50px);
+            grid-template-rows: repeat(10, 50px);
+            gap: 0;
+            position: relative;
+        }
+        .board::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(0deg, transparent, transparent 49px, #8B4513 49px, #8B4513 51px),
+                repeating-linear-gradient(90deg, transparent, transparent 49px, #8B4513 49px, #8B4513 51px);
+            pointer-events: none;
+        }
+        .river {
+            position: absolute;
+            top: 200px;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: #f4d03f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            color: #8B4513;
+            font-weight: bold;
+            letter-spacing: 20px;
+        }
+        .cell {
+            width: 50px;
+            height: 50px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .piece {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.4em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            border: 2px solid;
+        }
+        .piece.red {
+            background: linear-gradient(145deg, #fff5e6, #ffe4c4);
+            color: #c0392b;
+            border-color: #c0392b;
+        }
+        .piece.black {
+            background: linear-gradient(145deg, #fff5e6, #ffe4c4);
+            color: #2c3e50;
+            border-color: #2c3e50;
+        }
+        .piece:hover { transform: scale(1.1); }
+        .piece.selected {
+            box-shadow: 0 0 15px #f39c12, 0 0 30px #f39c12;
+            transform: scale(1.15);
+        }
+        .cell.valid::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            background: rgba(46, 204, 113, 0.6);
+            border-radius: 50%;
+            position: absolute;
+        }
+        .cell.capture::after {
+            width: 44px;
+            height: 44px;
+            background: transparent;
+            border: 4px solid rgba(231, 76, 60, 0.8);
+            border-radius: 50%;
+        }
+        .controls { margin-top: 15px; }
+        button {
+            padding: 10px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #8B4513;
+            color: #fff;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        button:hover { background: #654321; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+    <h1>🏯 中國象棋</h1>
+    <div class="info" id="info">紅方先行</div>
+    <div class="board-container">
+        <div class="board" id="board">
+            <div class="river">楚河 漢界</div>
+        </div>
+    </div>
+    <div class="controls">
+        <button onclick="initGame()">🔄 新遊戲</button>
+    </div>
+
+    <script>
+        const pieces = {
+            // Black pieces (top)
+            'r0': { type: '車', color: 'black', row: 0, col: 0 },
+            'n0': { type: '馬', color: 'black', row: 0, col: 1 },
+            'b0': { type: '象', color: 'black', row: 0, col: 2 },
+            'a0': { type: '士', color: 'black', row: 0, col: 3 },
+            'k': { type: '將', color: 'black', row: 0, col: 4 },
+            'a1': { type: '士', color: 'black', row: 0, col: 5 },
+            'b1': { type: '象', color: 'black', row: 0, col: 6 },
+            'n1': { type: '馬', color: 'black', row: 0, col: 7 },
+            'r1': { type: '車', color: 'black', row: 0, col: 8 },
+            'c0': { type: '砲', color: 'black', row: 2, col: 1 },
+            'c1': { type: '砲', color: 'black', row: 2, col: 7 },
+            'p0': { type: '卒', color: 'black', row: 3, col: 0 },
+            'p1': { type: '卒', color: 'black', row: 3, col: 2 },
+            'p2': { type: '卒', color: 'black', row: 3, col: 4 },
+            'p3': { type: '卒', color: 'black', row: 3, col: 6 },
+            'p4': { type: '卒', color: 'black', row: 3, col: 8 },
+            // Red pieces (bottom)
+            'R0': { type: '車', color: 'red', row: 9, col: 0 },
+            'N0': { type: '馬', color: 'red', row: 9, col: 1 },
+            'B0': { type: '相', color: 'red', row: 9, col: 2 },
+            'A0': { type: '仕', color: 'red', row: 9, col: 3 },
+            'K': { type: '帥', color: 'red', row: 9, col: 4 },
+            'A1': { type: '仕', color: 'red', row: 9, col: 5 },
+            'B1': { type: '相', color: 'red', row: 9, col: 6 },
+            'N1': { type: '馬', color: 'red', row: 9, col: 7 },
+            'R1': { type: '車', color: 'red', row: 9, col: 8 },
+            'C0': { type: '炮', color: 'red', row: 7, col: 1 },
+            'C1': { type: '炮', color: 'red', row: 7, col: 7 },
+            'P0': { type: '兵', color: 'red', row: 6, col: 0 },
+            'P1': { type: '兵', color: 'red', row: 6, col: 2 },
+            'P2': { type: '兵', color: 'red', row: 6, col: 4 },
+            'P3': { type: '兵', color: 'red', row: 6, col: 6 },
+            'P4': { type: '兵', color: 'red', row: 6, col: 8 }
+        };
+
+        let board, currentPlayer, selectedPiece, validMoves;
+
+        function initGame() {
+            board = Array(10).fill().map(() => Array(9).fill(null));
+            currentPlayer = 'red';
+            selectedPiece = null;
+            validMoves = [];
+
+            for (const [id, piece] of Object.entries(pieces)) {
+                const newPiece = { ...piece, id };
+                board[piece.row][piece.col] = newPiece;
+            }
+
+            updateInfo();
+            renderBoard();
+        }
+
+        function renderBoard() {
+            const boardEl = document.getElementById('board');
+            boardEl.innerHTML = '<div class="river">楚河 漢界</div>';
+
+            for (let row = 0; row < 10; row++) {
+                for (let col = 0; col < 9; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    cell.addEventListener('click', () => handleCellClick(row, col));
+
+                    if (validMoves.some(m => m.row === row && m.col === col)) {
+                        cell.classList.add(board[row][col] ? 'capture' : 'valid');
+                    }
+
+                    const piece = board[row][col];
+                    if (piece) {
+                        const pieceEl = document.createElement('div');
+                        pieceEl.className = `piece ${piece.color}`;
+                        if (selectedPiece && selectedPiece.id === piece.id) {
+                            pieceEl.classList.add('selected');
+                        }
+                        pieceEl.textContent = piece.type;
+                        cell.appendChild(pieceEl);
+                    }
+
+                    boardEl.appendChild(cell);
+                }
+            }
+        }
+
+        function handleCellClick(row, col) {
+            const piece = board[row][col];
+
+            if (selectedPiece) {
+                const move = validMoves.find(m => m.row === row && m.col === col);
+                if (move) {
+                    movePiece(selectedPiece, row, col);
+                    return;
+                }
+            }
+
+            if (piece && piece.color === currentPlayer) {
+                selectedPiece = piece;
+                validMoves = getValidMoves(piece);
+                renderBoard();
+            } else {
+                selectedPiece = null;
+                validMoves = [];
+                renderBoard();
+            }
+        }
+
+        function movePiece(piece, newRow, newCol) {
+            const captured = board[newRow][newCol];
+            board[piece.row][piece.col] = null;
+            board[newRow][newCol] = piece;
+            piece.row = newRow;
+            piece.col = newCol;
+
+            if (captured && (captured.type === '將' || captured.type === '帥')) {
+                document.getElementById('info').textContent = `${currentPlayer === 'red' ? '紅方' : '黑方'}獲勝！`;
+            }
+
+            currentPlayer = currentPlayer === 'red' ? 'black' : 'red';
+            selectedPiece = null;
+            validMoves = [];
+            updateInfo();
+            renderBoard();
+        }
+
+        function getValidMoves(piece) {
+            const moves = [];
+            const { type, color, row, col } = piece;
+
+            switch (type) {
+                case '車':
+                case '車':
+                    addLineMoves(row, col, [[0,1],[0,-1],[1,0],[-1,0]], color, moves);
+                    break;
+                case '馬':
+                case '馬':
+                    addHorseMoves(row, col, color, moves);
+                    break;
+                case '象':
+                case '相':
+                    addElephantMoves(row, col, color, moves);
+                    break;
+                case '士':
+                case '仕':
+                    addAdvisorMoves(row, col, color, moves);
+                    break;
+                case '將':
+                case '帥':
+                    addKingMoves(row, col, color, moves);
+                    break;
+                case '砲':
+                case '炮':
+                    addCannonMoves(row, col, color, moves);
+                    break;
+                case '卒':
+                case '兵':
+                    addPawnMoves(row, col, color, moves);
+                    break;
+            }
+
+            return moves;
+        }
+
+        function addLineMoves(row, col, directions, color, moves) {
+            for (const [dr, dc] of directions) {
+                let r = row + dr, c = col + dc;
+                while (r >= 0 && r < 10 && c >= 0 && c < 9) {
+                    if (!board[r][c]) {
+                        moves.push({ row: r, col: c });
+                    } else {
+                        if (board[r][c].color !== color) moves.push({ row: r, col: c });
+                        break;
+                    }
+                    r += dr;
+                    c += dc;
+                }
+            }
+        }
+
+        function addHorseMoves(row, col, color, moves) {
+            const steps = [
+                [-2, -1, -1, 0], [-2, 1, -1, 0],
+                [2, -1, 1, 0], [2, 1, 1, 0],
+                [-1, -2, 0, -1], [1, -2, 0, -1],
+                [-1, 2, 0, 1], [1, 2, 0, 1]
+            ];
+            for (const [dr, dc, br, bc] of steps) {
+                const nr = row + dr, nc = col + dc;
+                const blockR = row + br, blockC = col + bc;
+                if (nr >= 0 && nr < 10 && nc >= 0 && nc < 9 && !board[blockR][blockC]) {
+                    if (!board[nr][nc] || board[nr][nc].color !== color) {
+                        moves.push({ row: nr, col: nc });
+                    }
+                }
+            }
+        }
+
+        function addElephantMoves(row, col, color, moves) {
+            const steps = [[-2,-2,-1,-1], [-2,2,-1,1], [2,-2,1,-1], [2,2,1,1]];
+            for (const [dr, dc, br, bc] of steps) {
+                const nr = row + dr, nc = col + dc;
+                const blockR = row + br, blockC = col + bc;
+                if ((color === 'red' && nr >= 5 || color === 'black' && nr <= 4) &&
+                    nr >= 0 && nr < 10 && nc >= 0 && nc < 9 && !board[blockR][blockC]) {
+                    if (!board[nr][nc] || board[nr][nc].color !== color) {
+                        moves.push({ row: nr, col: nc });
+                    }
+                }
+            }
+        }
+
+        function addAdvisorMoves(row, col, color, moves) {
+            const steps = [[-1,-1], [-1,1], [1,-1], [1,1]];
+            const palace = color === 'red' ? { minRow: 7, maxRow: 9 } : { minRow: 0, maxRow: 2 };
+            for (const [dr, dc] of steps) {
+                const nr = row + dr, nc = col + dc;
+                if (nr >= palace.minRow && nr <= palace.maxRow && nc >= 3 && nc <= 5) {
+                    if (!board[nr][nc] || board[nr][nc].color !== color) {
+                        moves.push({ row: nr, col: nc });
+                    }
+                }
+            }
+        }
+
+        function addKingMoves(row, col, color, moves) {
+            const steps = [[0,1],[0,-1],[1,0],[-1,0]];
+            const palace = color === 'red' ? { minRow: 7, maxRow: 9 } : { minRow: 0, maxRow: 2 };
+            for (const [dr, dc] of steps) {
+                const nr = row + dr, nc = col + dc;
+                if (nr >= palace.minRow && nr <= palace.maxRow && nc >= 3 && nc <= 5) {
+                    if (!board[nr][nc] || board[nr][nc].color !== color) {
+                        moves.push({ row: nr, col: nc });
+                    }
+                }
+            }
+        }
+
+        function addCannonMoves(row, col, color, moves) {
+            const directions = [[0,1],[0,-1],[1,0],[-1,0]];
+            for (const [dr, dc] of directions) {
+                let r = row + dr, c = col + dc;
+                let jumped = false;
+                while (r >= 0 && r < 10 && c >= 0 && c < 9) {
+                    if (!jumped) {
+                        if (!board[r][c]) {
+                            moves.push({ row: r, col: c });
+                        } else {
+                            jumped = true;
+                        }
+                    } else {
+                        if (board[r][c]) {
+                            if (board[r][c].color !== color) moves.push({ row: r, col: c });
+                            break;
+                        }
+                    }
+                    r += dr;
+                    c += dc;
+                }
+            }
+        }
+
+        function addPawnMoves(row, col, color, moves) {
+            const forward = color === 'red' ? -1 : 1;
+            const crossed = color === 'red' ? row <= 4 : row >= 5;
+
+            const nr = row + forward;
+            if (nr >= 0 && nr < 10 && (!board[nr][col] || board[nr][col].color !== color)) {
+                moves.push({ row: nr, col: col });
+            }
+
+            if (crossed) {
+                for (const dc of [-1, 1]) {
+                    const nc = col + dc;
+                    if (nc >= 0 && nc < 9 && (!board[row][nc] || board[row][nc].color !== color)) {
+                        moves.push({ row: row, col: nc });
+                    }
+                }
+            }
+        }
+
+        function updateInfo() {
+            document.getElementById('info').textContent = currentPlayer === 'red' ? '紅方回合' : '黑方回合';
+        }
+
+        initGame();
+    </script>
+<a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a></body>
+</html>

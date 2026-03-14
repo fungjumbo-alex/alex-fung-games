@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+        }
+        h1 { margin-bottom: 15px; }
+        .controls { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center; }
+        button {
+            padding: 8px 16px;
+            font-size: 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #4a90d9;
+            color: white;
+            transition: all 0.2s;
+        }
+        button:hover { background: #357abd; }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(9, 40px);
+            gap: 1px;
+            background: #4a90d9;
+            padding: 2px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .cell {
+            width: 40px;
+            height: 40px;
+            border: none;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            background: #2a2a4a;
+            color: #fff;
+            transition: all 0.1s;
+        }
+        .cell:focus { outline: 2px solid #4a90d9; background: #3a3a5a; }
+        .cell.fixed { background: #1a1a3a; color: #888; }
+        .cell.error { background: #c0392b; }
+        .cell.highlight { background: #34495e; }
+        .cell:nth-child(3n) { border-right: 2px solid #4a90d9; }
+        .cell:nth-child(n+19):nth-child(-n+27),
+        .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid #4a90d9; }
+        .cell:nth-child(9n) { border-right: none; }
+        .info { margin-top: 15px; font-size: 1.1em; }
+        .message { margin-top: 10px; font-size: 1.3em; font-weight: bold; }
+        .win { color: #27ae60; }
+    </style>
+</head>
+<body>
+    <h1>🧩 Sudoku</h1>
+    <div class="controls">
+        <button onclick="newGame('easy')">Easy</button>
+        <button onclick="newGame('medium')">Medium</button>
+        <button onclick="newGame('hard')">Hard</button>
+        <button onclick="checkSolution()">✓ Check</button>
+        <button onclick="solvePuzzle()">💡 Solve</button>
+    </div>
+    <div class="board" id="board"></div>
+    <div class="info">Use keyboard 1-9 or click to enter numbers</div>
+    <div class="message" id="message"></div>
+
+    <script>
+        let board, solution, fixed;
+        const difficulties = { easy: 40, medium: 30, hard: 25 };
+
+        function generateSudoku() {
+            const grid = Array(9).fill().map(() => Array(9).fill(0));
+            fillGrid(grid);
+            return grid;
+        }
+
+        function fillGrid(grid) {
+            const nums = [1,2,3,4,5,6,7,8,9];
+            for (let row = 0; row < 9; row++) {
+                for (let col = 0; col < 9; col++) {
+                    if (grid[row][col] === 0) {
+                        shuffle(nums);
+                        for (const num of nums) {
+                            if (isValid(grid, row, col, num)) {
+                                grid[row][col] = num;
+                                if (fillGrid(grid)) return true;
+                                grid[row][col] = 0;
+                            }
+                        }
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+        }
+
+        function isValid(grid, row, col, num) {
+            for (let i = 0; i < 9; i++) {
+                if (grid[row][i] === num || grid[i][col] === num) return false;
+            }
+            const boxRow = Math.floor(row / 3) * 3;
+            const boxCol = Math.floor(col / 3) * 3;
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (grid[boxRow + i][boxCol + j] === num) return false;
+                }
+            }
+            return true;
+        }
+
+        function newGame(difficulty) {
+            solution = generateSudoku();
+            board = solution.map(row => [...row]);
+            fixed = Array(9).fill().map(() => Array(9).fill(true));
+
+            let cellsToClear = 81 - difficulties[difficulty];
+            while (cellsToClear > 0) {
+                const row = Math.floor(Math.random() * 9);
+                const col = Math.floor(Math.random() * 9);
+                if (board[row][col] !== 0) {
+                    board[row][col] = 0;
+                    fixed[row][col] = false;
+                    cellsToClear--;
+                }
+            }
+            document.getElementById('message').textContent = '';
+            renderBoard();
+        }
+
+        function renderBoard() {
+            const boardEl = document.getElementById('board');
+            boardEl.innerHTML = '';
+            for (let row = 0; row < 9; row++) {
+                for (let col = 0; col < 9; col++) {
+                    const cell = document.createElement('input');
+                    cell.type = 'text';
+                    cell.maxLength = 1;
+                    cell.className = 'cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    cell.value = board[row][col] || '';
+                    if (fixed[row][col]) {
+                        cell.classList.add('fixed');
+                        cell.readOnly = true;
+                    }
+                    cell.addEventListener('input', (e) => handleInput(e, row, col));
+                    cell.addEventListener('focus', () => highlightCell(row, col));
+                    boardEl.appendChild(cell);
+                }
+            }
+        }
+
+        function handleInput(e, row, col) {
+            const value = e.target.value;
+            if (value === '') {
+                board[row][col] = 0;
+            } else if (/^[1-9]$/.test(value)) {
+                board[row][col] = parseInt(value);
+            } else {
+                e.target.value = board[row][col] || '';
+            }
+            document.getElementById('message').textContent = '';
+        }
+
+        function highlightCell(row, col) {
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.classList.remove('highlight');
+                const r = parseInt(cell.dataset.row);
+                const c = parseInt(cell.dataset.col);
+                if (r === row || c === col || (Math.floor(r/3) === Math.floor(row/3) && Math.floor(c/3) === Math.floor(col/3))) {
+                    cell.classList.add('highlight');
+                }
+            });
+        }
+
+        function checkSolution() {
+            let correct = true;
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                cell.classList.remove('error');
+                const row = parseInt(cell.dataset.row);
+                const col = parseInt(cell.dataset.col);
+                if (board[row][col] !== solution[row][col]) {
+                    cell.classList.add('error');
+                    correct = false;
+                }
+            });
+            const msg = document.getElementById('message');
+            if (correct) {
+                msg.textContent = '🎉 Correct! You solved it!';
+                msg.className = 'message win';
+            } else {
+                msg.textContent = '❌ Some errors found';
+                msg.className = 'message';
+            }
+        }
+
+        function solvePuzzle() {
+            board = solution.map(row => [...row]);
+            renderBoard();
+            document.getElementById('message').textContent = '💡 Solution revealed';
+        }
+
+        newGame('easy');
+    </script>
+<a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a></body>
+</html>
