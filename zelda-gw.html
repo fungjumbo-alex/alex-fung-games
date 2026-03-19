@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Zelda GW - Game & Watch Adventure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .game-container {
+            background: #2a2a2a;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5), inset 0 2px 10px rgba(255,255,255,0.05);
+            border: 4px solid #3a3a3a;
+        }
+
+        .screen-frame {
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 10px;
+            border: 3px solid #3a3a3a;
+        }
+
+        canvas {
+            display: block;
+            background: #2a2a2a;
+            image-rendering: pixelated;
+         touch-action: none; }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 5px 10px;
+            color: #9bbc0f;
+            font-size: 14px;
+            text-shadow: 0 0 5px #9bbc0f;
+        }
+
+        .header span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .title {
+            text-align: center;
+            color: #9bbc0f;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #9bbc0f;
+            letter-spacing: 3px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        @media (pointer: coarse) {
+        }
+
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            background: #3a3a3a;
+            border: 2px solid #4a4a4a;
+            border-radius: 50%;
+            color: #9bbc0f;
+            font-size: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .control-btn:active {
+            background: #4a4a4a;
+            transform: scale(0.95);
+        }
+
+        .dpad {
+            display: grid;
+            grid-template-columns: repeat(3, 50px);
+            grid-template-rows: repeat(3, 50px);
+            gap: 2px;
+        }
+
+        .dpad-btn {
+            background: #3a3a3a;
+            border: 1px solid #4a4a4a;
+            color: #9bbc0f;
+            font-size: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .dpad-btn:active {
+            background: #4a4a4a;
+        }
+
+        .dpad-center {
+            background: #2a2a2a;
+            border: none;
+        }
+
+        .dpad-up { border-radius: 8px 8px 0 0; }
+        .dpad-down { border-radius: 0 0 8px 8px; }
+        .dpad-left { border-radius: 8px 0 0 8px; }
+        .dpad-right { border-radius: 0 8px 8px 0; }
+
+        .action-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #9bbc0f;
+            font-size: 24px;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .overlay.hidden {
+            display: none;
+        }
+
+        .overlay h2 {
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #9bbc0f;
+        }
+
+        .overlay p {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .start-hint {
+            margin-top: 30px;
+            font-size: 14px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .game-wrapper {
+            position: relative;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 8px;
+            left: 8px;
+            color: #9bbc0f;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-decoration: none;
+            z-index: 1000;
+            opacity: 0.7;
+            padding: 4px 8px;
+            border: 1px solid #9bbc0f;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.5);
+        }
+        .back-btn:hover { opacity: 1; }
+        .how-btn {
+            position: fixed;
+            top: 8px;
+            right: 8px;
+            color: #9bbc0f;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            z-index: 1000;
+            opacity: 0.7;
+            padding: 4px 8px;
+            border: 1px solid #9bbc0f;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.5);
+            cursor: pointer;
+        }
+        .how-btn:hover { opacity: 1; }
+        .how-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .how-overlay.show { display: flex; }
+        .how-box {
+            background: #1a1a1a;
+            border: 2px solid #9bbc0f;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 320px;
+            color: #9bbc0f;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            position: relative;
+        }
+        .how-box h3 { font-size: 18px; margin-bottom: 12px; text-align: center; }
+        .how-box p { margin: 8px 0; line-height: 1.5; color: #c8c8c8; }
+        .how-box .close-how {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            color: #9bbc0f;
+            font-size: 20px;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+    
+.back-btn{position:fixed;top:8px;left:8px;color:#9bbc0f;font-family:'Courier New',monospace;font-size:12px;text-decoration:none;z-index:1000;opacity:.7;padding:4px 8px;border:1px solid #9bbc0f;border-radius:4px;background:rgba(0,0,0,.5)}.back-btn:hover{opacity:1}
+.how-btn{position:fixed;top:8px;right:8px;color:#9bbc0f;font-family:'Courier New',monospace;font-size:12px;z-index:1000;opacity:.7;padding:4px 8px;border:1px solid #9bbc0f;border-radius:4px;background:rgba(0,0,0,.5);cursor:pointer}.how-btn:hover{opacity:1}
+.how-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:2000;justify-content:center;align-items:center}
+.how-overlay.show{display:flex}
+.how-box{background:#1a1a1a;border:2px solid #9bbc0f;border-radius:12px;padding:24px;max-width:320px;width:90%;color:#9bbc0f;font-family:'Courier New',monospace;font-size:14px;position:relative}
+.how-box h3{font-size:18px;margin-bottom:12px;text-align:center}
+.how-box p{margin:8px 0;line-height:1.5;color:#c8c8c8}
+.how-box .close-how{position:absolute;top:8px;right:12px;color:#9bbc0f;font-size:20px;cursor:pointer;background:none;border:none}
+</style>
+
+    <style>
+        @media (max-width: 500px) {
+            .game-shell { transform: scale(var(--shell-scale, 1)); transform-origin: top center; }
+        }
+    </style>
+    <script>
+    function scaleGame() {
+        const shell = document.querySelector('.game-shell');
+        if (!shell) return;
+        const vw = window.innerWidth;
+        const shellW = shell.offsetWidth;
+        if (shellW > vw - 16) {
+            const s = (vw - 16) / shellW;
+            shell.style.setProperty('--shell-scale', s);
+            shell.style.transform = 'scale(' + s + ')';
+            shell.style.transformOrigin = 'top center';
+            shell.style.marginBottom = '-' + (shell.offsetHeight * (1 - s)) + 'px';
+        } else {
+            shell.style.transform = '';
+            shell.style.marginBottom = '';
+        }
+    }
+    window.addEventListener('resize', scaleGame);
+    window.addEventListener('load', function() { setTimeout(scaleGame, 100); });
+    document.addEventListener('DOMContentLoaded', function() { setTimeout(scaleGame, 200); });
+    
+    document.body.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+    document.body.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+    // Ensure all buttons work with touch
+    document.querySelectorAll('button, .btn, .control-btn').forEach(function(btn) {
+        if (!btn._touchFixed) {
+            btn._touchFixed = true;
+            var handlers = btn.onclick;
+            if (handlers) {
+                btn.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    btn.click();
+                }, { passive: false });
+            }
+        }
+    });
+</script>
+    
+</head>
+<body>
+    <a href="index.html" class="back-btn">← Back to Games</a>
+    <div class="how-btn" id="howBtn">?</div>
+    <div class="how-overlay" id="howOverlay">
+        <div class="how-box">
+            <button class="close-how" id="closeHow">×</button>
+            <h3>How to Play</h3>
+            <p><strong>Objective:</strong> Navigate dungeons, defeat enemies, find the exit!</p>
+            <p><strong>Controls:</strong></p>
+            <p>• Arrow Keys or D-pad to move</p>
+            <p>• Space or ⚔️ button to attack</p>
+            <p><strong>Scoring:</strong></p>
+            <p>• +10 points per rupee</p>
+            <p>• +25 points per enemy defeated</p>
+            <p>• Collect keys to open doors!</p>
+            <p>• 3 hearts = Game Over</p>
+        </div>
+    </div>
+    <div class="game-container">
+        <div class="title">ZELDA GW</div>
+        <div class="header">
+            <span>❤️ <span id="lives">3</span></span>
+            <span>🔑 <span id="keys">0</span></span>
+            <span>💎 <span id="score">0</span></span>
+            <span>LVL <span id="level">1</span></span>
+        </div>
+        <div class="screen-frame">
+            <div class="game-wrapper">
+                <canvas id="game" width="320" height="288"></canvas>
+                <div class="overlay" id="overlay">
+                    <h2>ZELDA GW</h2>
+                    <p>Arrow Keys / Swipe: Move</p>
+                    <p>Space / Tap: Attack</p>
+                    <p>Collect keys to open doors</p>
+                    <p>Defeat enemies for rupees</p>
+                    <p>Find the exit to advance!</p>
+                    <p class="start-hint">Press SPACE or TAP to start</p>
+                </div>
+            </div>
+        </div>
+        <div class="controls">
+            <div class="dpad">
+                <div></div>
+                <div class="dpad-btn dpad-up" data-dir="up">▲</div>
+                <div></div>
+                <div class="dpad-btn dpad-left" data-dir="left">◀</div>
+                <div class="dpad-btn dpad-center"></div>
+                <div class="dpad-btn dpad-right" data-dir="right">▶</div>
+                <div></div>
+                <div class="dpad-btn dpad-down" data-dir="down">▼</div>
+                <div></div>
+            </div>
+            <div class="action-btns">
+                <div class="control-btn" id="attackBtn">⚔️</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const overlay = document.getElementById('overlay');
+
+        // Game & Watch Colors
+        const COLORS = {
+            bg: '#2a2a2a',
+            lcd: '#9bbc0f',
+            lcdDark: '#0f380f',
+            lcdMid: '#306230'
+        };
+
+        // Game constants
+        const TILE_SIZE = 16;
+        const GRID_WIDTH = 20;
+        const GRID_HEIGHT = 18;
+        const PLAYER_SIZE = 14;
+        const ENEMY_SIZE = 12;
+
+        // Game state
+        let gameState = 'start';
+        let lives = 3;
+        let keys = 0;
+        let score = 0;
+        let level = 1;
+        let currentRoom = 0;
+        let rooms = [];
+        let player = null;
+        let enemies = [];
+        let items = [];
+        let swordSwing = 0;
+        let invincible = 0;
+        let gameOverTimer = 0;
+
+        // Input state
+        let keysPressed = {};
+        let lastDirection = 'right';
+
+        // Tile types
+        const TILES = {
+            FLOOR: 0,
+            WALL: 1,
+            DOOR: 2,
+            EXIT: 3,
+            KEY: 4,
+            RUPEE: 5,
+            ENEMY_SPAWN: 6,
+            PLAYER_SPAWN: 7
+        };
+
+        // Sprite definitions (pixel art patterns)
+        const SPRITES = {
+            player: {
+                right: [
+                    '  ####  ',
+                    ' ###### ',
+                    '  # ##  ',
+                    ' ###### ',
+                    '  ####  ',
+                    '  ####  ',
+                    ' ##  ## ',
+                    ' ##  ## '
+                ],
+                left: [
+                    '  ####  ',
+                    ' ###### ',
+                    ' ## #   ',
+                    ' ###### ',
+                    '  ####  ',
+                    '  ####  ',
+                    ' ##  ## ',
+                    ' ##  ## '
+                ],
+                up: [
+                    '  ####  ',
+                    ' ###### ',
+                    '  ####  ',
+                    ' ###### ',
+                    '  ####  ',
+                    '  ####  ',
+                    ' ##  ## ',
+                    ' ##  ## '
+                ],
+                down: [
+                    '  ####  ',
+                    ' ###### ',
+                    '  ####  ',
+                    ' ###### ',
+                    '  ####  ',
+                    '  ####  ',
+                    ' ##  ## ',
+                    ' ##  ## '
+                ]
+            },
+            enemy: [
+                '  ####  ',
+                ' ##++## ',
+                ' #+  +# ',
+                ' #+  +# ',
+                ' ##  ## ',
+                '  ####  ',
+                ' ###### ',
+                ' ##  ## '
+            ],
+            key: [
+                '   ##   ',
+                '  ####  ',
+                '   ##   ',
+                '   ##   ',
+                '   ##   ',
+                ' ## ##  ',
+                '  ####  ',
+                '   ##   '
+            ],
+            rupee: [
+                '   ##   ',
+                '  ####  ',
+                ' ###### ',
+                ' ###### ',
+                '  ####  ',
+                '   ##   ',
+                '        ',
+                '        '
+            ],
+            door: [
+                '########',
+                '#      #',
+                '# ## # #',
+                '# ## # #',
+                '#      #',
+                '# #### #',
+                '#      #',
+                '########'
+            ],
+            heart: [
+                ' ## ##  ',
+                '####### ',
+                '####### ',
+                ' ###### ',
+                '  ####  ',
+                '   ##   ',
+                '        ',
+                '        '
+            ]
+        };
+
+        // Level definitions
+        function generateLevel(lvl) {
+            rooms = [];
+            const numRooms = Math.min(3 + lvl, 6);
+
+            for (let r = 0; r < numRooms; r++) {
+                const room = generateRoom(r, lvl, numRooms);
+                rooms.push(room);
+            }
+
+            currentRoom = 0;
+            loadRoom(0);
+        }
+
+        function generateRoom(roomIndex, lvl, totalRooms) {
+            const grid = [];
+            const isLastRoom = roomIndex === totalRooms - 1;
+
+            // Initialize with floor
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                grid[y] = [];
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    if (x === 0 || x === GRID_WIDTH - 1 || y === 0 || y === GRID_HEIGHT - 1) {
+                        grid[y][x] = TILES.WALL;
+                    } else {
+                        grid[y][x] = TILES.FLOOR;
+                    }
+                }
+            }
+
+            // Add internal walls
+            const wallPatterns = [
+                // Horizontal walls
+                [[4, 4], [5, 4], [6, 4], [7, 4]],
+                [[12, 4], [13, 4], [14, 4], [15, 4]],
+                [[4, 13], [5, 13], [6, 13], [7, 13]],
+                [[12, 13], [13, 13], [14, 13], [15, 13]],
+                // Vertical walls
+                [[4, 6], [4, 7], [4, 8], [4, 9]],
+                [[15, 6], [15, 7], [15, 8], [15, 9]],
+                [[9, 6], [9, 7], [9, 8]],
+                [[10, 9], [10, 10], [10, 11]],
+                // Corner blocks
+                [[2, 2], [3, 2], [2, 3]],
+                [[16, 2], [17, 2], [17, 3]],
+                [[2, 14], [3, 14], [2, 15]],
+                [[16, 14], [17, 14], [17, 15]]
+            ];
+
+            // Add some random wall patterns based on room index
+            const seed = roomIndex * 100 + lvl * 10;
+            for (let i = 0; i < 4 + (lvl % 3); i++) {
+                const pattern = wallPatterns[(seed + i) % wallPatterns.length];
+                const offsetX = ((seed + i * 3) % 5) - 2;
+                const offsetY = ((seed + i * 7) % 5) - 2;
+                pattern.forEach(([px, py]) => {
+                    const nx = px + offsetX;
+                    const ny = py + offsetY;
+                    if (nx > 1 && nx < GRID_WIDTH - 2 && ny > 1 && ny < GRID_HEIGHT - 2) {
+                        grid[ny][nx] = TILES.WALL;
+                    }
+                });
+            }
+
+            // Player spawn (left side)
+            grid[9][2] = TILES.PLAYER_SPAWN;
+
+            // Door to next room (right side)
+            if (!isLastRoom) {
+                grid[9][GRID_WIDTH - 1] = TILES.DOOR;
+                // Clear path to door
+                grid[9][GRID_WIDTH - 2] = TILES.FLOOR;
+            }
+
+            // Exit in last room
+            if (isLastRoom) {
+                grid[8][GRID_WIDTH - 2] = TILES.EXIT;
+                grid[9][GRID_WIDTH - 2] = TILES.EXIT;
+                grid[10][GRID_WIDTH - 2] = TILES.EXIT;
+            }
+
+            // Add key somewhere accessible
+            const keyX = 10 + ((roomIndex * 3) % 5);
+            const keyY = 5 + ((roomIndex * 5) % 5);
+            if (grid[keyY][keyX] === TILES.FLOOR) {
+                grid[keyY][keyX] = TILES.KEY;
+            }
+
+            // Add rupees
+            for (let i = 0; i < 3 + lvl; i++) {
+                const rx = 2 + ((seed + i * 11) % (GRID_WIDTH - 4));
+                const ry = 2 + ((seed + i * 13) % (GRID_HEIGHT - 4));
+                if (grid[ry][rx] === TILES.FLOOR) {
+                    grid[ry][rx] = TILES.RUPEE;
+                }
+            }
+
+            // Add enemy spawn points
+            for (let i = 0; i < 2 + Math.floor(lvl / 2); i++) {
+                const ex = 5 + ((seed + i * 17) % (GRID_WIDTH - 10));
+                const ey = 4 + ((seed + i * 19) % (GRID_HEIGHT - 8));
+                if (grid[ey][ex] === TILES.FLOOR && Math.abs(ex - 2) > 3) {
+                    grid[ey][ex] = TILES.ENEMY_SPAWN;
+                }
+            }
+
+            return { grid, isLastRoom };
+        }
+
+        function loadRoom(roomIndex) {
+            const room = rooms[roomIndex];
+            enemies = [];
+            items = [];
+
+            // Parse grid
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    const tile = room.grid[y][x];
+                    const px = x * TILE_SIZE + TILE_SIZE / 2;
+                    const py = y * TILE_SIZE + TILE_SIZE / 2;
+
+                    switch (tile) {
+                        case TILES.PLAYER_SPAWN:
+                            player = {
+                                x: px,
+                                y: py,
+                                vx: 0,
+                                vy: 0
+                            };
+                            break;
+                        case TILES.KEY:
+                            items.push({ type: 'key', x: px, y: py });
+                            break;
+                        case TILES.RUPEE:
+                            items.push({ type: 'rupee', x: px, y: py });
+                            break;
+                        case TILES.ENEMY_SPAWN:
+                            enemies.push({
+                                x: px,
+                                y: py,
+                                vx: 0,
+                                vy: 0,
+                                dir: 'left',
+                                moveTimer: 0,
+                                health: 1
+                            });
+                            break;
+                    }
+                }
+            }
+
+            swordSwing = 0;
+        }
+
+        function drawSprite(sprite, x, y, scale = 2) {
+            const lines = Array.isArray(sprite) ? sprite : SPRITES.player.down;
+            const pixelSize = scale;
+
+            lines.forEach((line, row) => {
+                for (let col = 0; col < line.length; col++) {
+                    const char = line[col];
+                    if (char === '#') {
+                        ctx.fillStyle = COLORS.lcd;
+                        ctx.fillRect(
+                            x + col * pixelSize - (line.length * pixelSize) / 2,
+                            y + row * pixelSize - (lines.length * pixelSize) / 2,
+                            pixelSize,
+                            pixelSize
+                        );
+                    } else if (char === '+') {
+                        ctx.fillStyle = COLORS.lcdDark;
+                        ctx.fillRect(
+                            x + col * pixelSize - (line.length * pixelSize) / 2,
+                            y + row * pixelSize - (lines.length * pixelSize) / 2,
+                            pixelSize,
+                            pixelSize
+                        );
+                    }
+                }
+            });
+        }
+
+        function drawTile(tile, x, y) {
+            const tx = x * TILE_SIZE;
+            const ty = y * TILE_SIZE;
+
+            ctx.fillStyle = COLORS.bg;
+            ctx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
+
+            switch (tile) {
+                case TILES.WALL:
+                    ctx.fillStyle = COLORS.lcdDark;
+                    ctx.fillRect(tx + 2, ty + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                    ctx.fillStyle = COLORS.lcdMid;
+                    ctx.fillRect(tx + 3, ty + 3, TILE_SIZE - 6, TILE_SIZE - 6);
+                    break;
+                case TILES.DOOR:
+                    drawSprite(SPRITES.door, tx + TILE_SIZE / 2, ty + TILE_SIZE / 2, 1.5);
+                    // Door frame
+                    ctx.fillStyle = COLORS.lcdDark;
+                    ctx.fillRect(tx, ty, TILE_SIZE, 2);
+                    break;
+                case TILES.EXIT:
+                    ctx.fillStyle = COLORS.lcd;
+                    // Draw staircase pattern
+                    for (let i = 0; i < 4; i++) {
+                        ctx.fillRect(tx + 2 + i * 3, ty + 4 + i * 2, TILE_SIZE - 4 - i * 3, 2);
+                    }
+                    break;
+            }
+        }
+
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = COLORS.bg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (!rooms[currentRoom]) return;
+
+            const room = rooms[currentRoom];
+
+            // Draw tiles
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    const tile = room.grid[y][x];
+                    if (tile !== TILES.FLOOR && tile !== TILES.PLAYER_SPAWN &&
+                        tile !== TILES.KEY && tile !== TILES.RUPEE && tile !== TILES.ENEMY_SPAWN) {
+                        drawTile(tile, x, y);
+                    }
+                }
+            }
+
+            // Draw items
+            items.forEach(item => {
+                if (item.type === 'key') {
+                    drawSprite(SPRITES.key, item.x, item.y, 1.5);
+                } else if (item.type === 'rupee') {
+                    drawSprite(SPRITES.rupee, item.x, item.y, 1.5);
+                }
+            });
+
+            // Draw enemies
+            enemies.forEach(enemy => {
+                if (enemy.health > 0) {
+                    drawSprite(SPRITES.enemy, enemy.x, enemy.y, 1.5);
+                }
+            });
+
+            // Draw player
+            if (player) {
+                // Flash when invincible
+                if (invincible === 0 || Math.floor(invincible / 4) % 2 === 0) {
+                    const sprite = SPRITES.player[lastDirection] || SPRITES.player.right;
+                    drawSprite(sprite, player.x, player.y, 1.5);
+
+                    // Draw sword swing
+                    if (swordSwing > 0) {
+                        ctx.fillStyle = COLORS.lcd;
+                        let sx = player.x;
+                        let sy = player.y;
+                        const swingDist = 16;
+
+                        switch (lastDirection) {
+                            case 'right':
+                                ctx.fillRect(sx + 8, sy - 2, swingDist, 4);
+                                break;
+                            case 'left':
+                                ctx.fillRect(sx - 8 - swingDist, sy - 2, swingDist, 4);
+                                break;
+                            case 'up':
+                                ctx.fillRect(sx - 2, sy - 8 - swingDist, 4, swingDist);
+                                break;
+                            case 'down':
+                                ctx.fillRect(sx - 2, sy + 8, 4, swingDist);
+                                break;
+                        }
+                    }
+                }
+            }
+
+            // Draw LCD scanlines effect
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            for (let y = 0; y < canvas.height; y += 2) {
+                ctx.fillRect(0, y, canvas.width, 1);
+            }
+        }
+
+        function update() {
+            if (gameState !== 'playing' || !player || !rooms[currentRoom]) return;
+
+            // Update timers
+            if (swordSwing > 0) swordSwing--;
+            if (invincible > 0) invincible--;
+
+            // Player movement
+            let dx = 0;
+            let dy = 0;
+            const speed = 2;
+
+            if (keysPressed['ArrowLeft'] || keysPressed['left']) { dx = -speed; lastDirection = 'left'; }
+            if (keysPressed['ArrowRight'] || keysPressed['right']) { dx = speed; lastDirection = 'right'; }
+            if (keysPressed['ArrowUp'] || keysPressed['up']) { dy = -speed; lastDirection = 'up'; }
+            if (keysPressed['ArrowDown'] || keysPressed['down']) { dy = speed; lastDirection = 'down'; }
+
+            // Try to move
+            const newX = player.x + dx;
+            const newY = player.y + dy;
+
+            if (!checkCollision(newX, player.y)) {
+                player.x = newX;
+            }
+            if (!checkCollision(player.x, newY)) {
+                player.y = newY;
+            }
+
+            // Check item collection
+            items = items.filter(item => {
+                const dist = Math.hypot(player.x - item.x, player.y - item.y);
+                if (dist < 12) {
+                    if (item.type === 'key') {
+                        keys++;
+                        updateUI();
+                    } else if (item.type === 'rupee') {
+                        score += 10;
+                        updateUI();
+                    }
+                    return false;
+                }
+                return true;
+            });
+
+            // Check door
+            const tileX = Math.floor(player.x / TILE_SIZE);
+            const tileY = Math.floor(player.y / TILE_SIZE);
+            const currentTile = rooms[currentRoom].grid[tileY]?.[tileX];
+
+            if (currentTile === TILES.DOOR && keys > 0) {
+                keys--;
+                updateUI();
+                currentRoom++;
+                loadRoom(currentRoom);
+            }
+
+            if (currentTile === TILES.EXIT) {
+                level++;
+                score += 100;
+                updateUI();
+                generateLevel(level);
+            }
+
+            // Update enemies
+            enemies.forEach(enemy => {
+                if (enemy.health <= 0) return;
+
+                enemy.moveTimer--;
+                if (enemy.moveTimer <= 0) {
+                    enemy.moveTimer = 30 + Math.random() * 30;
+
+                    // Move towards player
+                    const dx = player.x - enemy.x;
+                    const dy = player.y - enemy.y;
+                    const dist = Math.hypot(dx, dy);
+
+                    if (dist > 0) {
+                        enemy.vx = (dx / dist) * 1;
+                        enemy.vy = (dy / dist) * 1;
+                    }
+
+                    enemy.dir = Math.abs(dx) > Math.abs(dy) ?
+                        (dx > 0 ? 'right' : 'left') :
+                        (dy > 0 ? 'down' : 'up');
+                }
+
+                const newEX = enemy.x + enemy.vx;
+                const newEY = enemy.y + enemy.vy;
+
+                if (!checkEnemyCollision(newEX, enemy.y, enemy)) {
+                    enemy.x = newEX;
+                }
+                if (!checkEnemyCollision(enemy.x, newEY, enemy)) {
+                    enemy.y = newEY;
+                }
+
+                // Check player collision (damage)
+                const playerDist = Math.hypot(player.x - enemy.x, player.y - enemy.y);
+                if (playerDist < 12 && invincible === 0) {
+                    lives--;
+                    invincible = 90;
+                    updateUI();
+
+                    if (lives <= 0) {
+                        gameState = 'gameover';
+                        showOverlay('GAME OVER', `Final Score: ${score}\nLevel: ${level}`);
+                    }
+                }
+            });
+
+            // Remove dead enemies
+            enemies = enemies.filter(e => e.health > 0);
+        }
+
+        function checkCollision(x, y) {
+            const margin = 6;
+            const points = [
+                [x - margin, y - margin],
+                [x + margin, y - margin],
+                [x - margin, y + margin],
+                [x + margin, y + margin]
+            ];
+
+            for (const [px, py] of points) {
+                const tileX = Math.floor(px / TILE_SIZE);
+                const tileY = Math.floor(py / TILE_SIZE);
+                const tile = rooms[currentRoom]?.grid[tileY]?.[tileX];
+
+                if (tile === TILES.WALL) return true;
+                if (tile === TILES.DOOR && keys <= 0) return true;
+            }
+
+            return false;
+        }
+
+        function checkEnemyCollision(x, y, enemy) {
+            const margin = 6;
+            const points = [
+                [x - margin, y - margin],
+                [x + margin, y - margin],
+                [x - margin, y + margin],
+                [x + margin, y + margin]
+            ];
+
+            for (const [px, py] of points) {
+                const tileX = Math.floor(px / TILE_SIZE);
+                const tileY = Math.floor(py / TILE_SIZE);
+                const tile = rooms[currentRoom]?.grid[tileY]?.[tileX];
+
+                if (tile === TILES.WALL || tile === TILES.DOOR) return true;
+            }
+
+            return false;
+        }
+
+        function attack() {
+            if (gameState !== 'playing' || swordSwing > 0) return;
+
+            swordSwing = 15;
+
+            // Check enemy hits
+            let attackX = player.x;
+            let attackY = player.y;
+            const attackRange = 20;
+
+            switch (lastDirection) {
+                case 'right': attackX += attackRange; break;
+                case 'left': attackX -= attackRange; break;
+                case 'up': attackY -= attackRange; break;
+                case 'down': attackY += attackRange; break;
+            }
+
+            enemies.forEach(enemy => {
+                if (enemy.health <= 0) return;
+                const dist = Math.hypot(attackX - enemy.x, attackY - enemy.y);
+                if (dist < 16) {
+                    enemy.health = 0;
+                    score += 25;
+
+                    // Chance to drop rupee
+                    if (Math.random() < 0.5) {
+                        items.push({ type: 'rupee', x: enemy.x, y: enemy.y });
+                    }
+
+                    updateUI();
+                }
+            });
+        }
+
+        function updateUI() {
+            document.getElementById('lives').textContent = lives;
+            document.getElementById('keys').textContent = keys;
+            document.getElementById('score').textContent = score;
+            document.getElementById('level').textContent = level;
+        }
+
+        function showOverlay(title, message) {
+            overlay.classList.remove('hidden');
+            overlay.innerHTML = `
+                <h2>${title}</h2>
+                ${message.split('\n').map(line => `<p>${line}</p>`).join('')}
+                <p class="start-hint">Press SPACE or TAP to continue</p>
+            `;
+        }
+
+        function hideOverlay() {
+            overlay.classList.add('hidden');
+        }
+
+        function startGame() {
+            lives = 3;
+            keys = 0;
+            score = 0;
+            level = 1;
+            gameState = 'playing';
+            hideOverlay();
+            generateLevel(level);
+            updateUI();
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (gameState !== 'playing') {
+                    startGame();
+                } else {
+                    attack();
+                }
+            }
+            keysPressed[e.code] = true;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keysPressed[e.code] = false;
+        });
+
+        // Touch controls
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (gameState !== 'playing') {
+                startGame();
+                return;
+            }
+
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+        });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            if (gameState !== 'playing') return;
+
+            const touch = e.changedTouches[0];
+            const dx = touch.clientX - touchStartX;
+            const dy = touch.clientY - touchStartY;
+            const dist = Math.hypot(dx, dy);
+
+            if (dist < 20) {
+                // Tap = attack
+                attack();
+            } else {
+                // Swipe = move
+                const absDx = Math.abs(dx);
+                const absDy = Math.abs(dy);
+
+                keysPressed = {};
+
+                if (absDx > absDy) {
+                    if (dx > 0) {
+                        keysPressed['ArrowRight'] = true;
+                        lastDirection = 'right';
+                    } else {
+                        keysPressed['ArrowLeft'] = true;
+                        lastDirection = 'left';
+                    }
+                } else {
+                    if (dy > 0) {
+                        keysPressed['ArrowDown'] = true;
+                        lastDirection = 'down';
+                    } else {
+                        keysPressed['ArrowUp'] = true;
+                        lastDirection = 'up';
+                    }
+                }
+
+                // Release after short delay
+                setTimeout(() => {
+                    keysPressed = {};
+                }, 100);
+            }
+        });
+
+        // Overlay click/tap to start
+        overlay.addEventListener('click', () => {
+            if (gameState !== 'playing') {
+                startGame();
+            }
+        });
+        overlay.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (gameState !== 'playing') {
+                startGame();
+            }
+        }, { passive: false });
+
+        // Mobile D-pad controls
+        document.querySelectorAll('.dpad-btn[data-dir]').forEach(btn => {
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const dir = btn.dataset.dir;
+                keysPressed[dir] = true;
+                lastDirection = dir;
+            });
+
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                const dir = btn.dataset.dir;
+                keysPressed[dir] = false;
+            });
+        });
+
+        document.getElementById('attackBtn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (gameState !== 'playing') {
+                startGame();
+            } else {
+                attack();
+            }
+        });
+
+        // Initialize
+        showOverlay('ZELDA GW', 'Arrow Keys / Swipe: Move\nSpace / Tap: Attack\nCollect keys to open doors\nDefeat enemies for rupees\nFind the exit to advance!');
+        gameLoop();
+
+        // How to Play toggle
+        document.getElementById('howBtn').addEventListener('click', function() {
+            document.getElementById('howOverlay').classList.add('show');
+        });
+        document.getElementById('closeHow').addEventListener('click', function() {
+            document.getElementById('howOverlay').classList.remove('show');
+        });
+        document.getElementById('howOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

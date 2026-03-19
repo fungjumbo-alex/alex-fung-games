@@ -1,0 +1,3521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>⚔️ Risk - Classic Games</title>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* Color Palette - Vibrant & Modern */
+  --coral: #FF6B6B;
+  --coral-light: #FF8E8E;
+  --peach: #FFD4A3;
+  --peach-light: #FFE4C4;
+  --navy: #2C3E50;
+  --navy-dark: #1A252F;
+  --teal: #4ECDC4;
+  --teal-light: #7FE5DD;
+  --yellow: #FFE66D;
+  --yellow-light: #FFF4A3;
+  --green: #95E1D3;
+  --green-dark: #5FB8A8;
+  --purple: #A8E6CF;
+  --blue: #6C5CE7;
+
+  /* Gradients */
+  --gradient-coral: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+  --gradient-peach: linear-gradient(135deg, #FFD4A3 0%, #FFE4C4 100%);
+  --gradient-navy: linear-gradient(135deg, #2C3E50 0%, #1A252F 100%);
+  --gradient-teal: linear-gradient(135deg, #4ECDC4 0%, #7FE5DD 100%);
+  --gradient-yellow: linear-gradient(135deg, #FFE66D 0%, #FFF4A3 100%);
+  --gradient-green: linear-gradient(135deg, #95E1D3 0%, #5FB8A8 100%);
+  --gradient-blue: linear-gradient(135deg, #6C5CE7 0%, #a39bfe 100%);
+  --gradient-purple: linear-gradient(135deg, #a55eea 0%, #d6a2e8 100%);
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
+  --shadow-glow: 0 0 20px rgba(255, 107, 107, 0.3);
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  /* Prevent auto-zoom on double tap for all interactive elements */
+  touch-action: manipulation;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* Use a solid background color on body/html to prevent white flashes */
+  background-color: #667eea;
+  min-height: 100vh;
+  color: white;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Animated Background */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Combine the base gradient and the bubbles animation */
+  background:
+    radial-gradient(circle at 20% 50%, rgba(255, 107, 107, 0.2) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(78, 205, 196, 0.2) 0%, transparent 50%),
+    radial-gradient(circle at 40% 20%, rgba(255, 230, 109, 0.2) 0%, transparent 50%),
+    linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  animation: backgroundShift 15s ease infinite;
+  z-index: -1;
+  /* Ensure background doesn't scroll with content */
+  will-change: transform;
+}
+
+@keyframes backgroundShift {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+    /* Reduced scale slightly for better performance */
+  }
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+}
+
+/* Header */
+header {
+  text-align: center;
+  padding: var(--spacing-xl) 0;
+  animation: fadeInDown 0.6s ease;
+}
+
+header h1 {
+  font-size: 3.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: var(--spacing-sm);
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+header p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+/* Game Grid */
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-xl);
+  animation: fadeInUp 0.8s ease;
+}
+
+/* Game Card */
+.game-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.game-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.game-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.game-card:hover::before {
+  opacity: 1;
+}
+
+.game-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.game-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform var(--transition-normal);
+  color: white;
+  /* Ensure SVG color is white */
+}
+
+.game-icon svg {
+  width: 32px;
+  height: 32px;
+  stroke: currentColor;
+  stroke-width: 2px;
+}
+
+.game-card:hover .game-icon {
+  transform: rotate(5deg) scale(1.1);
+}
+
+.game-card h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.game-card p {
+  opacity: 0.8;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Game Colors */
+.game-card[data-game="tap-match"] .game-icon {
+  background: var(--gradient-coral);
+}
+
+.game-card[data-game="word-guess"] .game-icon {
+  background: var(--gradient-peach);
+}
+
+.game-card[data-game="minesweeper"] .game-icon {
+  background: var(--gradient-navy);
+}
+
+.game-card[data-game="hangman"] .game-icon {
+  background: linear-gradient(135deg, #FF9A76 0%, #FFBC94 100%);
+}
+
+.game-card[data-game="sound-memory"] .game-icon {
+  background: var(--gradient-navy);
+}
+
+.game-card[data-game="snake"] .game-icon {
+  background: var(--gradient-yellow);
+}
+
+.game-card[data-game="fruit-merge"] .game-icon {
+  background: var(--gradient-green);
+}
+
+.game-card[data-game="chopper"] .game-icon {
+  background: var(--gradient-teal);
+}
+
+.game-card[data-game="risk-battles"] .game-icon {
+  background: var(--gradient-navy);
+}
+
+.game-card[data-game="poker"] .game-icon {
+  background: var(--gradient-purple);
+}
+
+.game-card[data-game="mahjong"] .game-icon {
+  background: var(--gradient-coral);
+}
+
+.game-card[data-game="bubble-shooter"] .game-icon {
+  background: var(--gradient-blue);
+}
+
+.game-card[data-game="big2"] .game-icon {
+  background: var(--gradient-peach);
+}
+
+.game-card[data-game="2048"] .game-icon {
+  background: var(--gradient-yellow);
+}
+
+/* Game Container */
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Ensure game container fills viewport without scrolling */
+.game-container {
+  display: none;
+  animation: fadeIn 0.5s ease;
+  position: relative;
+  /* for HUD overlay */
+  height: 100vh;
+  /* fill viewport */
+  overflow: hidden;
+}
+
+.game-container.active {
+  display: block;
+}
+
+#menu-container {
+  max-height: 100vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE/Edge */
+}
+
+#menu-container::-webkit-scrollbar {
+  display: none;
+  /* Chrome/Safari */
+}
+
+/* Hide scrollbar for horizontal controls */
+.game-controls-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.game-controls-bar {
+  scrollbar-width: none;
+}
+
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.game-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.game-controls {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+/* Buttons */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: 'Inter', sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.difficulty-btn.active {
+  background: linear-gradient(135deg, #4ECDC4 0%, #7FE5DD 100%);
+  border-color: #4ECDC4;
+  box-shadow: 0 4px 20px rgba(78, 205, 196, 0.4);
+  transform: scale(1.05);
+}
+
+
+/* Back Button - Circular Icon Style */
+.btn-back-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0;
+  transition: all var(--transition-fast);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.btn-back-icon:hover {
+  background: rgba(0, 0, 0, 0.5);
+  transform: scale(1.1);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.btn-back-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  stroke-width: 2.5;
+}
+
+/* Header Layout Alignment */
+.game-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.btn-back:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Game Board Styles */
+.game-board {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  margin-top: var(--spacing-lg);
+}
+
+.game-stats {
+  display: flex;
+  gap: var(--spacing-lg);
+  justify-content: center;
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.stat {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  min-width: 120px;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin-bottom: 0.25rem;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-10px);
+  }
+
+  75% {
+    transform: translateX(10px);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+
+  /* Prevent horizontal scroll */
+  body {
+    overflow-x: hidden;
+  }
+
+  header h1 {
+    font-size: 2.5rem;
+  }
+
+  header p {
+    font-size: 1rem;
+  }
+
+  .game-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .game-title {
+    font-size: 1.8rem;
+  }
+
+  .container {
+    padding: var(--spacing-sm);
+  }
+
+  .game-board {
+    padding: var(--spacing-sm);
+    overflow-x: auto;
+  }
+
+  /* Ensure game cards are tappable */
+  .game-card {
+    padding: var(--spacing-md);
+    min-height: 80px;
+  }
+
+  .game-card h2 {
+    font-size: 1.5rem;
+  }
+
+  .game-card p {
+    font-size: 0.85rem;
+  }
+
+  /* Button improvements */
+  .btn {
+    padding: 0.875rem 1.25rem;
+    font-size: 1rem;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .game-header {
+    flex-direction: row;
+    /* Keep row layout on mobile */
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .game-controls {
+    width: auto;
+    /* Don't take full width */
+    justify-content: flex-end;
+    /* Align to right */
+    flex-wrap: wrap;
+    flex-grow: 1;
+    /* Allow to grow if needed, or keeping it auto is fine */
+  }
+
+  /* Reduce title size slightly to fit */
+  .game-title {
+    font-size: 1.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Stats adjustments */
+  .game-stats {
+    gap: var(--spacing-sm);
+    font-size: 0.9rem;
+  }
+
+  .stat {
+    min-width: 100px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  /* Card game specific */
+  .card {
+    width: 60px;
+    height: 85px;
+    font-size: 14px;
+  }
+
+  .card-corner {
+    font-size: 14px;
+  }
+
+  .card-center {
+    font-size: 28px;
+  }
+
+  /* Mahjong tiles */
+  .mahjong-tile {
+    width: 35px;
+    height: 45px;
+    font-size: 20px;
+  }
+
+  /* Modal improvements */
+  .game-modal-content {
+    padding: var(--spacing-lg);
+    max-width: 90%;
+  }
+
+  .game-modal-content h2 {
+    font-size: 1.8rem;
+  }
+
+  .instructions-content {
+    padding: var(--spacing-lg);
+    max-width: 90%;
+  }
+
+  .instructions-content h3 {
+    font-size: 1.5rem;
+  }
+
+  .instructions-content li {
+    font-size: 0.9rem;
+  }
+
+  /* Mahjong mobile fixes */
+  #mahjong-board {
+    height: 400px;
+    /* Reduced from 500px for better mobile fit */
+  }
+
+  /* Big 2 mobile fixes - reduce card overlap */
+  #big2-player-hand {
+    gap: -10px !important;
+    /* Override inline style, less cramped than -30px */
+    padding: 10px !important;
+  }
+
+  /* Poker mobile fixes - improve spacing */
+  #poker-controls {
+    gap: var(--spacing-sm) !important;
+    flex-wrap: wrap;
+  }
+
+  #poker-community-cards {
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+
+  #poker-player-hand {
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+
+  /* Bubble Shooter mobile fixes */
+  #bubble-shooter-canvas {
+    max-width: 100%;
+    height: auto;
+  }
+
+  #bubble-shooter-board {
+    height: auto;
+    min-height: 400px;
+  }
+}
+
+
+/* Hidden utility */
+.hidden {
+  display: none !important;
+}
+
+/* Game Instructions Overlay */
+.game-instructions {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+  padding: var(--spacing-lg);
+}
+
+.instructions-content {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  max-width: 500px;
+  width: 100%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: var(--shadow-lg);
+  animation: fadeInUp 0.5s ease;
+}
+
+.instructions-content h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-md);
+  text-align: center;
+}
+
+.instructions-content ul {
+  list-style: none;
+  margin-bottom: var(--spacing-lg);
+}
+
+.instructions-content li {
+  padding: var(--spacing-xs) 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.instructions-content li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--teal);
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.instructions-content strong {
+  color: var(--yellow);
+  font-weight: 600;
+}
+
+.instructions-content .btn {
+  width: 100%;
+  font-size: 1.1rem;
+  padding: 1rem;
+}
+
+@media (max-width: 768px) {
+  .instructions-content {
+    padding: var(--spacing-lg);
+  }
+
+  .instructions-content h3 {
+    font-size: 1.5rem;
+  }
+
+  .instructions-content li {
+    font-size: 0.9rem;
+  }
+}
+
+/* Game Modal */
+.game-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+  padding: var(--spacing-lg);
+}
+
+.game-modal-content {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(30px);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  max-width: 450px;
+  width: 100%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  animation: modalSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(-50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.game-modal-icon {
+  font-size: 5rem;
+  margin-bottom: var(--spacing-md);
+  animation: iconBounce 0.6s ease;
+  display: inline-block;
+}
+
+@keyframes iconBounce {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  25% {
+    transform: scale(1.2);
+  }
+
+  50% {
+    transform: scale(0.9);
+  }
+
+  75% {
+    transform: scale(1.1);
+  }
+}
+
+.game-modal-content h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-sm);
+  background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.game-modal-content p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.6;
+}
+
+.game-modal-content .btn {
+  width: 100%;
+  font-size: 1.2rem;
+  padding: 1rem;
+}
+
+@media (max-width: 768px) {
+  .game-modal-content {
+    padding: var(--spacing-lg);
+  }
+
+  .game-modal-icon {
+    font-size: 4rem;
+  }
+
+  .game-modal-content h2 {
+    font-size: 2rem;
+  }
+
+  .game-modal-content p {
+    font-size: 1rem;
+  }
+
+  .game-modal-content .btn {
+    font-size: 1rem;
+    padding: 0.8rem;
+  }
+}
+
+/* Make canvas responsive on mobile */
+#chopper-canvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Mahjong Styles */
+#mahjong-board {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.mahjong-tile {
+  position: absolute;
+  width: 40px;
+  height: 52px;
+  background: #f0e6d2;
+  border: 1px solid #c0b6a2;
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.5);
+  transition: transform 0.1s, box-shadow 0.1s;
+  user-select: none;
+  z-index: 1;
+}
+
+.mahjong-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.5);
+  z-index: 10;
+}
+
+.mahjong-tile.selected {
+  background: #fff8e0;
+  border-color: #ffd700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.6),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.5);
+  transform: translateY(-4px);
+  z-index: 20;
+}
+
+.mahjong-tile.matched {
+  animation: tileMatch 0.3s forwards;
+}
+
+@keyframes tileMatch {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* Risk Game Styles */
+#risk-map-container {
+  position: relative;
+  user-select: none;
+  transition: border-color 0.5s ease;
+  border-radius: 10px;
+}
+
+.risk-territory-badge {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background: #ccc;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
+  z-index: 10;
+}
+
+.risk-territory-badge:hover {
+  transform: translate(-50%, -50%) scale(1.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+  z-index: 20;
+}
+
+.risk-territory-badge.selected {
+  box-shadow: 0 0 0 3px #FFD700, 0 4px 8px rgba(0, 0, 0, 0.6);
+  transform: translate(-50%, -50%) scale(1.2);
+  z-index: 30;
+}
+
+.badge-count {
+  color: white;
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Action feedback animations */
+.risk-territory-badge.attacking {
+  animation: pulse-attack 0.5s ease-in-out 3;
+}
+
+.risk-territory-badge.defending {
+  animation: pulse-defend 0.5s ease-in-out 3;
+}
+
+.risk-territory-badge.reinforcing {
+  animation: pulse-reinforce 0.3s ease-in-out 2;
+}
+
+.risk-territory-badge.conquered {
+  animation: flash-conquered 0.8s ease-in-out;
+}
+
+@keyframes pulse-attack {
+
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.4);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 4px 8px rgba(0, 0, 0, 0.6);
+  }
+}
+
+@keyframes pulse-defend {
+
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.3);
+    box-shadow: 0 0 20px rgba(255, 165, 0, 0.8), 0 4px 8px rgba(0, 0, 0, 0.6);
+  }
+}
+
+@keyframes pulse-reinforce {
+
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
+  }
+}
+
+@keyframes flash-conquered {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  25% {
+    transform: translate(-50%, -50%) scale(1.5);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 1);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.3);
+  }
+
+  75% {
+    transform: translate(-50%, -50%) scale(1.5);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 1);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+#risk-status-bar {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+}
+
+#risk-message {
+  font-size: 1rem;
+  text-align: center;
+  min-width: 200px;
+}
+
+@media (max-width: 768px) {
+  .risk-territory-badge {
+    width: 24px;
+    height: 24px;
+  }
+
+  .badge-count {
+    font-size: 0.75rem;
+  }
+
+  /* Compact header layout for Risk game on mobile */
+  #risk-battles-game .game-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  #risk-battles-game .game-title {
+    font-size: 1.3rem;
+    margin: 0;
+    margin-left: 100px;
+  }
+
+  #risk-battles-game .game-controls {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  #risk-battles-game #risk-back {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    min-width: auto;
+    z-index: 10;
+  }
+
+  #risk-turn-indicator {
+    font-size: 0.9rem !important;
+    margin-right: 0 !important;
+  }
+
+  #risk-battles-game #risk-reset {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+
+  #risk-status-bar {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+    padding: 6px 8px !important;
+  }
+
+  #risk-player-stats {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)) !important;
+    gap: 5px !important;
+    margin-bottom: 5px !important;
+    font-size: 0.85rem;
+  }
+
+  #risk-phase-display {
+    font-size: 0.8rem !important;
+    padding: 4px 0;
+  }
+
+  #risk-message {
+    font-size: 0.75rem !important;
+    min-width: auto !important;
+    padding: 2px 0;
+  }
+
+  /* Smaller Next Phase button */
+  #risk-end-turn-btn {
+    padding: 6px 12px !important;
+    font-size: 0.85rem !important;
+  }
+
+  #risk-action-btn {
+    padding: 6px 12px !important;
+    font-size: 0.85rem !important;
+  }
+
+  #risk-map-container {
+    margin-bottom: 10px !important;
+    max-width: 100% !important;
+  }
+
+  /* Make the Risk game board more compact on mobile */
+  #risk-battles-game .game-board {
+    gap: 10px !important;
+    padding: 0 10px 20px 10px;
+  }
+
+  /* Ensure map image is fully visible */
+  #risk-map-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+}
+
+
+
+/* Word Guess Keyboard */
+.word-guess-keyboard {
+  max-width: 500px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.keyboard-row {
+  display: flex;
+  gap: 0.3rem;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.key-btn {
+  padding: 1rem;
+  min-width: 2.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.key-btn.wide {
+  min-width: 4rem;
+}
+
+/* Hangman Keyboard */
+.hangman-keyboard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  max-width: 600px;
+  margin: 2rem auto;
+  width: 100%;
+}
+
+.letter-btn {
+  width: 3rem;
+  height: 3rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 700;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+
+  /* Word Guess Mobile */
+  .word-guess-keyboard {
+    padding: 0 5px;
+    /* Add slight padding to container */
+  }
+
+  .keyboard-row {
+    gap: 2px;
+    /* Tighter gap */
+    margin-bottom: 4px;
+  }
+
+  .key-btn {
+    padding: 0.8rem 0;
+    /* Remove horizontal padding */
+    min-width: 0;
+    /* Allow shrinking */
+    flex: 1;
+    /* Distribute space evenly */
+    font-size: 0.85rem;
+    border-radius: 4px;
+    height: 3rem;
+    /* Fixed height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .key-btn.wide {
+    flex: 1.5;
+    /* Enter/Backspace take 1.5x space */
+    font-size: 0.7rem;
+  }
+
+  /* Hangman Mobile */
+  .letter-btn {
+    width: 2rem;
+    /* Smaller keys */
+    height: 2rem;
+    font-size: 0.9rem;
+    border-radius: 4px;
+  }
+
+  canvas {
+    display: block;
+    max-width: 100%;
+    border-radius: 4px;
+    /* Prevent default touch actions (scrolling, zooming) on canvas */
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .hangman-keyboard {
+    gap: 4px;
+  }
+}
+
+.card {
+  width: 70px;
+  height: 100px;
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 5px;
+  box-sizing: border-box;
+  font-family: 'Arial', sans-serif;
+  user-select: none;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.card.selected {
+  transform: translateY(-15px);
+  box-shadow: 0 0 10px #FFC300;
+  border: 2px solid #FFC300;
+}
+
+.card.red {
+  color: #d40000;
+}
+
+.card.black {
+  color: #2d2d2d;
+}
+
+.card-corner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.card-corner.top-left {
+  align-self: flex-start;
+}
+
+.card-corner.bottom-right {
+  align-self: flex-end;
+  transform: rotate(180deg);
+}
+
+.card-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 32px;
+}
+
+.mahjong-tile {
+  position: absolute;
+  width: 40px;
+  height: 50px;
+  background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow:
+    2px 2px 0 #ddd,
+    3px 3px 0 #bbb,
+    4px 4px 5px rgba(0, 0, 0, 0.3);
+  transition: transform 0.1s, box-shadow 0.1s;
+  user-select: none;
+  color: #333;
+}
+
+.mahjong-tile:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    2px 4px 0 #ddd,
+    3px 5px 0 #bbb,
+    4px 6px 8px rgba(0, 0, 0, 0.3);
+  z-index: 1000 !important;
+  /* Bring to front on hover */
+}
+
+.mahjong-tile.selected {
+  background: #e6f7ff;
+  border-color: #1890ff;
+  transform: translateY(-4px);
+  box-shadow:
+    2px 6px 0 #ddd,
+    3px 7px 0 #bbb,
+    4px 8px 10px rgba(24, 144, 255, 0.4);
+}
+
+.mahjong-tile.blocked {
+  filter: brightness(0.7);
+  cursor: not-allowed;
+  pointer-events: none;
+  /* Optional: disable clicks entirely */
+}
+
+.mahjong-tile.hint {
+  box-shadow: 0 0 15px #FFC300, 0 0 5px #FFC300 inset;
+  border-color: #FFC300;
+  z-index: 2000 !important;
+  animation: pulse-hint 1s infinite;
+}
+
+@keyframes pulse-hint {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Bridge Game Styles */
+.bridge-auction-history {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.auction-header {
+  font-weight: bold;
+  color: var(--teal);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 5px;
+}
+
+.auction-item {
+  padding: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.auction-item.empty {
+  background: transparent;
+}
+
+.bridge-bidding-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+}
+
+.turn-indicator {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--yellow);
+}
+
+.bid-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.btn-bid {
+  padding: 8px 12px;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-bid:hover:not(:disabled) {
+  background: var(--teal);
+  transform: scale(1.05);
+}
+
+.btn-bid:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.btn-pass {
+  width: 100%;
+  max-width: 200px;
+  padding: 10px;
+  background: var(--coral);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-pass:hover {
+  background: var(--coral-light);
+}
+
+.bridge-table {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  background: radial-gradient(circle at center, #358f58 0%, #246b40 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
+  border: 8px solid #5d4037;
+}
+
+.bridge-info {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  z-index: 10;
+}
+
+.bridge-hand {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  transition: all 0.3s;
+  z-index: 10;
+}
+
+.bridge-hand .card {
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s, margin 0.2s;
+}
+
+.bridge-hand .card:not(:first-child) {
+  margin-left: -40px;
+}
+
+.bridge-hand .card:hover {
+  transform: translateY(-20px);
+  z-index: 20;
+  margin-right: 10px;
+  /* Make space for hover */
+}
+
+/* Card Back Style */
+.card.back {
+  background: repeating-linear-gradient(45deg,
+      #b71c1c,
+      #b71c1c 10px,
+      #c62828 10px,
+      #c62828 20px);
+  border: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card.back::after {
+  content: '🂠';
+  font-size: 40px;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.hand-label {
+  position: absolute;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 6px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.south .hand-label {
+  bottom: -25px;
+  width: auto;
+  text-align: center;
+}
+
+.north .hand-label {
+  top: -25px;
+  width: auto;
+  text-align: center;
+}
+
+.west .hand-label {
+  left: 50%;
+  top: -30px;
+  transform: translateX(-50%) rotate(-90deg);
+}
+
+.east .hand-label {
+  left: 50%;
+  top: -30px;
+  transform: translateX(-50%) rotate(90deg);
+}
+
+.bridge-hand.south {
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.bridge-hand.north {
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.bridge-hand.west {
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%) rotate(90deg);
+  /* Default flex-direction: row makes it vertical when rotated 90deg */
+}
+
+.bridge-hand.west .card:not(:first-child) {
+  margin-left: -40px;
+  /* Standard overlap */
+  margin-top: 0;
+  /* Reset margin-top */
+}
+
+.bridge-hand.east {
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+}
+
+.bridge-hand.east .card:not(:first-child) {
+  margin-left: -40px;
+  margin-top: 0;
+}
+
+
+
+.bridge-trick-area {
+  width: 200px;
+  height: 200px;
+  position: relative;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.trick-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0 !important;
+  /* Override hand margin */
+}
+
+.trick-card.south {
+  transform: translate(-50%, -50%) translateY(30px);
+}
+
+.trick-card.north {
+  transform: translate(-50%, -50%) translateY(-30px);
+}
+
+.trick-card.west {
+  transform: translate(-50%, -50%) translateX(-30px);
+}
+
+.trick-card.east {
+  transform: translate(-50%, -50%) translateX(30px);
+}
+
+/* Bridge Bidding Hand Display */
+#bridge-bidding-hand {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  margin: 20px 0;
+  min-height: 120px;
+}
+
+#bridge-bidding-hand .card {
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s, margin 0.2s;
+}
+
+#bridge-bidding-hand .card:not(:first-child) {
+  margin-left: -40px;
+}
+
+#bridge-bidding-hand .card:hover {
+  transform: translateY(-10px);
+  z-index: 20;
+  margin-right: 10px;
+}
+
+/* Unit Purchase Buttons */
+.btn-unit {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid #444;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s;
+}
+
+.btn-unit:hover {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: #666;
+  transform: translateY(-2px);
+}
+
+.btn-unit:active {
+  transform: translateY(0);
+}
+
+.btn-unit.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.unit-icon {
+  font-size: 1.2em;
+}
+
+/* Action Buttons (Drop Bomb, Deploy Infantry) */
+.btn-action {
+  background: linear-gradient(145deg, #4a90e2, #357abd);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.1s, box-shadow 0.1s;
+  min-width: 160px;
+  cursor: pointer;
+}
+
+.btn-action:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#btn-drop-bomb {
+  background: linear-gradient(145deg, #e74c3c, #c0392b);
+}
+
+#btn-deploy-infantry {
+  background: linear-gradient(145deg, #2ecc71, #27ae60);
+}
+
+@media (max-width: 768px) {
+  .action-bar {
+    width: 100%;
+    padding: 0 10px;
+  }
+
+  .btn-action {
+    flex: 1;
+    padding: 16px 12px;
+    font-size: 1.1rem;
+    min-width: 0;
+  }
+
+  /* Minimize stats display on mobile */
+  #chopper-game .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 8px;
+    font-size: 0.85rem;
+  }
+
+  #chopper-game .stat {
+    padding: 6px 8px;
+  }
+
+  #chopper-game .stat-label {
+    font-size: 0.7rem;
+    margin-bottom: 2px;
+  }
+
+  #chopper-game .stat-value {
+    font-size: 1rem;
+  }
+
+  /* Make High Score span full width on second row */
+  #chopper-game .stat:last-child {
+    grid-column: 1 / -1;
+  }
+
+  /* Compact game controls bar */
+  .game-controls-bar {
+    gap: 6px !important;
+    padding: 0 8px;
+    margin-bottom: 6px !important;
+  }
+
+  .btn-unit,
+  .btn-action {
+    padding: 8px 10px !important;
+    font-size: 0.9rem !important;
+    min-width: 0 !important;
+    touch-action: none !important;
+    /* Disable all browser gestures */
+    -webkit-user-select: none;
+    /* Prevent text selection */
+    user-select: none;
+  }
+
+  .unit-icon {
+    font-size: 1em !important;
+  }
+
+  /* Prevent scrolling on mobile */
+  /* Prevent scrolling on mobile */
+  #chopper-game {
+    position: fixed;
+    /* Break out of container */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    background: #000;
+    /* Ensure background is opaque */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    /* Remove any padding */
+  }
+
+  #chopper-game .game-board {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 !important;
+    /* Remove padding to fill screen */
+  }
+
+  #chopper-canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+    object-fit: fill;
+    /* Fill the container exactly */
+  }
+}
+
+/* Evenly distributed controls bar */
+.game-controls-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  width: 100%;
+  padding: 8px 4px;
+  margin-top: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.game-controls-bar button {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 2px !important;
+  font-size: 0.7rem !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 48px !important;
+  border-radius: 6px !important;
+  line-height: 1.1;
+  margin: 0 !important;
+}
+
+.game-controls-bar button span:first-child {
+  font-size: 1.1rem;
+  margin-bottom: 1px;
+  display: block;
+}
+
+/* Specific colors for actions to distinguish from units */
+#btn-drop-bomb {
+  background: linear-gradient(145deg, #e74c3c, #c0392b);
+}
+
+#btn-deploy-infantry {
+  background: linear-gradient(145deg, #2ecc71, #27ae60);
+}
+
+/* Force header to be inline on mobile for Chopper */
+#chopper-game .game-header {
+  flex-direction: row !important;
+  justify-content: flex-start !important;
+  gap: 10px;
+}
+
+/* Global Full Screen for Chopper Game */
+#chopper-game {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  background: #000;
+  overflow: hidden;
+  display: none;
+  /* Hidden by default */
+  padding: 0;
+}
+
+#chopper-game.active {
+  display: flex;
+  /* Visible when active */
+  flex-direction: column;
+}
+
+#chopper-game .game-board {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+}
+
+#chopper-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+  object-fit: fill;
+}
+
+/* 2048 Game Styles */
+#game-2048-grid {
+  position: relative;
+  width: 350px;
+  height: 350px;
+  background: #bbada0;
+  border-radius: 6px;
+  margin: 0 auto;
+  padding: 10px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 10px;
+  touch-action: none;
+  /* Prevent browser handling of gestures */
+}
+
+#2048-game .game-board {
+  touch-action: none;
+  /* Ensure the container also ignores gestures */
+}
+
+.grid-cell {
+  width: 100%;
+  height: 100%;
+  background: rgba(238, 228, 218, 0.35);
+  border-radius: 3px;
+  position: static;
+  /* Default */
+}
+
+/* Tiles need to be absolute to move on top? */
+/* In my JS verify: */
+/* I used absolute positioning for tiles based on percentages. */
+/* So the #game-2048-grid needs to be relative, but it also contains .grid-cell which are static? */
+/* If I use the grid layout for .grid-cell, they will take up space. width/height 100% of grid track. */
+/* The tiles are appended to #game-2048-grid. */
+/* They need to be absolute relative to container. */
+
+.tile {
+  width: 100%;
+  height: 100%;
+  border-radius: 3px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #776e65;
+  background: #eee4da;
+  transition: all 0.15s ease;
+  z-index: 10;
+}
+
+.tile-2 {
+  background: #eee4da;
+}
+
+.tile-4 {
+  background: #ede0c8;
+}
+
+.tile-8 {
+  background: #f2b179;
+  color: #f9f6f2;
+}
+
+.tile-16 {
+  background: #f59563;
+  color: #f9f6f2;
+}
+
+.tile-32 {
+  background: #f67c5f;
+  color: #f9f6f2;
+}
+
+.tile-64 {
+  background: #f65e3b;
+  color: #f9f6f2;
+}
+
+.tile-128 {
+  background: #edcf72;
+  color: #f9f6f2;
+  font-size: 1.8rem;
+}
+
+.tile-256 {
+  background: #edcc61;
+  color: #f9f6f2;
+  font-size: 1.8rem;
+}
+
+.tile-512 {
+  background: #edc850;
+  color: #f9f6f2;
+  font-size: 1.8rem;
+}
+
+.tile-1024 {
+  background: #edc53f;
+  color: #f9f6f2;
+  font-size: 1.5rem;
+}
+
+.tile-2048 {
+  background: #edc22e;
+  color: #f9f6f2;
+  font-size: 1.5rem;
+}
+
+@media (max-width: 400px) {
+  #game-2048-grid {
+    width: 300px;
+    height: 300px;
+  }
+}
+    .game-container {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        position: relative !important;
+    }
+    .btn-back-icon { display: none !important; }
+    .back-link {
+        display: inline-block;
+        padding: 8px 16px;
+        margin: 10px;
+        color: #666;
+        text-decoration: none;
+        font-size: 14px;
+    }
+    .back-link:hover { color: #333; }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">&larr; Back</a>
+    <div id="risk-battles-game" class="game-container">
+      <div class="game-header">
+        <div class="game-header-left">
+          <button class="btn-back-icon" id="risk-back">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </button>
+          <h1 class="game-title">🌍 World Battles</h1>
+        </div>
+        <div class="game-controls">
+          <div id="risk-turn-indicator" style="font-weight: bold; font-size: 1.2rem; margin-right: 20px;">Player's Turn
+          </div>
+          <!-- Edit mode disabled for production -->
+          <!-- <button class="btn btn-secondary" id="risk-edit-mode-btn">📍 Edit Mode</button>
+          <button class="btn btn-primary" id="risk-export-coords-btn" style="display: none;">💾 Export Coords</button> -->
+          <button class="btn btn-secondary" id="risk-reset">Restart</button>
+        </div>
+      </div>
+
+      <div class="game-instructions" id="risk-battles-instructions">
+        <div class="instructions-content">
+          <h3>🌍 How to Play</h3>
+          <ul>
+            <li><strong>Goal:</strong> Conquer all territories</li>
+            <li><strong>Reinforce:</strong> Click your territories to place troops</li>
+            <li><strong>Attack:</strong> Click your territory (2+ troops), then enemy territory</li>
+            <li><strong>Fortify:</strong> Move troops between your territories (optional)</li>
+            <li><strong>Tip:</strong> Control continents for bonus troops!</li>
+          </ul>
+          <button class="btn btn-primary"
+            onclick="document.getElementById('risk-battles-instructions').classList.add('hidden')">Got it!</button>
+        </div>
+      </div>
+
+      <div class="game-board" style="display: flex; flex-direction: column; gap: 20px; align-items: center;">
+
+        <div id="risk-player-stats"
+          style="width: 100%; max-width: 800px; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 10px;">
+          <!-- Player stats will be injected here by JS -->
+        </div>
+
+        <div id="risk-status-bar"
+          style="width: 100%; max-width: 800px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); padding: 10px 20px; border-radius: 8px;">
+          <div id="risk-phase-display" style="font-size: 1.1rem; font-weight: bold; color: #FFD700;">Phase: Setup</div>
+          <div id="risk-message" style="color: #fff; font-style: italic;"></div>
+          <div>
+            <button class="btn btn-primary" id="risk-action-btn" style="display: none;">Action</button>
+            <button class="btn btn-secondary" id="risk-end-turn-btn">Next Phase</button>
+          </div>
+        </div>
+
+        <div id="risk-map-container"
+          style="position: relative; width: 100%; max-width: 800px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+          <img src="images/world-map.jpg" alt="World Map"
+            style="width: 100%; height: auto; display: block; border-radius: 10px;">
+          <!-- Badges will be injected here by JS -->
+        </div>
+
+      </div>
+    </div>
+        <div id="game-modal" class="game-modal hidden">
+        <div class="game-modal-content">
+            <div class="game-modal-icon" id="game-modal-icon">🎉</div>
+            <h2 id="game-modal-title">Game Over</h2>
+            <p id="game-modal-message">Great job!</p>
+            <button class="btn btn-primary" id="game-modal-btn">Play Again</button>
+            <button class="btn btn-secondary hidden" id="game-modal-exit-btn" style="margin-top: 10px;">Exit Game</button>
+        </div>
+    </div>
+<script>
+    // Global Modal Utility
+window.showGameModal = function (icon, title, message, callback, exitCallback) {
+  const modal = document.getElementById('game-modal');
+  const modalIcon = document.getElementById('game-modal-icon');
+  const modalTitle = document.getElementById('game-modal-title');
+  const modalMessage = document.getElementById('game-modal-message');
+  const modalBtn = document.getElementById('game-modal-btn');
+  const exitBtn = document.getElementById('game-modal-exit-btn');
+
+  modalIcon.textContent = icon;
+  modalTitle.textContent = title;
+  modalMessage.textContent = message;
+
+  // Remove previous click handlers
+  const newBtn = modalBtn.cloneNode(true);
+  modalBtn.parentNode.replaceChild(newBtn, modalBtn);
+
+  // Add new click handler
+  newBtn.addEventListener('click', () => {
+    modal.classList.add('hidden');
+    if (callback) callback();
+  });
+
+  // Handle exit button
+  if (exitBtn) {
+    if (exitCallback) {
+      exitBtn.classList.remove('hidden');
+      const newExitBtn = exitBtn.cloneNode(true);
+      exitBtn.parentNode.replaceChild(newExitBtn, exitBtn);
+
+      newExitBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+        exitCallback();
+      });
+    } else {
+      exitBtn.classList.add('hidden');
+    }
+  }
+
+  // Show modal
+  modal.classList.remove('hidden');
+};
+
+// Main App Controller
+class GameApp {
+  constructor() {
+    this.currentGame = null;
+    this.menuContainer = document.getElementById('menu-container');
+    this.init();
+  }
+
+  init() {
+    // Add click handlers for game cards
+    const gameCards = document.querySelectorAll('.game-card');
+    gameCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const gameName = card.dataset.game;
+        window.location.hash = gameName; // Update hash to trigger route handler
+      });
+    });
+
+    // Add back button handlers (Event Delegation)
+    document.addEventListener('click', (e) => {
+      const backBtn = e.target.closest('.btn-back-icon');
+      if (backBtn) {
+        e.preventDefault();
+        window.location.hash = ''; // Return to menu via hash
+      }
+    });
+
+    // Handle routing
+    window.addEventListener('hashchange', () => this.handleRoute());
+    window.addEventListener('load', () => this.handleRoute());
+  }
+
+  handleRoute() {
+    const hash = window.location.hash.slice(1); // Remove '#'
+    if (hash) {
+      this.showGame(hash);
+    } else {
+      this.showMenu();
+    }
+  }
+
+  showGame(gameName) {
+    // Hide menu first
+    this.menuContainer.classList.add('hidden');
+
+    // Hide any currently active game if switching directly between games (edge case)
+    if (this.currentGame && this.currentGame !== gameName) {
+      const currentContainer = document.getElementById(`${this.currentGame}-game`);
+      if (currentContainer) currentContainer.classList.remove('active');
+      this.cleanupGame(this.currentGame);
+    }
+
+    const gameContainer = document.getElementById(`${gameName}-game`);
+    if (gameContainer) {
+      gameContainer.classList.add('active');
+      this.currentGame = gameName;
+
+      // Show instructions if needed (simple check if already active handled by logic/CSS usually, but good to ensure)
+      // Note: Some games hide instructions on start, so we only show if it's a "fresh" entry or we want to persist state?
+      // Default behavior: show instructions when entering a game.
+      const instructions = document.getElementById(`${gameName}-instructions`);
+      if (instructions) {
+        // Only show if we strictly want reset? 
+        // Let's remove 'hidden' class to ensure they see it on entry.
+        instructions.classList.remove('hidden');
+      }
+
+      // Initialize the game
+      this.initializeGame(gameName);
+    } else {
+      // Invalid game hash -> go back to menu
+      console.warn(`Game ${gameName} not found, redirecting to menu.`);
+      window.location.hash = '';
+    }
+  }
+
+  showMenu() {
+    if (this.currentGame) {
+      const gameContainer = document.getElementById(`${this.currentGame}-game`);
+      if (gameContainer) {
+        gameContainer.classList.remove('active');
+      }
+
+      // We don't necessarily need to reset instructions here, they are handled in showGame entry.
+
+      // Clean up game
+      this.cleanupGame(this.currentGame);
+      this.currentGame = null;
+    }
+    this.menuContainer.classList.remove('hidden');
+  }
+
+  initializeGame(gameName) {
+    switch (gameName) {
+      case 'tap-match':
+        if (window.tapMatchGame) window.tapMatchGame.init();
+        break;
+      case 'word-guess':
+        if (window.wordGuessGame) window.wordGuessGame.init();
+        break;
+      case 'minesweeper':
+        if (window.minesweeperGame) window.minesweeperGame.init();
+        break;
+      case 'hangman':
+        if (window.hangmanGame) window.hangmanGame.init();
+        break;
+      case 'sound-memory':
+        if (window.soundMemoryGame) window.soundMemoryGame.init();
+        break;
+      case 'snake':
+        // Snake game is initialized by the user clicking "Start Game"
+        break;
+      case 'mahjong':
+        if (window.mahjongGame) window.mahjongGame.init();
+        break;
+      case 'big2':
+        if (window.big2Game) window.big2Game.init();
+        break;
+      case 'poker':
+        if (window.pokerGame) window.pokerGame.init();
+        break;
+      case 'bubble-shooter':
+        if (window.bubbleShooterGame) window.bubbleShooterGame.init();
+        break;
+      case 'risk-battles':
+        if (window.riskGame) window.riskGame.init();
+        break;
+      case 'fruit-merge':
+        if (window.fruitMergeGame) window.fruitMergeGame.init();
+        break;
+      case 'chopper':
+        if (window.chopperGame) window.chopperGame.init();
+        break;
+      case '2048':
+        if (window.game2048) window.game2048.init();
+        break;
+    }
+  }
+
+  cleanupGame(gameName) {
+    switch (gameName) {
+      case 'tap-match':
+        if (window.tapMatchGame) window.tapMatchGame.cleanup();
+        break;
+      case 'word-guess':
+        if (window.wordGuessGame) window.wordGuessGame.cleanup();
+        break;
+      case 'minesweeper':
+        if (window.minesweeperGame) window.minesweeperGame.cleanup();
+        break;
+      case 'hangman':
+        if (window.hangmanGame) window.hangmanGame.cleanup();
+        break;
+      case 'sound-memory':
+        if (window.soundMemoryGame) window.soundMemoryGame.cleanup();
+        break;
+      case 'snake':
+        if (window.snakeGame) window.snakeGame.cleanup();
+        break;
+      case 'mahjong':
+        // No cleanup needed yet
+        break;
+      case 'big2':
+        // No cleanup needed yet
+        break;
+      case 'poker':
+        // No cleanup needed yet
+        break;
+      case 'chopper':
+        if (window.chopperGame) window.chopperGame.cleanup();
+        break;
+    }
+  }
+}
+
+// Initialize app when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  window.gameApp = new GameApp();
+});
+
+    class RiskBattlesGame {
+    constructor() {
+        this.attackerTroops = 0;
+        this.defenderTroops = 0;
+        this.isGameActive = false;
+
+        // DOM Elements
+        this.attackerInput = document.getElementById('risk-attacker-count');
+        this.defenderInput = document.getElementById('risk-defender-count');
+        this.rollBtn = document.getElementById('risk-roll-btn');
+        this.blitzBtn = document.getElementById('risk-blitz-btn');
+        this.resetBtn = document.getElementById('risk-reset');
+        this.backBtn = document.getElementById('risk-back');
+
+        this.attackerDiceContainer = document.getElementById('risk-attacker-dice');
+        this.defenderDiceContainer = document.getElementById('risk-defender-dice');
+        this.battleLog = document.getElementById('risk-battle-log');
+
+        this.attackerTroopsDisplay = document.getElementById('risk-attacker-display');
+        this.defenderTroopsDisplay = document.getElementById('risk-defender-display');
+
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        this.rollBtn.addEventListener('click', () => this.battleRound());
+        this.blitzBtn.addEventListener('click', () => this.blitzBattle());
+        this.resetBtn.addEventListener('click', () => this.resetGame());
+        this.backBtn.addEventListener('click', () => {
+            document.getElementById('risk-battles-game').classList.remove('active');
+            document.getElementById('menu-container').style.display = 'block';
+        });
+
+        // Input validation
+        this.attackerInput.addEventListener('change', () => this.updateTroopDisplays());
+        this.defenderInput.addEventListener('change', () => this.updateTroopDisplays());
+    }
+
+    init() {
+        this.attackerInput.value = 5;
+        this.defenderInput.value = 5;
+        this.updateTroopDisplays();
+        this.clearBattlefield();
+        this.log("Enter troop counts and start battling!");
+    }
+
+    updateTroopDisplays() {
+        this.attackerTroops = parseInt(this.attackerInput.value) || 0;
+        this.defenderTroops = parseInt(this.defenderInput.value) || 0;
+
+        this.attackerTroopsDisplay.textContent = this.attackerTroops;
+        this.defenderTroopsDisplay.textContent = this.defenderTroops;
+
+        this.checkButtons();
+    }
+
+    checkButtons() {
+        const canBattle = this.attackerTroops > 1 && this.defenderTroops > 0;
+        this.rollBtn.disabled = !canBattle;
+        this.blitzBtn.disabled = !canBattle;
+    }
+
+    rollDie() {
+        return Math.floor(Math.random() * 6) + 1;
+    }
+
+    battleRound(isBlitz = false) {
+        if (this.attackerTroops <= 1 || this.defenderTroops <= 0) return;
+
+        // Determine number of dice
+        const attackerDiceCount = Math.min(this.attackerTroops - 1, 3);
+        const defenderDiceCount = Math.min(this.defenderTroops, 2);
+
+        // Roll dice
+        const attackerRolls = [];
+        for (let i = 0; i < attackerDiceCount; i++) attackerRolls.push(this.rollDie());
+
+        const defenderRolls = [];
+        for (let i = 0; i < defenderDiceCount; i++) defenderRolls.push(this.rollDie());
+
+        // Sort descending
+        attackerRolls.sort((a, b) => b - a);
+        defenderRolls.sort((a, b) => b - a);
+
+        // Compare
+        let attackerLosses = 0;
+        let defenderLosses = 0;
+        const comparisons = Math.min(attackerRolls.length, defenderRolls.length);
+
+        for (let i = 0; i < comparisons; i++) {
+            if (attackerRolls[i] > defenderRolls[i]) {
+                defenderLosses++;
+            } else {
+                attackerLosses++;
+            }
+        }
+
+        // Update troops
+        this.attackerTroops -= attackerLosses;
+        this.defenderTroops -= defenderLosses;
+
+        // Update Inputs/Display
+        this.attackerInput.value = this.attackerTroops;
+        this.defenderInput.value = this.defenderTroops;
+        this.updateTroopDisplays();
+
+        // Render Dice (only if not blitzing or it's the last round of blitz)
+        if (!isBlitz) {
+            this.renderDice(attackerRolls, defenderRolls);
+            this.log(`Attacker lost ${attackerLosses}, Defender lost ${defenderLosses}`);
+        }
+
+        return { attackerLosses, defenderLosses };
+    }
+
+    async blitzBattle() {
+        this.clearBattlefield();
+        this.log("Blitzing...");
+
+        let totalAttackerLosses = 0;
+        let totalDefenderLosses = 0;
+
+        while (this.attackerTroops > 1 && this.defenderTroops > 0) {
+            const result = this.battleRound(true);
+            totalAttackerLosses += result.attackerLosses;
+            totalDefenderLosses += result.defenderLosses;
+
+            // Small delay for visual effect if desired, but blitz usually implies instant
+            // await new Promise(r => setTimeout(r, 50)); 
+        }
+
+        this.log(`Blitz Result: Attacker lost ${totalAttackerLosses}, Defender lost ${totalDefenderLosses}`);
+
+        if (this.defenderTroops === 0) {
+            this.log("Attacker Wins!");
+        } else {
+            this.log("Defender Holds!");
+        }
+    }
+
+    renderDice(attackerRolls, defenderRolls) {
+        this.attackerDiceContainer.innerHTML = attackerRolls.map(val => `<div class="die die-attacker">${val}</div>`).join('');
+        this.defenderDiceContainer.innerHTML = defenderRolls.map(val => `<div class="die die-defender">${val}</div>`).join('');
+    }
+
+    clearBattlefield() {
+        this.attackerDiceContainer.innerHTML = '';
+        this.defenderDiceContainer.innerHTML = '';
+        this.battleLog.innerHTML = '';
+    }
+
+    log(message) {
+        const entry = document.createElement('div');
+        entry.textContent = message;
+        this.battleLog.prepend(entry);
+    }
+
+    resetGame() {
+        this.init();
+    }
+}
+
+// Initialize game when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    const game = new RiskBattlesGame();
+
+    // Handle game card click
+    const gameCard = document.getElementById('risk-battles-card');
+    if (gameCard) {
+        gameCard.addEventListener('click', () => {
+            document.getElementById('menu-container').style.display = 'none';
+            const gameContainer = document.getElementById('risk-battles-game');
+            gameContainer.classList.add('active');
+            gameContainer.style.display = 'block';
+            game.init();
+        });
+    }
+});
+ const RISK_DATA = {
+    continents: {
+        NA: { name: "North America", bonus: 5, color: "#FFD700" }, // Gold
+        SA: { name: "South America", bonus: 2, color: "#FF6B6B" }, // Red
+        EU: { name: "Europe", bonus: 5, color: "#4ECDC4" },       // Teal
+        AF: { name: "Africa", bonus: 3, color: "#D4A373" },       // Brown
+        AS: { name: "Asia", bonus: 7, color: "#95E1D3" },         // Green
+        AU: { name: "Australia", bonus: 2, color: "#FF9A76" }     // Orange
+    },
+    territories: [
+        // North America
+        { id: "alaska", name: "Alaska", continent: "NA", x: 7, y: 13, neighbors: ["nw-territory", "alberta", "kamchatka"] },
+        { id: "nw-territory", name: "N.W. Territory", continent: "NA", x: 16, y: 14, neighbors: ["alaska", "alberta", "ontario", "greenland"] },
+        { id: "greenland", name: "Greenland", continent: "NA", x: 34, y: 9, neighbors: ["nw-territory", "ontario", "quebec", "iceland"] },
+        { id: "alberta", name: "Alberta", continent: "NA", x: 15, y: 23, neighbors: ["alaska", "nw-territory", "ontario", "western-us"] },
+        { id: "ontario", name: "Ontario", continent: "NA", x: 22, y: 24, neighbors: ["nw-territory", "greenland", "quebec", "eastern-us", "western-us", "alberta"] },
+        { id: "quebec", name: "Quebec", continent: "NA", x: 29, y: 24, neighbors: ["greenland", "ontario", "eastern-us"] },
+        { id: "western-us", name: "Western U.S.", continent: "NA", x: 16, y: 34, neighbors: ["alberta", "ontario", "eastern-us", "central-america"] },
+        { id: "eastern-us", name: "Eastern U.S.", continent: "NA", x: 23, y: 37, neighbors: ["ontario", "quebec", "western-us", "central-america"] },
+        { id: "central-america", name: "Central America", continent: "NA", x: 16, y: 46, neighbors: ["western-us", "eastern-us", "venezuela"] },
+
+        // South America
+        { id: "venezuela", name: "Venezuela", continent: "SA", x: 24, y: 56, neighbors: ["central-america", "peru", "brazil"] },
+        { id: "peru", name: "Peru", continent: "SA", x: 25, y: 68, neighbors: ["venezuela", "brazil", "argentina"] },
+        { id: "brazil", name: "Brazil", continent: "SA", x: 32, y: 65, neighbors: ["venezuela", "peru", "argentina", "north-africa"] },
+        { id: "argentina", name: "Argentina", continent: "SA", x: 27, y: 79, neighbors: ["peru", "brazil"] },
+
+        // Europe
+        { id: "iceland", name: "Iceland", continent: "EU", x: 44, y: 20, neighbors: ["greenland", "great-britain", "scandinavia"] },
+        { id: "scandinavia", name: "Scandinavia", continent: "EU", x: 49, y: 20, neighbors: ["iceland", "great-britain", "northern-europe", "ukraine"] },
+        { id: "great-britain", name: "Great Britain", continent: "EU", x: 41, y: 31, neighbors: ["iceland", "scandinavia", "northern-europe", "western-europe"] },
+        { id: "northern-europe", name: "Northern Europe", continent: "EU", x: 50, y: 33, neighbors: ["scandinavia", "great-britain", "western-europe", "southern-europe", "ukraine"] },
+        { id: "western-europe", name: "Western Europe", continent: "EU", x: 43, y: 47, neighbors: ["great-britain", "northern-europe", "southern-europe", "north-africa"] },
+        { id: "southern-europe", name: "Southern Europe", continent: "EU", x: 51, y: 43, neighbors: ["western-europe", "northern-europe", "ukraine", "north-africa", "egypt", "middle-east"] },
+        { id: "ukraine", name: "Ukraine", continent: "EU", x: 60, y: 25, neighbors: ["scandinavia", "northern-europe", "southern-europe", "ural", "afghanistan", "middle-east"] },
+
+        // Africa
+        { id: "north-africa", name: "North Africa", continent: "AF", x: 45, y: 62, neighbors: ["western-europe", "southern-europe", "egypt", "east-africa", "congo", "brazil"] },
+        { id: "egypt", name: "Egypt", continent: "AF", x: 53, y: 57, neighbors: ["southern-europe", "north-africa", "east-africa", "middle-east"] },
+        { id: "east-africa", name: "East Africa", continent: "AF", x: 58, y: 66, neighbors: ["egypt", "north-africa", "congo", "south-africa", "madagascar", "middle-east"] },
+        { id: "congo", name: "Congo", continent: "AF", x: 53, y: 73, neighbors: ["north-africa", "east-africa", "south-africa"] },
+        { id: "south-africa", name: "South Africa", continent: "AF", x: 53, y: 84, neighbors: ["congo", "east-africa", "madagascar"] },
+        { id: "madagascar", name: "Madagascar", continent: "AF", x: 63, y: 83, neighbors: ["east-africa", "south-africa"] },
+
+        // Asia
+        { id: "ural", name: "Ural", continent: "AS", x: 69, y: 23, neighbors: ["ukraine", "afghanistan", "china", "siberia"] },
+        { id: "siberia", name: "Siberia", continent: "AS", x: 75, y: 16, neighbors: ["ural", "china", "mongolia", "irkutsk", "yakutsk"] },
+        { id: "yakutsk", name: "Yakutsk", continent: "AS", x: 81, y: 11, neighbors: ["siberia", "irkutsk", "kamchatka"] },
+        { id: "kamchatka", name: "Kamchatka", continent: "AS", x: 90, y: 12, neighbors: ["yakutsk", "irkutsk", "mongolia", "japan", "alaska"] },
+        { id: "irkutsk", name: "Irkutsk", continent: "AS", x: 80, y: 25, neighbors: ["siberia", "yakutsk", "kamchatka", "mongolia"] },
+        { id: "mongolia", name: "Mongolia", continent: "AS", x: 82, y: 34, neighbors: ["siberia", "irkutsk", "kamchatka", "japan", "china"] },
+        { id: "japan", name: "Japan", continent: "AS", x: 91, y: 35, neighbors: ["kamchatka", "mongolia"] },
+        { id: "afghanistan", name: "Afghanistan", continent: "AS", x: 67, y: 35, neighbors: ["ukraine", "ural", "china", "india", "middle-east"] },
+        { id: "china", name: "China", continent: "AS", x: 79, y: 43, neighbors: ["mongolia", "siberia", "ural", "afghanistan", "india", "siam"] },
+        { id: "middle-east", name: "Middle East", continent: "AS", x: 61, y: 51, neighbors: ["southern-europe", "ukraine", "afghanistan", "india", "egypt", "east-africa"] },
+        { id: "india", name: "India", continent: "AS", x: 72, y: 50, neighbors: ["middle-east", "afghanistan", "china", "siam"] },
+        { id: "siam", name: "Siam", continent: "AS", x: 80, y: 55, neighbors: ["india", "china", "indonesia"] },
+
+        // Australia
+        { id: "indonesia", name: "Indonesia", continent: "AU", x: 81, y: 71, neighbors: ["siam", "new-guinea", "western-australia"] },
+        { id: "new-guinea", name: "New Guinea", continent: "AU", x: 90, y: 67, neighbors: ["indonesia", "eastern-australia", "western-australia"] },
+        { id: "western-australia", name: "Western Australia", continent: "AU", x: 84, y: 86, neighbors: ["indonesia", "new-guinea", "eastern-australia"] },
+        { id: "eastern-australia", name: "Eastern Australia", continent: "AU", x: 92, y: 81, neighbors: ["new-guinea", "western-australia"] }
+    ]
+};
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = RISK_DATA;
+} else {
+    window.RISK_DATA = RISK_DATA;
+}
+ class RiskGame {
+    constructor() {
+        this.territories = {}; // id -> { owner, troops }
+        this.players = [
+            { id: 0, name: "Player (Red)", color: "#FF6B6B", troopsToPlace: 0, cards: [] },
+            { id: 1, name: "Bot 1 (Blue)", color: "#4ECDC4", troopsToPlace: 0, cards: [], isAI: true },
+            { id: 2, name: "Bot 2 (Yellow)", color: "#D4A017", troopsToPlace: 0, cards: [], isAI: true },
+            { id: 3, name: "Bot 3 (Green)", color: "#45B649", troopsToPlace: 0, cards: [], isAI: true },
+            { id: 4, name: "Bot 4 (Purple)", color: "#B19CD9", troopsToPlace: 0, cards: [], isAI: true }
+        ];
+        this.currentPlayerIndex = 0;
+        this.phase = 'SETUP'; // SETUP, REINFORCE, ATTACK, FORTIFY
+
+        this.selectedTerritory = null;
+        this.targetTerritory = null;
+
+        // DOM Elements
+        this.mapContainer = document.getElementById('risk-map-container');
+        this.phaseDisplay = document.getElementById('risk-phase-display');
+        this.turnIndicator = document.getElementById('risk-turn-indicator');
+        this.actionBtn = document.getElementById('risk-action-btn');
+        this.endTurnBtn = document.getElementById('risk-end-turn-btn');
+        this.messageDisplay = document.getElementById('risk-message');
+
+        // Modal Elements
+        this.modal = document.getElementById('game-modal');
+        this.modalTitle = document.getElementById('game-modal-title');
+        this.modalMessage = document.getElementById('game-modal-message');
+        this.modalBtn = document.getElementById('game-modal-btn');
+        this.modalExitBtn = document.getElementById('game-modal-exit-btn');
+
+        // Edit mode elements
+        this.editModeBtn = document.getElementById('risk-edit-mode-btn');
+        this.exportCoordsBtn = document.getElementById('risk-export-coords-btn');
+        this.editMode = false;
+        this.draggedBadge = null;
+        this.dragOffset = { x: 0, y: 0 };
+
+        // Sound effects
+        this.audioContext = null;
+        this.sounds = {
+            attack: { freq: 150, duration: 0.15 },
+            defend: { freq: 200, duration: 0.15 },
+            reinforce: { freq: 400, duration: 0.1 },
+            conquered: { freq: 600, duration: 0.3 },
+            win: { freq: 800, duration: 0.5 }
+        };
+
+        // Do not init immediately, wait for app.js
+    }
+
+    init() {
+        // Initialize audio context on first user interaction
+        if (!this.audioContext) {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        this.setupMap();
+        this.setupEventListeners();
+        this.startGame();
+    }
+
+    setupMap() {
+        // Clear existing badges
+        const existingBadges = this.mapContainer.querySelectorAll('.risk-territory-badge');
+        existingBadges.forEach(b => b.remove());
+
+        RISK_DATA.territories.forEach(t => {
+            const badge = document.createElement('div');
+            badge.className = 'risk-territory-badge';
+            badge.id = `badge-${t.id}`;
+            badge.style.left = `${t.x}%`;
+            badge.style.top = `${t.y}%`;
+            badge.dataset.id = t.id;
+
+            const count = document.createElement('span');
+            count.className = 'badge-count';
+            count.textContent = '0';
+            badge.appendChild(count);
+
+            badge.addEventListener('click', (e) => this.handleTerritoryClick(t.id));
+            this.mapContainer.appendChild(badge);
+
+            // Initialize state
+            this.territories[t.id] = { owner: null, troops: 0 };
+        });
+    }
+
+    setupEventListeners() {
+        // Remove old listeners to prevent duplicates if re-inited (though simple re-init usually fine)
+        // Ideally we'd use named functions but for this scope it's okay
+
+        // We need to clone nodes to remove listeners if we are re-initializing on the same page load
+        // But since we are just replacing the class instance, the DOM elements are persistent.
+        // Let's just assume fresh start or handle it carefully.
+        // Actually, better to just assign onclick properties to avoid stacking listeners
+        this.endTurnBtn.onclick = () => this.nextPhase();
+        this.actionBtn.onclick = () => this.handleAction();
+
+        // Restart button
+        const resetBtn = document.getElementById('risk-reset');
+        if (resetBtn) {
+            resetBtn.onclick = () => this.init();
+        }
+
+        this.modalBtn.onclick = () => {
+            this.modal.classList.add('hidden');
+            this.init();
+        };
+
+        this.modalExitBtn.onclick = () => {
+            this.modal.classList.add('hidden');
+            document.getElementById('risk-battles-game').classList.remove('active');
+            document.getElementById('menu-container').style.display = 'block';
+        };
+
+        // Edit mode handlers (only if buttons exist)
+        if (this.editModeBtn) {
+            this.editModeBtn.onclick = () => this.toggleEditMode();
+        }
+        if (this.exportCoordsBtn) {
+            this.exportCoordsBtn.onclick = () => this.exportCoordinates();
+        }
+    }
+
+    startGame() {
+        // Randomly assign territories
+        const shuffled = [...RISK_DATA.territories].sort(() => 0.5 - Math.random());
+        shuffled.forEach((t, index) => {
+            const owner = index % this.players.length;
+            this.territories[t.id] = { owner: owner, troops: 1 };
+        });
+
+        // Initial troops distribution
+        // Give random +2 to some territories
+        for (let i = 0; i < 30; i++) {
+            const t = shuffled[Math.floor(Math.random() * shuffled.length)];
+            this.territories[t.id].troops++;
+        }
+
+        this.updateMap();
+        this.currentPlayerIndex = 0;
+        this.startTurn();
+    }
+
+    startTurn() {
+        this.phase = 'REINFORCE';
+        const player = this.getCurrentPlayer();
+
+        // Skip eliminated players
+        if (this.isPlayerEliminated(player.id)) {
+            this.endTurn();
+            return;
+        }
+
+        // Calculate reinforcements
+        let bonus = Math.floor(Object.values(this.territories).filter(t => t.owner === player.id).length / 3);
+        bonus = Math.max(3, bonus);
+
+        // Continent bonuses
+        Object.values(RISK_DATA.continents).forEach(cont => {
+            const contId = Object.keys(RISK_DATA.continents).find(key => RISK_DATA.continents[key] === cont);
+            const territoriesInCont = RISK_DATA.territories.filter(t => t.continent === contId);
+            const ownsAll = territoriesInCont.every(t => this.territories[t.id].owner === player.id);
+            if (ownsAll) bonus += cont.bonus;
+        });
+
+        player.troopsToPlace = bonus;
+        this.updateUI();
+
+        if (player.isAI) {
+            this.runAITurn();
+        }
+    }
+
+    isPlayerEliminated(playerId) {
+        return !Object.values(this.territories).some(t => t.owner === playerId);
+    }
+
+    handleTerritoryClick(territoryId) {
+        if (this.getCurrentPlayer().isAI) return;
+
+        const territory = this.territories[territoryId];
+        const player = this.getCurrentPlayer();
+
+        if (this.phase === 'REINFORCE') {
+            if (territory.owner === player.id && player.troopsToPlace > 0) {
+                territory.troops++;
+                player.troopsToPlace--;
+                this.flashBadge(territoryId, 'reinforcing');
+                this.playSound('reinforce');
+                this.updateMap();
+                this.updateUI();
+                if (player.troopsToPlace === 0) {
+                    this.phase = 'ATTACK';
+                    this.updateUI();
+                }
+            }
+        } else if (this.phase === 'ATTACK') {
+            if (territory.owner === player.id) {
+                // Select attacker
+                if (territory.troops > 1) {
+                    this.selectedTerritory = territoryId;
+                    this.targetTerritory = null;
+                    this.updateMap(); // Highlight selection
+                    this.showMessage("Select an enemy territory to attack.");
+                }
+            } else if (this.selectedTerritory) {
+                // Select target
+                const attacker = this.territories[this.selectedTerritory];
+                const defender = territory;
+
+                // Check adjacency
+                const tData = RISK_DATA.territories.find(t => t.id === this.selectedTerritory);
+                if (tData.neighbors.includes(territoryId)) {
+                    this.targetTerritory = territoryId;
+                    this.updateMap();
+                    // Flash badges and play sound
+                    this.flashBadge(this.selectedTerritory, 'attacking');
+                    this.flashBadge(territoryId, 'defending');
+                    this.playSound('attack');
+                    // Delay battle to show animation
+                    setTimeout(() => {
+                        this.resolveBattle(this.selectedTerritory, territoryId);
+                    }, 300);
+                } else {
+                    this.showMessage("Territories are not connected!");
+                }
+            }
+        } else if (this.phase === 'FORTIFY') {
+            if (territory.owner === player.id) {
+                if (!this.selectedTerritory) {
+                    if (territory.troops > 1) {
+                        this.selectedTerritory = territoryId;
+                        this.updateMap();
+                        this.showMessage("Select destination for troops.");
+                    }
+                } else {
+                    // Move troops
+                    // Simplified: check adjacency only (BFS for path is better but complex)
+                    const tData = RISK_DATA.territories.find(t => t.id === this.selectedTerritory);
+                    if (tData.neighbors.includes(territoryId) && territory.owner === player.id) {
+                        const mover = this.territories[this.selectedTerritory];
+                        const count = mover.troops - 1; // Move all but 1
+                        mover.troops = 1;
+                        territory.troops += count;
+                        this.selectedTerritory = null;
+                        this.updateMap();
+                        this.nextPhase(); // End turn after fortify
+                    } else {
+                        this.selectedTerritory = null; // Deselect
+                        this.updateMap();
+                    }
+                }
+            }
+        }
+    }
+
+    resolveBattle(attackerId, defenderId) {
+        const attacker = this.territories[attackerId];
+        const defender = this.territories[defenderId];
+
+        // Simple blitz logic for now
+        let attTroops = attacker.troops;
+        let defTroops = defender.troops;
+
+        while (attTroops > 1 && defTroops > 0) {
+            const attDice = Math.min(attTroops - 1, 3);
+            const defDice = Math.min(defTroops, 2);
+
+            const attRolls = Array(attDice).fill(0).map(() => Math.floor(Math.random() * 6) + 1).sort((a, b) => b - a);
+            const defRolls = Array(defDice).fill(0).map(() => Math.floor(Math.random() * 6) + 1).sort((a, b) => b - a);
+
+            const comparisons = Math.min(attDice, defDice);
+            for (let i = 0; i < comparisons; i++) {
+                if (attRolls[i] > defRolls[i]) defTroops--;
+                else attTroops--;
+            }
+        }
+
+        attacker.troops = attTroops;
+        defender.troops = defTroops;
+
+        if (defender.troops === 0) {
+            // Conquered
+            defender.owner = attacker.owner;
+            defender.troops = attTroops - 1; // Move all available
+            attacker.troops = 1;
+            this.flashBadge(defenderId, 'conquered');
+            this.playSound('conquered');
+            this.showMessage(`Conquered ${defenderId}!`);
+        } else {
+            this.showMessage(`Attack failed.`);
+        }
+
+        this.selectedTerritory = null;
+        this.targetTerritory = null;
+        this.updateMap();
+        this.checkWinCondition();
+    }
+
+    nextPhase() {
+        if (this.phase === 'REINFORCE') {
+            // Can't skip reinforce if troops pending
+            if (this.getCurrentPlayer().troopsToPlace > 0) {
+                this.showMessage("Place all troops first!");
+                return;
+            }
+            this.phase = 'ATTACK';
+        } else if (this.phase === 'ATTACK') {
+            this.phase = 'FORTIFY';
+            this.selectedTerritory = null;
+            this.targetTerritory = null;
+            this.updateMap();
+        } else if (this.phase === 'FORTIFY') {
+            this.endTurn();
+        }
+        this.updateUI();
+    }
+
+    endTurn() {
+        this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
+        this.startTurn();
+    }
+
+    getCurrentPlayer() {
+        return this.players[this.currentPlayerIndex];
+    }
+
+    updateMap() {
+        RISK_DATA.territories.forEach(t => {
+            const badge = document.getElementById(`badge-${t.id}`);
+            const data = this.territories[t.id];
+
+            if (!badge || !data) return;
+
+            const countSpan = badge.querySelector('.badge-count');
+
+            if (data.owner !== null && this.players[data.owner]) {
+                badge.style.backgroundColor = this.players[data.owner].color;
+            } else {
+                badge.style.backgroundColor = '#ccc'; // Default gray
+            }
+
+            countSpan.textContent = data.troops;
+
+            // Highlight selection
+            if (this.selectedTerritory === t.id) {
+                badge.classList.add('selected');
+            } else {
+                badge.classList.remove('selected');
+            }
+        });
+    }
+
+    updateUI() {
+        const player = this.getCurrentPlayer();
+        this.turnIndicator.textContent = `${player.name}'s Turn`;
+        this.turnIndicator.style.color = player.color;
+
+        // Add visual indicator for turn
+        this.mapContainer.style.border = `4px solid ${player.color}`;
+
+        let status = `Phase: ${this.phase}`;
+        if (this.phase === 'REINFORCE') {
+            status += ` (Troops: ${player.troopsToPlace})`;
+        }
+        this.phaseDisplay.textContent = status;
+        this.phaseDisplay.style.color = player.color;
+
+        if (this.phase === 'REINFORCE' && player.troopsToPlace > 0) {
+            this.endTurnBtn.disabled = true;
+        } else {
+            this.endTurnBtn.disabled = false;
+        }
+
+        if (this.phase === 'FORTIFY') {
+            this.endTurnBtn.textContent = "End Turn";
+        } else {
+            this.endTurnBtn.textContent = "Next Phase";
+        }
+
+        this.updatePlayerStats();
+    }
+
+    updatePlayerStats() {
+        const statsContainer = document.getElementById('risk-player-stats');
+        if (!statsContainer) return;
+
+        // Calculate stats for each player
+        const playerStats = this.players.map(player => {
+            const territories = Object.values(this.territories).filter(t => t.owner === player.id);
+            const territoryCount = territories.length;
+            const troopCount = territories.reduce((sum, t) => sum + t.troops, 0);
+            return { player, territoryCount, troopCount };
+        });
+
+        // Sort by territory count (descending)
+        playerStats.sort((a, b) => b.territoryCount - a.territoryCount);
+
+        // Render stats - remove color names and labels
+        statsContainer.innerHTML = playerStats.map(({ player, territoryCount, troopCount }) => {
+            const isEliminated = territoryCount === 0;
+            // Remove color name from player name (e.g., "Player (Red)" -> "Player")
+            const displayName = player.name.replace(/\s*\([^)]*\)/g, '');
+            return `
+                <div style="background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 6px; border-left: 4px solid ${player.color}; ${isEliminated ? 'opacity: 0.5;' : ''}">
+                    <div style="font-weight: bold; color: ${player.color}; font-size: 0.9rem; margin-bottom: 4px;">${displayName}</div>
+                    <div style="font-size: 0.85rem; color: #fff;">
+                        🏴 ${territoryCount}
+                    </div>
+                    <div style="font-size: 0.85rem; color: #fff;">
+                        ⚔️ ${troopCount}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    showMessage(msg) {
+        this.messageDisplay.textContent = msg;
+        setTimeout(() => this.messageDisplay.textContent = '', 3000);
+    }
+
+    checkWinCondition() {
+        const owners = new Set(Object.values(this.territories).map(t => t.owner));
+        if (owners.size === 1) {
+            const winner = this.players[[...owners][0]];
+
+            this.playSound('win');
+
+            // Use global modal system
+            const icon = winner.id === 0 ? '🎉' : '😢';
+            const title = winner.id === 0 ? 'Victory!' : 'Defeat!';
+            const message = `${winner.name} has conquered the world!`;
+
+            window.showGameModal(
+                icon,
+                title,
+                message,
+                () => this.init(), // Play Again callback
+                () => { // Exit callback
+                    document.getElementById('risk-battles-game').classList.remove('active');
+                    document.getElementById('menu-container').classList.remove('hidden');
+                }
+            );
+        }
+    }
+
+    async runAITurn() {
+        // Very dumb AI
+        const player = this.getCurrentPlayer();
+
+        // 1. Reinforce
+        await new Promise(r => setTimeout(r, 800));
+        while (player.troopsToPlace > 0) {
+            // Find owned territory
+            const myTerritories = Object.keys(this.territories).filter(id => this.territories[id].owner === player.id);
+            if (myTerritories.length === 0) break; // Should be eliminated check
+            const target = myTerritories[Math.floor(Math.random() * myTerritories.length)];
+            this.territories[target].troops++;
+            player.troopsToPlace--;
+            this.updateMap();
+            await new Promise(r => setTimeout(r, 100));
+        }
+
+        this.phase = 'ATTACK';
+        this.updateUI();
+
+        // 2. Attack (Try a few times)
+        for (let i = 0; i < 5; i++) {
+            await new Promise(r => setTimeout(r, 800));
+            // Find territory with > 1 troop
+            const attackers = Object.keys(this.territories).filter(id => this.territories[id].owner === player.id && this.territories[id].troops > 1);
+            if (attackers.length === 0) break;
+
+            const attackerId = attackers[Math.floor(Math.random() * attackers.length)];
+            const tData = RISK_DATA.territories.find(t => t.id === attackerId);
+
+            // Find enemy neighbor
+            const neighbors = tData.neighbors.filter(nid => this.territories[nid].owner !== player.id);
+            if (neighbors.length > 0) {
+                const targetId = neighbors[Math.floor(Math.random() * neighbors.length)];
+                this.showMessage(`${player.name} attacking ${targetId}...`);
+                this.resolveBattle(attackerId, targetId);
+            }
+        }
+
+        this.phase = 'FORTIFY';
+        this.updateUI();
+        await new Promise(r => setTimeout(r, 800));
+
+        // 3. Fortify (Skip)
+        this.endTurn();
+    }
+
+    handleAction() {
+        // Placeholder for manual dice rolling if we add it back
+    }
+
+    toggleEditMode() {
+        this.editMode = !this.editMode;
+
+        if (this.editMode) {
+            this.editModeBtn.textContent = '✅ Edit Mode ON';
+            this.editModeBtn.classList.remove('btn-secondary');
+            this.editModeBtn.classList.add('btn-primary');
+            this.exportCoordsBtn.style.display = 'inline-block';
+            this.endTurnBtn.style.display = 'none';
+            this.actionBtn.style.display = 'none';
+
+            // Make badges draggable
+            this.enableBadgeDragging();
+        } else {
+            this.editModeBtn.textContent = '📍 Edit Mode';
+            this.editModeBtn.classList.remove('btn-primary');
+            this.editModeBtn.classList.add('btn-secondary');
+            this.exportCoordsBtn.style.display = 'none';
+            this.endTurnBtn.style.display = 'inline-block';
+
+            // Disable dragging
+            this.disableBadgeDragging();
+        }
+    }
+
+    enableBadgeDragging() {
+        const badges = this.mapContainer.querySelectorAll('.risk-territory-badge');
+        badges.forEach(badge => {
+            badge.style.cursor = 'move';
+            badge.style.zIndex = '100';
+
+            const onMouseDown = (e) => {
+                if (!this.editMode) return;
+                e.preventDefault();
+                e.stopPropagation();
+
+                this.draggedBadge = badge;
+                const rect = this.mapContainer.getBoundingClientRect();
+                const badgeRect = badge.getBoundingClientRect();
+
+                this.dragOffset = {
+                    x: e.clientX - badgeRect.left - badgeRect.width / 2,
+                    y: e.clientY - badgeRect.top - badgeRect.height / 2
+                };
+
+                badge.style.opacity = '0.7';
+            };
+
+            badge.addEventListener('mousedown', onMouseDown);
+            badge._editModeMouseDown = onMouseDown;
+        });
+
+        this.mapContainer.addEventListener('mousemove', this._onMouseMove = (e) => {
+            if (!this.draggedBadge || !this.editMode) return;
+
+            const rect = this.mapContainer.getBoundingClientRect();
+            const x = ((e.clientX - rect.left - this.dragOffset.x) / rect.width) * 100;
+            const y = ((e.clientY - rect.top - this.dragOffset.y) / rect.height) * 100;
+
+            // Clamp to map bounds
+            const clampedX = Math.max(0, Math.min(100, x));
+            const clampedY = Math.max(0, Math.min(100, y));
+
+            this.draggedBadge.style.left = `${clampedX}%`;
+            this.draggedBadge.style.top = `${clampedY}%`;
+
+            // Update title to show coordinates
+            this.draggedBadge.setAttribute('title',
+                `${this.draggedBadge.dataset.id}: x: ${Math.round(clampedX)}, y: ${Math.round(clampedY)}`
+            );
+        });
+
+        this.mapContainer.addEventListener('mouseup', this._onMouseUp = () => {
+            if (this.draggedBadge) {
+                this.draggedBadge.style.opacity = '1';
+                this.draggedBadge = null;
+            }
+        });
+    }
+
+    disableBadgeDragging() {
+        const badges = this.mapContainer.querySelectorAll('.risk-territory-badge');
+        badges.forEach(badge => {
+            badge.style.cursor = 'pointer';
+            badge.style.zIndex = '10';
+            if (badge._editModeMouseDown) {
+                badge.removeEventListener('mousedown', badge._editModeMouseDown);
+                delete badge._editModeMouseDown;
+            }
+        });
+
+        if (this._onMouseMove) {
+            this.mapContainer.removeEventListener('mousemove', this._onMouseMove);
+            delete this._onMouseMove;
+        }
+        if (this._onMouseUp) {
+            this.mapContainer.removeEventListener('mouseup', this._onMouseUp);
+            delete this._onMouseUp;
+        }
+    }
+
+    exportCoordinates() {
+        const badges = this.mapContainer.querySelectorAll('.risk-territory-badge');
+        const coords = {};
+
+        badges.forEach(badge => {
+            const id = badge.dataset.id;
+            const x = Math.round(parseFloat(badge.style.left));
+            const y = Math.round(parseFloat(badge.style.top));
+            coords[id] = { x, y };
+        });
+
+        // Create formatted output
+        let output = '// Updated coordinates:\n';
+        RISK_DATA.territories.forEach(t => {
+            if (coords[t.id]) {
+                output += `{ id: "${t.id}", name: "${t.name}", continent: "${t.continent}", x: ${coords[t.id].x}, y: ${coords[t.id].y}, neighbors: ${JSON.stringify(t.neighbors)} },\n`;
+            }
+        });
+
+        // Copy to clipboard
+        navigator.clipboard.writeText(output).then(() => {
+            alert('Coordinates copied to clipboard! 📋\n\nPaste them into risk-data.js');
+        }).catch(() => {
+            // Fallback: show in console
+            console.log(output);
+            alert('Coordinates logged to console! Check the browser console.');
+        });
+    }
+
+    // Sound and visual effects
+    playSound(type) {
+        if (!this.audioContext || this.editMode) return;
+
+        try {
+            const ctx = this.audioContext;
+            const now = ctx.currentTime;
+
+            switch (type) {
+                case 'attack':
+                    // Explosive attack sound - quick descending tone
+                    this.createExplosion(now);
+                    break;
+
+                case 'defend':
+                    // Shield/block sound - short thud
+                    this.createBlock(now);
+                    break;
+
+                case 'reinforce':
+                    // Positive chirp - ascending tone
+                    this.createChirp(now);
+                    break;
+
+                case 'conquered':
+                    // Triumphant fanfare
+                    this.createFanfare(now);
+                    break;
+
+                case 'win':
+                    // Victory melody
+                    this.createVictory(now);
+                    break;
+            }
+        } catch (e) {
+            // Silently fail if audio context not available
+        }
+    }
+
+    createExplosion(time) {
+        const osc = this.audioContext.createOscillator();
+        const gain = this.audioContext.createGain();
+
+        osc.connect(gain);
+        gain.connect(this.audioContext.destination);
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(200, time);
+        osc.frequency.exponentialRampToValueAtTime(50, time + 0.2);
+
+        gain.gain.setValueAtTime(0.3, time);
+        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+
+        osc.start(time);
+        osc.stop(time + 0.2);
+    }
+
+    createBlock(time) {
+        const osc = this.audioContext.createOscillator();
+        const gain = this.audioContext.createGain();
+
+        osc.connect(gain);
+        gain.connect(this.audioContext.destination);
+
+        osc.type = 'square';
+        osc.frequency.value = 100;
+
+        gain.gain.setValueAtTime(0.25, time);
+        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+
+        osc.start(time);
+        osc.stop(time + 0.1);
+    }
+
+    createChirp(time) {
+        const osc = this.audioContext.createOscillator();
+        const gain = this.audioContext.createGain();
+
+        osc.connect(gain);
+        gain.connect(this.audioContext.destination);
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, time);
+        osc.frequency.exponentialRampToValueAtTime(800, time + 0.1);
+
+        gain.gain.setValueAtTime(0.2, time);
+        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.15);
+
+        osc.start(time);
+        osc.stop(time + 0.15);
+    }
+
+    createFanfare(time) {
+        // Three note ascending fanfare
+        const notes = [500, 630, 800];
+        notes.forEach((freq, i) => {
+            const osc = this.audioContext.createOscillator();
+            const gain = this.audioContext.createGain();
+
+            osc.connect(gain);
+            gain.connect(this.audioContext.destination);
+
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+
+            const startTime = time + (i * 0.1);
+            gain.gain.setValueAtTime(0.2, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.15);
+
+            osc.start(startTime);
+            osc.stop(startTime + 0.15);
+        });
+    }
+
+    createVictory(time) {
+        // Victory melody - major chord arpeggio
+        const notes = [523, 659, 784, 1047]; // C, E, G, C
+        notes.forEach((freq, i) => {
+            const osc = this.audioContext.createOscillator();
+            const gain = this.audioContext.createGain();
+
+            osc.connect(gain);
+            gain.connect(this.audioContext.destination);
+
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+
+            const startTime = time + (i * 0.12);
+            gain.gain.setValueAtTime(0.15, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.3);
+
+            osc.start(startTime);
+            osc.stop(startTime + 0.3);
+        });
+    }
+
+    flashBadge(territoryId, animationType) {
+        if (this.editMode) return;
+
+        const badge = document.getElementById(`badge-${territoryId}`);
+        if (!badge) return;
+
+        badge.classList.add(animationType);
+        setTimeout(() => {
+            badge.classList.remove(animationType);
+        }, animationType === 'conquered' ? 800 : 1500);
+    }
+}
+
+window.riskGame = new RiskGame();
+
+// Auto-init for standalone mode
+setTimeout(function() { riskGame.init(); }, 100);
+    </script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>🧩 Tangram</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; touch-action: none; }
+        a.back-link { color: #888; text-decoration: none; font-size: 14px; margin-bottom: 5px; }
+        h1 { font-size: 1.3em; margin-bottom: 5px; }
+        .info { font-size: 0.9em; color: #888; margin-bottom: 6px; }
+        canvas { border-radius: 10px; touch-action: none; background: #2d3748; max-width: 95vw; }
+        .actions { display: flex; gap: 8px; margin-top: 10px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 0.9em; background: rgba(255,255,255,0.15); color: #fff; touch-action: manipulation; cursor: pointer; }
+        .btn:active { background: rgba(255,255,255,0.3); }
+        .puzzles { display: flex; gap: 5px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }
+        .puzzles .btn { width: auto; padding: 0 12px; font-size: 0.8em; }
+        .puzzles .btn.active { background: #4a90d9; }
+        .msg { margin-top: 6px; font-size: 0.9em; color: #f1c40f; }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">← Back</a>
+    <h1>🧩 Tangram</h1>
+    <div class="info" id="info">Drag pieces to match the shape. Double-tap to rotate.</div>
+    <canvas id="game"></canvas>
+    <div class="actions">
+        <div class="btn" onclick="resetPieces()">🔄 Reset</div>
+        <div class="btn" onclick="showHint()">💡 Hint</div>
+    </div>
+    <div class="puzzles" id="puzzles"></div>
+    <div class="msg" id="msg"></div>
+    <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const W = 360, H = 360;
+    canvas.width = W; canvas.height = H;
+    const GRID = 30;
+
+    // 7 tangram pieces defined as polygons (relative to center)
+    const PIECE_DEFS = [
+        { name: 'Lg Tri 1', color: '#e74c3c', points: [[-60,-40],[60,-40],[-60,40]] },
+        { name: 'Lg Tri 2', color: '#3498db', points: [[-60,40],[60,-40],[60,40]] },
+        { name: 'Med Tri', color: '#2ecc71', points: [[-42,-28],[42,-28],[0,28]] },
+        { name: 'Sm Tri 1', color: '#f1c40f', points: [[-30,-20],[30,-20],[-30,20]] },
+        { name: 'Sm Tri 2', color: '#9b59b6', points: [[-30,20],[30,-20],[30,20]] },
+        { name: 'Square', color: '#e67e22', points: [[-25,-25],[25,-25],[25,25],[-25,25]] },
+        { name: 'Parallelogram', color: '#1abc9c', points: [[-40,-20],[0,-20],[40,20],[0,20]] },
+    ];
+
+    // Target shapes (silhouettes)
+    const TARGETS = [
+        { name: 'Square', outline: [[-80,-80],[80,-80],[80,80],[-80,80]] },
+        { name: 'Triangle', outline: [[0,-100],[100,80],[-100,80]] },
+        { name: 'Rectangle', outline: [[-120,-50],[120,-50],[120,50],[-120,50]] },
+        { name: 'House', outline: [[0,-100],[90,-20],[90,90],[-90,90],[-90,-20]] },
+        { name: 'Arrow', outline: [[0,-100],[60,-20],[30,-20],[30,100],[-30,100],[-30,-20],[-60,-20]] },
+    ];
+
+    let pieces = [], selectedPiece = null, offsetX = 0, offsetY = 0, currentTarget = 0, hintMode = false;
+
+    function initPieces() {
+        pieces = PIECE_DEFS.map((def, i) => ({
+            ...def, x: 60 + (i % 4) * 80, y: 40 + Math.floor(i / 4) * 100, angle: 0, points: def.points.map(p => [...p])
+        }));
+    }
+
+    function resetPieces() { initPieces(); hintMode = false; draw(); }
+    function showHint() { hintMode = !hintMode; draw(); }
+
+    function draw() {
+        ctx.clearRect(0, 0, W, H);
+
+        // Draw target silhouette
+        const target = TARGETS[currentTarget];
+        ctx.save();
+        ctx.translate(W/2, H/2);
+        ctx.fillStyle = hintMode ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)';
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        target.outline.forEach((p, i) => i === 0 ? ctx.moveTo(p[0], p[1]) : ctx.lineTo(p[0], p[1]));
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.restore();
+
+        // Draw pieces
+        pieces.forEach((piece, i) => {
+            ctx.save();
+            ctx.translate(piece.x, piece.y);
+            ctx.rotate(piece.angle * Math.PI / 180);
+            ctx.fillStyle = piece.color;
+            ctx.strokeStyle = i === selectedPiece ? '#fff' : 'rgba(0,0,0,0.3)';
+            ctx.lineWidth = i === selectedPiece ? 3 : 1;
+            ctx.globalAlpha = i === selectedPiece ? 0.9 : 0.8;
+            ctx.beginPath();
+            piece.points.forEach((p, j) => j === 0 ? ctx.moveTo(p[0], p[1]) : ctx.lineTo(p[0], p[1]));
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.globalAlpha = 1;
+            ctx.restore();
+        });
+    }
+
+    function getPieceAt(x, y) {
+        for (let i = pieces.length - 1; i >= 0; i--) {
+            const p = pieces[i];
+            const dx = x - p.x, dy = y - p.y;
+            const cos = Math.cos(-p.angle * Math.PI/180), sin = Math.sin(-p.angle * Math.PI/180);
+            const rx = dx * cos - dy * sin, ry = dx * sin + dy * cos;
+            if (pointInPolygon(rx, ry, p.points)) return i;
+        }
+        return -1;
+    }
+
+    function pointInPolygon(x, y, pts) {
+        let inside = false;
+        for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+            if (((pts[i][1] > y) !== (pts[j][1] > y)) && (x < (pts[j][0]-pts[i][0])*(y-pts[i][1])/(pts[j][1]-pts[i][1])+pts[i][0]))
+                inside = !inside;
+        }
+        return inside;
+    }
+
+    let lastTap = 0;
+    canvas.addEventListener('touchstart', e => {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = W / rect.width, scaleY = H / rect.height;
+        const x = (e.touches[0].clientX - rect.left) * scaleX;
+        const y = (e.touches[0].clientY - rect.top) * scaleY;
+        const now = Date.now();
+
+        if (now - lastTap < 300) { // Double tap = rotate
+            const idx = getPieceAt(x, y);
+            if (idx >= 0) { pieces[idx].angle = (pieces[idx].angle + 45) % 360; draw(); }
+            lastTap = 0;
+            return;
+        }
+        lastTap = now;
+
+        const idx = getPieceAt(x, y);
+        if (idx >= 0) {
+            selectedPiece = idx;
+            offsetX = x - pieces[idx].x;
+            offsetY = y - pieces[idx].y;
+            // Move to top
+            const p = pieces.splice(idx, 1)[0];
+            pieces.push(p);
+            selectedPiece = pieces.length - 1;
+            draw();
+        }
+    });
+
+    canvas.addEventListener('touchmove', e => {
+        e.preventDefault();
+        if (selectedPiece === null) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = W / rect.width, scaleY = H / rect.height;
+        const x = (e.touches[0].clientX - rect.left) * scaleX;
+        const y = (e.touches[0].clientY - rect.top) * scaleY;
+        pieces[selectedPiece].x = x - offsetX;
+        pieces[selectedPiece].y = y - offsetY;
+        draw();
+    });
+
+    canvas.addEventListener('touchend', () => { selectedPiece = null; });
+
+    // Mouse support
+    canvas.addEventListener('mousedown', e => {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = W / rect.width, scaleY = H / rect.height;
+        const x = (e.clientX - rect.left) * scaleX;
+        const y = (e.clientY - rect.top) * scaleY;
+        const now = Date.now();
+        if (now - lastTap < 300) { const idx = getPieceAt(x, y); if (idx >= 0) pieces[idx].angle = (pieces[idx].angle + 45) % 360; lastTap = 0; draw(); return; }
+        lastTap = now;
+        const idx = getPieceAt(x, y);
+        if (idx >= 0) { selectedPiece = idx; offsetX = x - pieces[idx].x; offsetY = y - pieces[idx].y; const p = pieces.splice(idx, 1)[0]; pieces.push(p); selectedPiece = pieces.length - 1; draw(); }
+    });
+    canvas.addEventListener('mousemove', e => {
+        if (selectedPiece === null) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = W / rect.width, scaleY = H / rect.height;
+        pieces[selectedPiece].x = (e.clientX - rect.left) * scaleX - offsetX;
+        pieces[selectedPiece].y = (e.clientY - rect.top) * scaleY - offsetY;
+        draw();
+    });
+    canvas.addEventListener('mouseup', () => { selectedPiece = null; });
+
+    // Puzzle selector
+    const pDiv = document.getElementById('puzzles');
+    TARGETS.forEach((t, i) => {
+        const b = document.createElement('div');
+        b.className = 'btn' + (i === 0 ? ' active' : '');
+        b.textContent = t.name;
+        b.onclick = () => {
+            currentTarget = i;
+            document.querySelectorAll('.puzzles .btn').forEach(x => x.classList.remove('active'));
+            b.classList.add('active');
+            initPieces();
+            draw();
+        };
+        pDiv.appendChild(b);
+    });
+
+    initPieces();
+    draw();
+    </script>
+</body>
+</html>

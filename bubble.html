@@ -18,13 +18,18 @@
     <h1>🫧 Bubble Shooter</h1>
     <div class="info">Score: <b id="score">0</b></div>
     <canvas id="game" width="320" height="480"></canvas>
-    <button onclick="init()">🔄 New Game</button>
+    <button onclick="newGame()">🔄 New Game</button>
     <script>
         const canvas = document.getElementById('game');
         const ctx = canvas.getContext('2d');
         const R = 18, COLS = 8, ROWS = 10;
         const COLORS = ['#e74c3c', '#3498db', '#27ae60', '#f1c40f', '#9b59b6'];
-        let grid, shooter, nextColor, score, over;
+        let grid, shooter, nextColor, score, over, gameStarted = false;
+
+        function newGame() {
+            if (gameStarted && !confirm('Game is in progress. Start a new game? Current progress will be lost.')) return;
+            init();
+        }
 
         function init() {
             grid = [];
@@ -40,6 +45,7 @@
             nextColor = COLORS[Math.floor(Math.random() * COLORS.length)];
             score = 0;
             over = false;
+            gameStarted = false;
             document.getElementById('score').textContent = 0;
             draw();
         }
@@ -76,6 +82,7 @@
 
         function shoot(tx, ty) {
             if (over) return;
+            gameStarted = true;
             const angle = Math.atan2(ty - shooter.y, tx - shooter.x);
             let x = shooter.x, y = shooter.y;
             const dx = Math.cos(angle) * 8, dy = Math.sin(angle) * 8;

@@ -21,15 +21,21 @@
     <h1>🧩 15 Puzzle</h1>
     <div class="info">Moves: <b id="moves">0</b></div>
     <div class="grid" id="grid"></div>
-    <button onclick="init()">Shuffle</button>
+    <button onclick="newGame()">Shuffle</button>
     <script>
-        let tiles, empty, moves;
+        let tiles, empty, moves, gameStarted = false;
+
+        function newGame() {
+            if (gameStarted && !confirm('Game is in progress. Start a new game? Current progress will be lost.')) return;
+            init();
+        }
 
         function init() {
             tiles = [...Array(15).keys()].map(i => i + 1);
             tiles.push(null);
             empty = 15;
             moves = 0;
+            gameStarted = false;
             document.getElementById('moves').textContent = 0;
             shuffle();
             render();
@@ -62,6 +68,7 @@
 
         function click(i) {
             if (getNeighbors(empty).includes(i)) {
+                gameStarted = true;
                 swap(i);
                 moves++;
                 document.getElementById('moves').textContent = moves;

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>🐍 Snakes & Ladders</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; }
+        a.back-link { color: #888; text-decoration: none; font-size: 14px; margin-bottom: 5px; }
+        h1 { font-size: 1.5em; margin-bottom: 5px; }
+        .info { display: flex; gap: 15px; margin-bottom: 8px; font-size: 0.9em; flex-wrap: wrap; justify-content: center; }
+        .info span { background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 8px; }
+        .info .p1 { border: 2px solid #e74c3c; }
+        .info .p2 { border: 2px solid #3498db; }
+        canvas { border-radius: 10px; touch-action: none; max-width: 95vw; max-height: 52vh; }
+        .btn { padding: 14px 40px; border: none; border-radius: 12px; font-size: 1.1em; font-weight: bold; background: #4a90d9; color: #fff; touch-action: manipulation; cursor: pointer; margin-top: 12px; }
+        .btn:active { background: #357abd; transform: scale(0.95); }
+        .msg { margin-top: 8px; font-size: 1em; color: #f1c40f; min-height: 24px; }
+        .win-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10; align-items: center; justify-content: center; }
+        .win-overlay.show { display: flex; }
+        .win-box { background: #2a2a4e; padding: 30px; border-radius: 15px; text-align: center; }
+        .win-box h2 { color: #f1c40f; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">← Back</a>
+    <h1>🐍 Snakes & Ladders</h1>
+    <div class="info">
+        <span class="p1">🔴 You: <b id="p1pos">0</b></span>
+        <span class="p2">🔵 Bot: <b id="p2pos">0</b></span>
+        <span>🎲 <b id="dice">-</b></span>
+    </div>
+    <canvas id="game"></canvas>
+    <div class="msg" id="msg">Tap "Roll Dice" to start!</div>
+    <div class="btn" id="rollBtn" onclick="rollDice()">🎲 Roll Dice</div>
+    <div class="win-overlay" id="winOverlay">
+        <div class="win-box">
+            <h2 id="winTitle">🎉 You Win!</h2>
+            <p id="winMsg"></p>
+            <div class="btn" style="margin:0 auto;padding:0 20px;" onclick="newGame()">Play Again</div>
+        </div>
+    </div>
+    <script>
+    const CELL = 50, COLS = 10, ROWS = 10;
+    const snakes = { 16: 6, 47: 26, 49: 11, 56: 53, 62: 19, 64: 60, 87: 24, 93: 73, 95: 75, 98: 78 };
+    const ladders = { 1: 38, 4: 14, 9: 31, 21: 42, 28: 84, 36: 44, 51: 67, 71: 91, 80: 100 };
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    canvas.width = COLS * CELL; canvas.height = ROWS * CELL;
+
+    let p1 = 0, p2 = 0, turn = 1, rolling = false, animating = false, gameOver = false, gameStarted = false;
+
+    function posToXY(pos) {
+        pos = pos - 1;
+        const row = Math.floor(pos / COLS), col = pos % COLS;
+        const x = (row % 2 === 0) ? col : (COLS - 1 - col);
+        return { x: x * CELL + CELL/2, y: (ROWS - 1 - row) * CELL + CELL/2 };
+    }
+
+    function newGame() {
+        if (gameStarted && !confirm('Game is in progress. Start a new game? Current progress will be lost.')) return;
+        p1 = 0; p2 = 0; turn = 1; gameOver = false; rolling = false; animating = false; gameStarted = false;
+        document.getElementById('winOverlay').classList.remove('show');
+        updateUI(); draw();
+        setMsg('Tap "Roll Dice" to start!');
+    }
+
+    function rollDice() {
+        if (rolling || animating || gameOver || turn !== 1) return;
+        gameStarted = true;
+        rolling = true;
+        const val = Math.floor(Math.random() * 6) + 1;
+        document.getElementById('dice').textContent = val;
+        setMsg(`You rolled a ${val}!`);
+        setTimeout(() => movePlayer(1, val), 400);
+    }
+
+    function movePlayer(player, val) {
+        let pos = player === 1 ? p1 : p2;
+        const newPos = Math.min(pos + val, 100);
+        animateMove(player, pos, newPos, () => {
+            if (player === 1) p1 = newPos; else p2 = newPos;
+            let finalPos = newPos;
+            if (snakes[newPos]) { finalPos = snakes[newPos]; setMsg(`${player===1?'You':'Bot'} slid down a snake! 🐍`); }
+            else if (ladders[newPos]) { finalPos = ladders[newPos]; setMsg(`${player===1?'You':'Bot'} climbed a ladder! 🪜`); }
+            if (finalPos !== newPos) {
+                setTimeout(() => {
+                    animateMove(player, newPos, finalPos, () => {
+                        if (player === 1) p1 = finalPos; else p2 = finalPos;
+                        updateUI(); draw(); checkWin(player);
+                    });
+                }, 300);
+            } else {
+                updateUI(); draw(); checkWin(player);
+            }
+        });
+    }
+
+    function animateMove(player, from, to, cb) {
+        animating = true;
+        const step = from < to ? 1 : -1;
+        let cur = from;
+        const iv = setInterval(() => {
+            cur += step;
+            if (player === 1) p1 = cur; else p2 = cur;
+            draw();
+            if (cur === to) { clearInterval(iv); animating = false; cb(); }
+        }, 80);
+    }
+
+    function checkWin(player) {
+        const pos = player === 1 ? p1 : p2;
+        if (pos >= 100) {
+            gameOver = true; rolling = false;
+            document.getElementById('winTitle').textContent = player === 1 ? '🎉 You Win!' : '😢 Bot Wins!';
+            document.getElementById('winMsg').textContent = player === 1 ? 'Congratulations!' : 'Better luck next time!';
+            document.getElementById('winOverlay').classList.add('show');
+            return;
+        }
+        setTimeout(() => {
+            if (player === 1 && !gameOver) {
+                turn = 2; setMsg("Bot's turn...");
+                document.getElementById('rollBtn').textContent = '⏳ Bot thinking...';
+                setTimeout(() => { const v = Math.floor(Math.random()*6)+1; document.getElementById('dice').textContent = v; setMsg(`Bot rolled ${v}!`); setTimeout(() => movePlayer(2, v), 400); }, 800);
+            } else if (player === 2 && !gameOver) {
+                turn = 1; rolling = false;
+                document.getElementById('rollBtn').textContent = '🎲 Roll Dice';
+                setMsg('Your turn!');
+            }
+        }, 500);
+    }
+
+    function setMsg(m) { document.getElementById('msg').textContent = m; }
+    function updateUI() {
+        document.getElementById('p1pos').textContent = p1;
+        document.getElementById('p2pos').textContent = p2;
+    }
+
+    function draw() {
+        for (let r = 0; r < ROWS; r++)
+            for (let c = 0; c < COLS; c++) {
+                const light = (r + c) % 2 === 0;
+                ctx.fillStyle = light ? '#2d3748' : '#1a202c';
+                ctx.fillRect(c*CELL, r*CELL, CELL, CELL);
+            }
+        // Draw snakes
+        ctx.strokeStyle = '#e53e3e'; ctx.lineWidth = 3;
+        for (const [from, to] of Object.entries(snakes)) {
+            const a = posToXY(+from), b = posToXY(to);
+            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+            ctx.fillStyle = '#e53e3e'; ctx.font = '14px Arial'; ctx.textAlign = 'center';
+            ctx.fillText('🐍', (a.x+b.x)/2, (a.y+b.y)/2);
+        }
+        // Draw ladders
+        ctx.strokeStyle = '#48bb78'; ctx.lineWidth = 3;
+        for (const [from, to] of Object.entries(ladders)) {
+            const a = posToXY(+from), b = posToXY(to);
+            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+            ctx.fillStyle = '#48bb78'; ctx.font = '14px Arial'; ctx.textAlign = 'center';
+            ctx.fillText('🪜', (a.x+b.x)/2, (a.y+b.y)/2);
+        }
+        // Draw numbers
+        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '10px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        for (let i = 1; i <= 100; i++) { const p = posToXY(i); ctx.fillText(i, p.x, p.y - 16); }
+        // Draw players
+        if (p1 > 0) { const p = posToXY(p1); ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(p.x-6, p.y+4, 8, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#fff'; ctx.font = '10px Arial'; ctx.fillText('P1', p.x-6, p.y+4); }
+        if (p2 > 0) { const p = posToXY(p2); ctx.fillStyle = '#3498db'; ctx.beginPath(); ctx.arc(p.x+6, p.y+4, 8, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#fff'; ctx.font = '10px Arial'; ctx.fillText('P2', p.x+6, p.y+4); }
+        // Finish star
+        const fin = posToXY(100);
+        ctx.font = '20px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('⭐', fin.x, fin.y - 2);
+    }
+
+    newGame();
+    </script>
+</body>
+</html>

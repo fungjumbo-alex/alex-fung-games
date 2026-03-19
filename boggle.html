@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>🔍 Boggle</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; touch-action: none; }
+        a.back-link { color: #888; text-decoration: none; font-size: 14px; margin-bottom: 5px; }
+        h1 { font-size: 1.5em; margin-bottom: 5px; }
+        .hud { display: flex; gap: 20px; margin-bottom: 8px; font-size: 1em; }
+        .hud span { background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 8px; }
+        .hud .timer { color: #f1c40f; }
+        .grid { display: grid; grid-template-columns: repeat(4, 70px); gap: 4px; margin: 8px 0; }
+        .cell { width: 70px; height: 70px; border-radius: 10px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 1.8em; font-weight: bold; cursor: pointer; touch-action: manipulation; user-select: none; transition: background 0.1s; }
+        .cell.selected { background: rgba(74,144,217,0.4); }
+        .cell:active { background: rgba(74,144,217,0.6); }
+        .current-word { font-size: 1.4em; margin: 8px 0; min-height: 36px; color: #4a90d9; letter-spacing: 3px; }
+        .found-words { max-width: 320px; margin-top: 8px; max-height: 150px; overflow-y: auto; }
+        .found-words h3 { font-size: 0.9em; color: #888; margin-bottom: 4px; }
+        .found-words .words { display: flex; flex-wrap: wrap; gap: 4px; }
+        .found-words .word { background: rgba(46,204,113,0.2); color: #2ecc71; padding: 3px 8px; border-radius: 6px; font-size: 0.85em; }
+        .btn { padding: 12px 30px; border: none; border-radius: 10px; font-size: 1em; font-weight: bold; background: #4a90d9; color: #fff; touch-action: manipulation; cursor: pointer; margin-top: 10px; }
+        .score-display { font-size: 0.9em; color: #888; margin-top: 4px; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10; align-items: center; justify-content: center; }
+        .overlay.show { display: flex; }
+        .overlay-box { background: #2a2a4e; padding: 30px; border-radius: 15px; text-align: center; max-width: 320px; }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">← Back</a>
+    <h1>🔍 Boggle</h1>
+    <div class="hud">
+        <span>⏱ <span id="timer">3:00</span></span>
+        <span>Score: <span id="score">0</span></span>
+        <span>Found: <span id="found">0</span></span>
+    </div>
+    <div class="current-word" id="currentWord"></div>
+    <div class="grid" id="grid"></div>
+    <div class="found-words">
+        <h3>Found Words:</h3>
+        <div class="words" id="foundWords"></div>
+    </div>
+    <div class="score-display" id="scoreDisplay"></div>
+    <div class="btn" id="startBtn" onclick="newGame()">New Game</div>
+    <div class="overlay" id="endOverlay">
+        <div class="overlay-box">
+            <h2>⏱ Time's Up!</h2>
+            <p id="endMsg"></p>
+            <div class="btn" style="margin:10px auto 0;" onclick="newGame()">Play Again</div>
+        </div>
+    </div>
+    <script>
+    const WORDS = new Set("ace act add age ago aid aim air all and ant any ape arc are ark arm art ash ask ate awe axe bad bag ban bar bat bay bed bet bid big bin bit bog bow box boy bud bug bun bus but buy cab can cap car cat cow cry cup cut dad dam day den dew did dig dim dip dog dot dry dub dud due dug dun duo dye ear eat eel egg ego elk elm emu end era eve ewe eye fad fan far fat fax fed fee few fig fin fit fix fly foe fog for fox fry fun fur gag gal gap gas gel gem get gin gnu god got gum gun gut guy gym had hag ham has hat hay hem hen her hew hid him hip his hit hob hog hop hot how hub hue hug hum hut ice icy ill imp ink inn ion ire irk ivy jab jag jam jar jaw jay jet jig job jog jot joy jug jut keg ken key kid kin kit lab lad lag lap law lax lay lea led leg let lid lie lip lit log lot low lug mad man map mar mat maw may men met mid mix mob mop mow mud mug mum nab nag nap nay net new nil nip nit nod nor not now nun nut oak oar oat odd ode off oft oil old one opt orb ore our out owe owl own pad pal pan pap par pat paw pay pea peg pen per pet pew pie pig pin pit ply pod pop pot pow pox pro pry pub pug pun pup pus put rag ram ran rap rat raw ray red ref rib rid rig rim rip rob rod roe rot row rub rug rum run rut rye sac sad sag sap sat saw say sea set sew shy sin sip sir sit six ski sky sly sob sod son sop sot sow soy spa spy sty sub sue sum sun sup tab tad tag tan tap tar tat tax tea ten the tie tin tip toe ton too top tot tow toy try tub tug tun two urn use van vat vet vie vim vow wad wag war was wax way web wed wet who wig win wit woe wok won woo wow yak yam yap yaw yea yes yet yew you zap zen zip zoo able acid acre aged aide aisle also anti arch area army aunt auto avid away axle back bail bait bake bald ball band bane bang bank bare bark barn base bath bead beam bean bear beat been beer bell belt bend best bias bike bile bill bind bird bite blah bled blow blue blur boar boat body bold bolt bomb bond bone book boom boot bore born boss both bout bowl buck bulk bull bump burn bush bust busy cage cake calf call calm came camp cane cape card care cart case cash cast cave cell chat chin chip chop cite city clad clam clan clap claw clay clip clod clone close club clue clue coal coat code coil coin cold colt comb come cone cook cool cope copy cord core cork corn cost coup crab crew crop crow cube cult curb cure curl cute daft dale dame damp dare dark darn dart dash data date dawn dead deaf deal dear deck deed deem deep deer demo dent deny desk dial dice died diet dime dine dire dirt disc dish dock does dome done doom door dose down drag draw drew drip drop drug drum dual duck duel dull dumb dump dune dung dusk dust duty each earn ease east easy echo edge else emit ends epic euro even ever evil exam exit face fact fade fail fair fake fall fame fang fare farm fast fate fawn fear feat feed feel fell felt file fill film find fine fire firm fish fist five flag flat flaw flea fled flee flew flip flit flog flow foam foil fold folk fond food fool foot ford fore fork form fort foul four free frog from fuel full fund fury fuse fuss gain gale game gang gape garb gash gasp gate gave gaze gear gene gift girl give glad glow glue gnaw goat goes gold golf gone good gore grab gray grew grid grim grin grip grow gulf gust guts hack hail hair hale half hall halt hand hang hard hare harm harp hate haul have haze head heal heap hear heat heed heel held help herb herd here hero hide high hike hill hint hire hold hole holy home hood hook hope horn host hour huge hull hung hunt hurl hurt husk hymn icon idea idle inch info into iron isle item jack jade jail jamb java jazz jean jerk jest joke jolt jump jury just keen keep kept kick kill kind king kiss kite knee knew knit knob knot know lace lack laid lake lamb lame lamp land lane lard last late lawn lazy lead leaf leak lean leap left lend lens less liar lick life lift like lime limp line link lion list live load loan lock loft logo lone long look loop lord lore lose loss lost loud love luck lump lung lure lurk made mail main make male mall mane many mare mark mask mass mast mate maze mead meal mean meet meld melt memo mend menu mere mesh mild mile milk mill mind mine mint miss mist moan moat mock mode mold mood moon moor more moss most moth move much mule muse mush must mute myth nail name navy near neat neck need nest next nice nine node none norm nose note noun nude numb oath obey odor omen once only onto opal open oral oven over pace pack page paid pail pain pair pale palm pane park part pass past path pave peak pear peel peer pile pine pink pipe plan play plea plod plot plow plug plum plus poem poet poke pole poll polo pond pony pool poor pope pore pork port pose post pour pray prey prod prop pull pulp pump pure push quit race rack raft rage raid rail rain rake ramp rang rank rare rash rate rave read real ream reap rear reed reef rein rely rend rent rest rice rich ride rift rind ring riot ripe rise risk road roam roar robe rock rode role roll roof room root rope rose rote rude ruin rule rump rung rush rust safe sage said sail sake sale salt same sand sane sang sank save seal seam sear seat seed seek seem seen self sell send sent shed shin ship shoe shook shop shot show shut sick side sift sigh sign silk sing sink site size skip slab slam slap slat sled slid slim slip slit slot slow slug slum snap snow soak soap soar sock soft soil sold sole some song soon sore sort soul sour span spar spec sped spin spit spot spry spur stab stag star stay stem step stew stir stop stub stud such suit sulk sure surf swan swap swim swirl tail take tale talk tall tame tank tape tart task taxi team tear teen tell tend tent term test text than that them then they thin this thus tick tide tidy tied tier tile till tilt time tiny tire toad toil told toll tone took tool tops tore torn toss tour town trap tray tree trek trim trio trod trot true tube tuck tuna tune turn twin type ugly undo unit unto upon urge used user vain vale vane vary vase vast veil vein vent verb very vest view vine visa void volt vote wade wage wait wake walk wall wand ward warm warn warp wash wave wavy waxy weak wean wear weed week well went were west what when whim whip whom wick wide wife wild will wilt wind wine wing wipe wire wise wish with woke wolf wood wool word wore work worm worn wrap wren writ yank yard yarn year yell your zone".split(" "));
+
+    const SIZE = 4;
+    let board, selected, foundSet, score, timeLeft, gameRunning, timerInterval;
+
+    function newGame() {
+        if (gameRunning && !confirm('Game is in progress. Start a new game? Current progress will be lost.')) return;
+        document.getElementById('endOverlay').classList.remove('show');
+        board = [];
+        for (let i = 0; i < SIZE * SIZE; i++) {
+            const r = Math.random();
+            board.push(r < 0.35 ? 'aeiou'[Math.floor(Math.random()*5)] : 'bcdfghjklmnpqrstvwxyz'[Math.floor(Math.random()*21)]);
+        }
+        // Ensure at least 4 vowels
+        let v = board.filter(l => 'aeiou'.includes(l)).length;
+        while (v < 4) { const i = Math.floor(Math.random()*16); if (!'aeiou'.includes(board[i])) { board[i] = 'aeiou'[Math.floor(Math.random()*5)]; v++; } }
+
+        selected = []; foundSet = new Set(); score = 0; timeLeft = 180; gameRunning = true;
+        document.getElementById('foundWords').innerHTML = '';
+        document.getElementById('scoreDisplay').textContent = '';
+        render(); startTimer();
+    }
+
+    function startTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+            document.getElementById('timer').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+            if (timeLeft <= 0) { clearInterval(timerInterval); gameRunning = false; endGame(); }
+        }, 1000);
+    }
+
+    function cellIdx(x, y) { return y * SIZE + x; }
+
+    function getWord() { return selected.map(i => board[i]).join(''); }
+
+    function selectCell(idx) {
+        if (!gameRunning) return;
+        const x = idx % SIZE, y = Math.floor(idx / SIZE);
+        if (selected.includes(idx)) return;
+        if (selected.length > 0) {
+            const last = selected[selected.length - 1];
+            const lx = last % SIZE, ly = Math.floor(last / SIZE);
+            const dist = Math.abs(x - lx) + Math.abs(y - ly);
+            if (dist > 1 || (dist === 0)) return;
+        }
+        selected.push(idx);
+        const word = getWord();
+        document.getElementById('currentWord').textContent = word;
+        if (word.length >= 3 && WORDS.has(word) && !foundSet.has(word)) {
+            foundSet.add(word);
+            const pts = word.length === 3 ? 1 : word.length === 4 ? 1 : word.length === 5 ? 2 : word.length === 6 ? 3 : 5;
+            score += pts;
+            document.getElementById('score').textContent = score;
+            document.getElementById('found').textContent = foundSet.size;
+            const wEl = document.createElement('span');
+            wEl.className = 'word'; wEl.textContent = word + (pts > 1 ? ` +${pts}` : '');
+            document.getElementById('foundWords').appendChild(wEl);
+            setTimeout(() => { selected = []; document.getElementById('currentWord').textContent = ''; render(); }, 200);
+        }
+        render();
+    }
+
+    function endSelection() {
+        selected = [];
+        document.getElementById('currentWord').textContent = '';
+        render();
+    }
+
+    function render() {
+        const grid = document.getElementById('grid');
+        grid.innerHTML = '';
+        board.forEach((letter, i) => {
+            const cell = document.createElement('div');
+            cell.className = 'cell' + (selected.includes(i) ? ' selected' : '');
+            cell.textContent = letter.toUpperCase();
+            cell.ontouchstart = e => { e.preventDefault(); selectCell(i); };
+            cell.onmousedown = e => { e.preventDefault(); selectCell(i); };
+            grid.appendChild(cell);
+        });
+    }
+
+    function endGame() {
+        document.getElementById('endMsg').textContent = `You found ${foundSet.size} words for ${score} points!`;
+        // Show missed words
+        const possible = findAllPossible();
+        document.getElementById('endMsg').textContent += ` (${possible.length} possible words)`;
+        document.getElementById('endOverlay').classList.add('show');
+    }
+
+    function findAllPossible() {
+        const found = [];
+        for (const w of WORDS) {
+            if (w.length < 3 || foundSet.has(w)) continue;
+            if (canFormWord(w)) found.push(w);
+        }
+        return found.sort();
+    }
+
+    function canFormWord(word) {
+        const used = Array(SIZE*SIZE).fill(false);
+        return dfs(word, 0, used, -1);
+    }
+
+    function dfs(word, pos, used, lastIdx) {
+        if (pos >= word.length) return true;
+        for (let i = 0; i < SIZE*SIZE; i++) {
+            if (used[i] || board[i] !== word[pos]) continue;
+            if (lastIdx >= 0) {
+                const x = i%SIZE, y = Math.floor(i/SIZE), lx = lastIdx%SIZE, ly = Math.floor(lastIdx/SIZE);
+                if (Math.abs(x-lx) + Math.abs(y-ly) > 1) continue;
+            }
+            used[i] = true;
+            if (dfs(word, pos+1, used, i)) return true;
+            used[i] = false;
+        }
+        return false;
+    }
+
+    // End selection on touch end
+    document.addEventListener('touchend', () => { if (selected.length > 0) endSelection(); });
+    document.addEventListener('mouseup', () => { if (selected.length > 0) endSelection(); });
+
+    newGame();
+    </script>
+</body>
+</html>

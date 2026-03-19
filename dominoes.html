@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dominoes</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #0f0f23 100%); min-height: 100vh; color: #fff; padding: 50px 5px 10px; }
+        .container { max-width: 500px; margin: 0 auto; text-align: center; }
+        h1 { font-size: 1.3em; margin-bottom: 10px; }
+        .status { margin-bottom: 10px; color: #4a90d9; font-size: 0.9em; }
+        .board { background: #2d5a3d; border-radius: 10px; padding: 10px; min-height: 80px; margin-bottom: 10px; overflow-x: auto; display: flex; align-items: center; gap: 2px; }
+        .domino { display: flex; background: #fff; border-radius: 4px; min-width: 28px; }
+        .domino.vertical { flex-direction: column; }
+        .domino.horizontal { flex-direction: row; }
+        .domino .half { width: 26px; height: 26px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; padding: 2px; }
+        .domino.horizontal .half { border-right: 1px solid #ccc; }
+        .domino.horizontal .half:last-child { border: none; }
+        .domino.vertical .half { border-bottom: 1px solid #ccc; }
+        .domino.vertical .half:last-child { border: none; }
+        .dot { width: 5px; height: 5px; background: #333; border-radius: 50%; margin: 1px; }
+        .boneyard { background: rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; margin-bottom: 10px; }
+        .hand { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-bottom: 15px; }
+        .hand .domino { cursor: pointer; transition: all 0.2s; }
+        .hand .domino:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(74,144,217,0.5); }
+        .hand .domino.selected { box-shadow: 0 0 0 3px #4a90d9; }
+        .hand .domino.disabled { opacity: 0.4; cursor: not-allowed; }
+        .ai-hand { color: #888; font-size: 0.9em; margin-bottom: 10px; }
+        .buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        button { padding: 10px 20px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #4a90d9; color: white; }
+        button:disabled { background: #555; cursor: not-allowed; }
+        .place-btns { display: none; gap: 5px; margin-top: 10px; }
+        .place-btns.show { display: flex; }
+    </style>
+</head>
+<body>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <div class="container">
+        <h1>🁣 Dominoes</h1>
+        <div class="status" id="status">Your turn</div>
+        <div class="ai-hand">AI has <span id="aiCount">7</span> tiles</div>
+        <div class="board" id="board"></div>
+        <div class="boneyard">Boneyard: <span id="boneyardCount">14</span> tiles</div>
+        <div class="place-btns" id="placeBtns">
+            <button onclick="placeDomino('left')">← Left</button>
+            <button onclick="placeDomino('right')">Right →</button>
+            <button onclick="cancelSelect()">Cancel</button>
+        </div>
+        <div class="hand" id="hand"></div>
+        <div class="buttons">
+            <button onclick="drawTile()" id="drawBtn">Draw Tile</button>
+            <button onclick="newGame()">New Game</button>
+        </div>
+    </div>
+    <script>
+        let boneyard = [], playerHand = [], aiHand = [], board = [];
+        let leftEnd = null, rightEnd = null;
+        let selectedTile = null, isPlayerTurn = true, gameOver = false, gameStarted = false;
+
+        function createDominoes() {
+            const tiles = [];
+            for (let i = 0; i <= 6; i++) {
+                for (let j = i; j <= 6; j++) {
+                    tiles.push({ top: i, bottom: j });
+                }
+            }
+            return tiles.sort(() => Math.random() - 0.5);
+        }
+
+        function renderDots(num) {
+            const patterns = {
+                0: [], 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8],
+                5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8]
+            };
+            return Array(9).fill(0).map((_, i) => patterns[num].includes(i) ? '<div class="dot"></div>' : '<div></div>').join('');
+        }
+
+        function renderDomino(tile, isVertical = true) {
+            const cls = isVertical ? 'vertical' : 'horizontal';
+            return `<div class="domino ${cls}">
+                <div class="half" style="display:grid;grid-template-columns:repeat(3,1fr);">${renderDots(isVertical ? tile.top : tile.left ?? tile.top)}</div>
+                <div class="half" style="display:grid;grid-template-columns:repeat(3,1fr);">${renderDots(isVertical ? tile.bottom : tile.right ?? tile.bottom)}</div>
+            </div>`;
+        }
+
+        function init() {
+            boneyard = createDominoes();
+            playerHand = boneyard.splice(0, 7);
+            aiHand = boneyard.splice(0, 7);
+            board = [];
+            leftEnd = rightEnd = null;
+            selectedTile = null;
+            isPlayerTurn = true;
+            gameOver = false;
+            gameStarted = false;
+            document.getElementById('placeBtns').classList.remove('show');
+            render();
+        }
+
+        function render() {
+            document.getElementById('aiCount').textContent = aiHand.length;
+            document.getElementById('boneyardCount').textContent = boneyard.length;
+            
+            const boardEl = document.getElementById('board');
+            if (board.length === 0) {
+                boardEl.innerHTML = '<span style="color:#888;">Play a tile to start</span>';
+            } else {
+                boardEl.innerHTML = board.map(t => renderDomino({...t, left: t.leftVal, right: t.rightVal}, false)).join('');
+            }
+            
+            const handEl = document.getElementById('hand');
+            handEl.innerHTML = playerHand.map((t, i) => {
+                const canPlay = canPlayTile(t);
+                const sel = selectedTile === i ? 'selected' : (!canPlay && board.length > 0 ? 'disabled' : '');
+                return `<div class="domino vertical ${sel}" onclick="selectTile(${i})">
+                    <div class="half" style="display:grid;grid-template-columns:repeat(3,1fr);">${renderDots(t.top)}</div>
+                    <div class="half" style="display:grid;grid-template-columns:repeat(3,1fr);">${renderDots(t.bottom)}</div>
+                </div>`;
+            }).join('');
+            
+            document.getElementById('drawBtn').disabled = boneyard.length === 0 || !isPlayerTurn || gameOver;
+        }
+
+        function canPlayTile(tile) {
+            if (board.length === 0) return true;
+            const vals = [tile.top, tile.bottom];
+            return vals.includes(leftEnd) || vals.includes(rightEnd);
+        }
+
+        function selectTile(index) {
+            if (!isPlayerTurn || gameOver) return;
+            const tile = playerHand[index];
+            if (!canPlayTile(tile)) return;
+            
+            selectedTile = index;
+            document.getElementById('placeBtns').classList.add('show');
+            render();
+        }
+
+        function cancelSelect() {
+            selectedTile = null;
+            document.getElementById('placeBtns').classList.remove('show');
+            render();
+        }
+
+        function placeDomino(side) {
+            if (selectedTile === null) return;
+            const tile = playerHand[selectedTile];
+
+            gameStarted = true;
+            if (board.length === 0) {
+                board.push({ leftVal: tile.top, rightVal: tile.bottom });
+                leftEnd = tile.top;
+                rightEnd = tile.bottom;
+            } else if (side === 'left') {
+                if (tile.bottom === leftEnd) {
+                    board.unshift({ leftVal: tile.top, rightVal: tile.bottom });
+                    leftEnd = tile.top;
+                } else if (tile.top === leftEnd) {
+                    board.unshift({ leftVal: tile.bottom, rightVal: tile.top });
+                    leftEnd = tile.bottom;
+                } else return;
+            } else {
+                if (tile.top === rightEnd) {
+                    board.push({ leftVal: tile.top, rightVal: tile.bottom });
+                    rightEnd = tile.bottom;
+                } else if (tile.bottom === rightEnd) {
+                    board.push({ leftVal: tile.bottom, rightVal: tile.top });
+                    rightEnd = tile.top;
+                } else return;
+            }
+            
+            playerHand.splice(selectedTile, 1);
+            selectedTile = null;
+            document.getElementById('placeBtns').classList.remove('show');
+            
+            if (playerHand.length === 0) {
+                gameOver = true;
+                document.getElementById('status').textContent = '🎉 You win!';
+                render();
+                return;
+            }
+            
+            isPlayerTurn = false;
+            document.getElementById('status').textContent = 'AI thinking...';
+            render();
+            setTimeout(aiTurn, 800);
+        }
+
+        function drawTile() {
+            if (boneyard.length === 0 || !isPlayerTurn) return;
+            playerHand.push(boneyard.pop());
+            render();
+        }
+
+        function aiTurn() {
+            if (gameOver) return;
+            
+            // Find playable tile
+            let played = false;
+            for (let i = 0; i < aiHand.length; i++) {
+                const tile = aiHand[i];
+                if (board.length === 0) {
+                    board.push({ leftVal: tile.top, rightVal: tile.bottom });
+                    leftEnd = tile.top;
+                    rightEnd = tile.bottom;
+                    aiHand.splice(i, 1);
+                    played = true;
+                    break;
+                }
+                
+                const vals = [tile.top, tile.bottom];
+                if (vals.includes(leftEnd)) {
+                    if (tile.bottom === leftEnd) {
+                        board.unshift({ leftVal: tile.top, rightVal: tile.bottom });
+                        leftEnd = tile.top;
+                    } else {
+                        board.unshift({ leftVal: tile.bottom, rightVal: tile.top });
+                        leftEnd = tile.bottom;
+                    }
+                    aiHand.splice(i, 1);
+                    played = true;
+                    break;
+                } else if (vals.includes(rightEnd)) {
+                    if (tile.top === rightEnd) {
+                        board.push({ leftVal: tile.top, rightVal: tile.bottom });
+                        rightEnd = tile.bottom;
+                    } else {
+                        board.push({ leftVal: tile.bottom, rightVal: tile.top });
+                        rightEnd = tile.top;
+                    }
+                    aiHand.splice(i, 1);
+                    played = true;
+                    break;
+                }
+            }
+            
+            if (!played && boneyard.length > 0) {
+                aiHand.push(boneyard.pop());
+            }
+            
+            if (aiHand.length === 0) {
+                gameOver = true;
+                document.getElementById('status').textContent = 'AI wins!';
+                render();
+                return;
+            }
+            
+            isPlayerTurn = true;
+            document.getElementById('status').textContent = 'Your turn';
+            render();
+        }
+
+        function newGame() {
+            if (gameStarted && !confirm('Game is in progress. Start a new game? Current progress will be lost.')) return;
+            init();
+        }
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>🃏 FreeCell</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 8px; touch-action: manipulation; }
+        a.back-link { color: #888; text-decoration: none; font-size: 14px; margin-bottom: 4px; }
+        h1 { font-size: 1.3em; margin-bottom: 4px; }
+        .top-row { display: flex; gap: 4px; margin-bottom: 8px; justify-content: space-between; width: 100%; max-width: 380px; }
+        .cell-group { display: flex; gap: 4px; }
+        .cell { width: 44px; height: 60px; border: 2px dashed rgba(255,255,255,0.2); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.4em; }
+        .card { width: 44px; height: 60px; border-radius: 6px; background: #fff; color: #1a1a2e; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; font-size: 0.75em; cursor: pointer; touch-action: manipulation; position: relative; box-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
+        .card.red { color: #e74c3c; }
+        .card.black { color: #1a1a2e; }
+        .card.selected { box-shadow: 0 0 0 3px #f1c40f; transform: translateY(-4px); }
+        .card.in-cell { position: absolute; top: 0; left: 0; }
+        .tableau { display: flex; gap: 4px; justify-content: center; }
+        .column { width: 44px; min-height: 80px; position: relative; display: flex; flex-direction: column; align-items: center; }
+        .column .card { margin-top: -40px; }
+        .column .card:first-child { margin-top: 0; }
+        .actions { display: flex; gap: 8px; margin-top: 10px; }
+        .btn { padding: 8px 20px; border: none; border-radius: 8px; font-size: 0.9em; background: rgba(255,255,255,0.15); color: #fff; touch-action: manipulation; cursor: pointer; }
+        .btn:active { background: rgba(255,255,255,0.3); }
+        .moves { margin-top: 6px; font-size: 0.85em; color: #888; }
+        .win-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10; align-items: center; justify-content: center; }
+        .win-overlay.show { display: flex; }
+        .win-box { background: #2a2a4e; padding: 30px; border-radius: 15px; text-align: center; }
+        .win-box h2 { color: #f1c40f; }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">← Back</a>
+    <h1>🃏 FreeCell</h1>
+    <div class="top-row">
+        <div class="cell-group" id="freeCells"></div>
+        <div class="cell-group" id="foundations"></div>
+    </div>
+    <div class="tableau" id="tableau"></div>
+    <div class="moves">Moves: <span id="moveCount">0</span></div>
+    <div class="actions">
+        <div class="btn" onclick="newGame()">🔄 New Game</div>
+        <div class="btn" onclick="autoMove()">⬆ Auto</div>
+    </div>
+    <div class="win-overlay" id="winOverlay">
+        <div class="win-box">
+            <h2>🎉 You Win!</h2>
+            <p id="winMsg"></p>
+            <div class="btn" style="margin:10px auto 0;" onclick="newGame();document.getElementById('winOverlay').classList.remove('show')">Play Again</div>
+        </div>
+    </div>
+    <script>
+    const SUITS = ['♠','♥','♦','♣'], RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+    const isRed = s => s === '♥' || s === '♦';
+    let freeCells, foundations, tableau, selected, moveCount, gameStarted = false;
+
+    function makeCard(suit, rank) { return { suit, rank, color: isRed(suit) ? 'red' : 'black', value: RANKS.indexOf(rank) }; }
+    function makeDeck() { const d = []; SUITS.forEach(s => RANKS.forEach(r => d.push(makeCard(s,r)))); return d; }
+    function shuffle(a) { for (let i = a.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; }
+
+    function newGame() {
+        if (gameStarted && !confirm('Game is in progress. Start a new game? Current progress will be lost.')) return;
+        freeCells = [null,null,null,null];
+        foundations = [[],[],[],[]];
+        tableau = [[],[],[],[],[],[],[],[]];
+        const deck = shuffle(makeDeck());
+        for (let i = 0; i < 52; i++) tableau[i % 8].push(deck[i]);
+        selected = null; moveCount = 0; gameStarted = false;
+        render();
+    }
+
+    function canPlaceFoundation(card, fi) {
+        const f = foundations[fi];
+        if (f.length === 0) return card.rank === 'A' && SUITS[fi] === card.suit;
+        const top = f[f.length-1];
+        return top.suit === card.suit && RANKS.indexOf(card.rank) === RANKS.indexOf(top.rank) + 1;
+    }
+
+    function findFoundation(card) {
+        return foundations.findIndex(f => {
+            if (f.length === 0) return card.rank === 'A';
+            const top = f[f.length-1];
+            return top.suit === card.suit && RANKS.indexOf(card.rank) === RANKS.indexOf(top.rank) + 1;
+        });
+    }
+
+    function canPlaceTableau(card, col) {
+        const c = tableau[col];
+        if (c.length === 0) return true;
+        const top = c[c.length-1];
+        return top.color !== card.color && RANKS.indexOf(card.rank) === RANKS.indexOf(top.rank) - 1;
+    }
+
+    function selectCard(source, index, cardIndex) {
+        if (selected) {
+            tryMove(source, index, cardIndex);
+        } else {
+            let card;
+            if (source === 'free') card = freeCells[index];
+            else card = tableau[index][cardIndex !== undefined ? cardIndex : tableau[index].length - 1];
+            if (card) selected = { source, index, cardIndex: cardIndex !== undefined ? cardIndex : tableau[index].length - 1 };
+            render();
+        }
+    }
+
+    function tryMove(dest, destIndex) {
+        if (!selected) { selectCard(dest, destIndex); return; }
+        const { source, index, cardIndex } = selected;
+        let card;
+        if (source === 'free') card = freeCells[index];
+        else card = tableau[index][cardIndex];
+        if (!card) { selected = null; render(); return; }
+
+        let moved = false;
+        if (dest === 'free' && freeCells[destIndex] === null && source !== 'free') {
+            if (source === 'tableau' && cardIndex !== tableau[index].length - 1) { selected = null; render(); return; }
+            freeCells[destIndex] = card;
+            if (source === 'free') freeCells[index] = null;
+            else tableau[index].splice(cardIndex, 1);
+            moved = true;
+        } else if (dest === 'foundation') {
+            if (canPlaceFoundation(card, destIndex)) {
+                if (source === 'tableau' && cardIndex !== tableau[index].length - 1) { selected = null; render(); return; }
+                foundations[destIndex].push(card);
+                if (source === 'free') freeCells[index] = null;
+                else tableau[index].splice(cardIndex, 1);
+                moved = true;
+            }
+        } else if (dest === 'tableau') {
+            if (canPlaceTableau(card, destIndex)) {
+                if (source === 'free') { freeCells[index] = null; tableau[destIndex].push(card); moved = true; }
+                else {
+                    const cards = tableau[index].splice(cardIndex);
+                    tableau[destIndex].push(...cards);
+                    moved = true;
+                }
+            }
+        }
+        if (moved) { gameStarted = true; moveCount++; selected = null; render(); checkWin(); }
+        else if (source === dest && index === destIndex) { selected = null; render(); }
+        else { selected = null; render(); }
+    }
+
+    function autoMove() {
+        let moved = true;
+        while (moved) {
+            moved = false;
+            for (let i = 0; i < 8; i++) {
+                if (tableau[i].length === 0) continue;
+                const card = tableau[i][tableau[i].length-1];
+                const fi = findFoundation(card);
+                if (fi >= 0) { foundations[fi].push(card); tableau[i].pop(); moveCount++; moved = true; }
+            }
+            for (let i = 0; i < 4; i++) {
+                if (!freeCells[i]) continue;
+                const fi = findFoundation(freeCells[i]);
+                if (fi >= 0) { foundations[fi].push(freeCells[i]); freeCells[i] = null; moveCount++; moved = true; }
+            }
+        }
+        render(); checkWin();
+    }
+
+    function checkWin() {
+        const total = foundations.reduce((s,f) => s + f.length, 0);
+        if (total === 52) {
+            document.getElementById('winMsg').textContent = `Completed in ${moveCount} moves!`;
+            document.getElementById('winOverlay').classList.add('show');
+        }
+    }
+
+    function render() {
+        document.getElementById('moveCount').textContent = moveCount;
+        // Free cells
+        const fcDiv = document.getElementById('freeCells');
+        fcDiv.innerHTML = '';
+        for (let i = 0; i < 4; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            if (freeCells[i]) {
+                const c = freeCells[i];
+                const cardEl = createCardEl(c, selected && selected.source === 'free' && selected.index === i);
+                cardEl.onclick = () => selectCard('free', i);
+                cell.appendChild(cardEl);
+            } else {
+                cell.onclick = () => tryMove('free', i);
+            }
+            fcDiv.appendChild(cell);
+        }
+        // Foundations
+        const fDiv = document.getElementById('foundations');
+        fDiv.innerHTML = '';
+        for (let i = 0; i < 4; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.style.color = isRed(SUITS[i]) ? '#e74c3c' : '#aaa';
+            cell.textContent = SUITS[i];
+            cell.onclick = () => tryMove('foundation', i);
+            if (foundations[i].length > 0) {
+                const c = foundations[i][foundations[i].length-1];
+                const cardEl = createCardEl(c, false);
+                cardEl.onclick = () => tryMove('foundation', i);
+                cell.textContent = '';
+                cell.appendChild(cardEl);
+            }
+            fDiv.appendChild(cell);
+        }
+        // Tableau
+        const tDiv = document.getElementById('tableau');
+        tDiv.innerHTML = '';
+        for (let i = 0; i < 8; i++) {
+            const col = document.createElement('div');
+            col.className = 'column';
+            if (tableau[i].length === 0) {
+                col.onclick = () => tryMove('tableau', i);
+                col.style.border = '2px dashed rgba(255,255,255,0.1)';
+                col.style.borderRadius = '6px';
+                col.style.minHeight = '80px';
+            }
+            tableau[i].forEach((card, ci) => {
+                const cardEl = createCardEl(card, selected && selected.source === 'tableau' && selected.index === i && selected.cardIndex === ci);
+                cardEl.onclick = (e) => { e.stopPropagation(); selectCard('tableau', i, ci); };
+                cardEl.style.zIndex = ci;
+                col.appendChild(cardEl);
+            });
+            if (tableau[i].length > 0) {
+                col.onclick = () => tryMove('tableau', i);
+            }
+            tDiv.appendChild(col);
+        }
+    }
+
+    function createCardEl(card, isSelected) {
+        const el = document.createElement('div');
+        el.className = 'card ' + card.color + (isSelected ? ' selected' : '');
+        el.innerHTML = `<span>${card.rank}</span><span>${card.suit}</span>`;
+        return el;
+    }
+
+    newGame();
+    </script>
+</body>
+</html>

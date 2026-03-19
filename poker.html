@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Poker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #0f0f23 100%); min-height: 100vh; color: #fff; padding: 50px 10px 10px; }
+        .container { max-width: 400px; margin: 0 auto; text-align: center; }
+        h1 { font-size: 1.3em; margin-bottom: 10px; }
+        .paytable { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; font-size: 0.7em; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 8px; margin-bottom: 15px; }
+        .paytable span:nth-child(odd) { text-align: left; color: #4a90d9; }
+        .paytable span:nth-child(even) { text-align: right; }
+        .cards { display: flex; gap: 5px; justify-content: center; margin: 15px 0; flex-wrap: wrap; }
+        .card { width: 55px; height: 80px; background: #fff; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.2em; cursor: pointer; transition: all 0.2s; position: relative; }
+        .card.red { color: #e74c3c; }
+        .card.black { color: #2c3e50; }
+        .card.held { box-shadow: 0 0 0 3px #4a90d9; }
+        .card .rank { font-weight: bold; font-size: 1.1em; }
+        .card .suit { font-size: 1.4em; }
+        .card.back { background: #4a90d9; color: transparent; }
+        .info { display: flex; justify-content: space-around; margin: 15px 0; font-size: 0.9em; }
+        .info div { background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 8px; }
+        .info label { color: #4a90d9; font-size: 0.8em; }
+        .info span { display: block; font-size: 1.2em; }
+        .buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        button { padding: 10px 20px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #4a90d9; color: white; }
+        button:hover { background: #357abd; }
+        button:disabled { background: #555; cursor: not-allowed; }
+        .bet-btns { display: flex; gap: 5px; justify-content: center; margin: 10px 0; }
+        .bet-btns button { padding: 5px 10px; font-size: 12px; }
+        .result { font-size: 1.1em; color: #2ecc71; margin: 10px 0; min-height: 25px; }
+    </style>
+</head>
+<body>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <div class="container">
+        <h1>🎰 Video Poker</h1>
+        <div class="paytable">
+            <span>Royal Flush</span><span>250x</span>
+            <span>Straight Flush</span><span>50x</span>
+            <span>Four of a Kind</span><span>25x</span>
+            <span>Full House</span><span>9x</span>
+            <span>Flush</span><span>6x</span>
+            <span>Straight</span><span>4x</span>
+            <span>Three of a Kind</span><span>3x</span>
+            <span>Two Pair</span><span>2x</span>
+            <span>Jacks or Better</span><span>1x</span>
+        </div>
+        <div class="info">
+            <div><label>Credits</label><span id="credits">100</span></div>
+            <div><label>Bet</label><span id="bet">1</span></div>
+            <div><label>Win</label><span id="win">0</span></div>
+        </div>
+        <div class="bet-btns">
+            <button onclick="changeBet(-1)">-Bet</button>
+            <button onclick="changeBet(1)">+Bet</button>
+            <button onclick="maxBet()">Max Bet</button>
+        </div>
+        <div class="cards" id="cards"></div>
+        <div class="result" id="result"></div>
+        <div class="buttons">
+            <button onclick="deal()" id="dealBtn">Deal</button>
+            <button onclick="draw()" id="drawBtn" disabled>Draw</button>
+        </div>
+    </div>
+    <script>
+        const suits = ['♠', '♥', '♦', '♣'];
+        const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        let deck = [], hand = [], held = [false, false, false, false, false];
+        let credits = 100, bet = 1, gamePhase = 'bet';
+
+        function createDeck() {
+            deck = [];
+            for (let s of suits) for (let r of ranks) deck.push({ rank: r, suit: s });
+            deck.sort(() => Math.random() - 0.5);
+        }
+
+        function getCardValue(rank) {
+            return ranks.indexOf(rank);
+        }
+
+        function isRed(suit) {
+            return suit === '♥' || suit === '♦';
+        }
+
+        function renderCards() {
+            const container = document.getElementById('cards');
+            container.innerHTML = hand.map((card, i) => `
+                <div class="card ${isRed(card.suit) ? 'red' : 'black'} ${held[i] ? 'held' : ''}" onclick="toggleHold(${i})">
+                    <span class="rank">${card.rank}</span>
+                    <span class="suit">${card.suit}</span>
+                </div>
+            `).join('');
+        }
+
+        function toggleHold(i) {
+            if (gamePhase !== 'draw') return;
+            held[i] = !held[i];
+            renderCards();
+        }
+
+        function changeBet(delta) {
+            if (gamePhase !== 'bet') return;
+            bet = Math.max(1, Math.min(5, bet + delta));
+            document.getElementById('bet').textContent = bet;
+        }
+
+        function maxBet() {
+            if (gamePhase !== 'bet') return;
+            bet = 5;
+            document.getElementById('bet').textContent = bet;
+        }
+
+        function deal() {
+            if (credits < bet) { alert('Not enough credits!'); return; }
+            credits -= bet;
+            document.getElementById('credits').textContent = credits;
+            document.getElementById('win').textContent = 0;
+            document.getElementById('result').textContent = '';
+            
+            createDeck();
+            hand = deck.splice(0, 5);
+            held = [false, false, false, false, false];
+            gamePhase = 'draw';
+            
+            document.getElementById('dealBtn').disabled = true;
+            document.getElementById('drawBtn').disabled = false;
+            renderCards();
+        }
+
+        function draw() {
+            for (let i = 0; i < 5; i++) {
+                if (!held[i]) hand[i] = deck.pop();
+            }
+            renderCards();
+            
+            const result = evaluateHand();
+            const winAmount = result.multiplier * bet;
+            
+            if (winAmount > 0) {
+                credits += winAmount;
+                document.getElementById('result').textContent = `${result.name}! +${winAmount}`;
+                document.getElementById('result').style.color = '#2ecc71';
+            } else {
+                document.getElementById('result').textContent = 'No win';
+                document.getElementById('result').style.color = '#e74c3c';
+            }
+            
+            document.getElementById('credits').textContent = credits;
+            document.getElementById('win').textContent = winAmount;
+            
+            gamePhase = 'bet';
+            document.getElementById('dealBtn').disabled = false;
+            document.getElementById('drawBtn').disabled = true;
+        }
+
+        function evaluateHand() {
+            const rankCounts = {};
+            const suitCounts = {};
+            const values = hand.map(c => getCardValue(c.rank)).sort((a, b) => a - b);
+            
+            hand.forEach(c => {
+                rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1;
+                suitCounts[c.suit] = (suitCounts[c.suit] || 0) + 1;
+            });
+            
+            const counts = Object.values(rankCounts).sort((a, b) => b - a);
+            const isFlush = Object.values(suitCounts)[0] === 5;
+            const isStraight = values[4] - values[0] === 4 && new Set(values).size === 5;
+            const isLowStraight = values.join(',') === '0,1,2,3,12'; // A-2-3-4-5
+            const hasRoyal = values.includes(12) && values.includes(11) && values.includes(10) && values.includes(9) && values.includes(8);
+            
+            if (isFlush && hasRoyal) return { name: 'Royal Flush', multiplier: 250 };
+            if (isFlush && (isStraight || isLowStraight)) return { name: 'Straight Flush', multiplier: 50 };
+            if (counts[0] === 4) return { name: 'Four of a Kind', multiplier: 25 };
+            if (counts[0] === 3 && counts[1] === 2) return { name: 'Full House', multiplier: 9 };
+            if (isFlush) return { name: 'Flush', multiplier: 6 };
+            if (isStraight || isLowStraight) return { name: 'Straight', multiplier: 4 };
+            if (counts[0] === 3) return { name: 'Three of a Kind', multiplier: 3 };
+            if (counts[0] === 2 && counts[1] === 2) return { name: 'Two Pair', multiplier: 2 };
+            
+            // Jacks or better
+            const pairs = Object.entries(rankCounts).filter(([r, c]) => c === 2);
+            if (pairs.some(([r]) => getCardValue(r) >= 9)) return { name: 'Jacks or Better', multiplier: 1 };
+            
+            return { name: '', multiplier: 0 };
+        }
+
+        renderCards();
+    </script>
+</body>
+</html>

@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Oil Panic - Game & Watch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a1a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            touch-action: none;
+            padding: 10px;
+        }
+
+        .game-shell {
+            transform-origin: center center;
+            max-width: 100%;
+        }
+
+        canvas {
+            touch-action: none;
+         touch-action: none; }
+
+        .game-shell {
+            background: linear-gradient(145deg, #4a4a4a 0%, #2d2d2d 50%, #1a1a1a 100%);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow:
+                0 10px 40px rgba(0,0,0,0.5),
+                inset 0 2px 3px rgba(255,255,255,0.1),
+                inset 0 -2px 3px rgba(0,0,0,0.3);
+        }
+
+        .game-title {
+            text-align: center;
+            color: #9bbc0f;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 #000;
+            margin-bottom: 10px;
+            letter-spacing: 4px;
+        }
+
+        .screen-bezel {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow:
+                inset 0 3px 10px rgba(0,0,0,0.8),
+                0 2px 0 rgba(255,255,255,0.05);
+        }
+
+        canvas {
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding: 0 10px;
+        }
+
+        .control-btn {
+            width: 70px;
+            height: 70px;
+            min-width: 50px;
+            min-height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(145deg, #3d3d3d, #252525);
+            box-shadow:
+                0 4px 8px rgba(0,0,0,0.4),
+                inset 0 1px 0 rgba(255,255,255,0.1);
+            color: #9bbc0f;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        @media (max-width: 400px) {
+            .game-shell {
+                padding: 10px;
+            }
+            .control-btn {
+                width: 55px;
+                height: 55px;
+            }
+            .game-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 8px;
+            }
+        }
+
+        .control-btn:active {
+            transform: translateY(2px);
+            box-shadow:
+                0 2px 4px rgba(0,0,0,0.4),
+                inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        .control-btn svg {
+            width: 30px;
+            height: 30px;
+            fill: #9bbc0f;
+        }
+
+        .center-controls {
+            display: flex;
+            gap: 20px;
+        }
+
+        .game-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(145deg, #5a5a5a, #3a3a3a);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            color: #9bbc0f;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .brand {
+            text-align: center;
+            color: #666;
+            font-size: 10px;
+            margin-top: 10px;
+            letter-spacing: 2px;
+        }
+
+        .score-display {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 15px;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #9bbc0f;
+        }
+
+        .miss-indicators {
+            display: flex;
+            gap: 5px;
+        }
+
+        .miss-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #3a3a3a;
+            transition: background 0.3s;
+        }
+
+        .miss-dot.active {
+            background: #9bbc0f;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 8px;
+            left: 8px;
+            color: #9bbc0f;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-decoration: none;
+            z-index: 1000;
+            opacity: 0.7;
+            padding: 4px 8px;
+            border: 1px solid #9bbc0f;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.5);
+        }
+        .back-btn:hover { opacity: 1; }
+        .how-btn {
+            position: fixed;
+            top: 8px;
+            right: 8px;
+            color: #9bbc0f;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            z-index: 1000;
+            opacity: 0.7;
+            padding: 4px 8px;
+            border: 1px solid #9bbc0f;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.5);
+            cursor: pointer;
+        }
+        .how-btn:hover { opacity: 1; }
+        .how-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .how-overlay.show { display: flex; }
+        .how-box {
+            background: #1a1a1a;
+            border: 2px solid #9bbc0f;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 320px;
+            color: #9bbc0f;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            position: relative;
+        }
+        .how-box h3 { font-size: 18px; margin-bottom: 12px; text-align: center; }
+        .how-box p { margin: 8px 0; line-height: 1.5; color: #c8c8c8; }
+        .how-box .close-how {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            color: #9bbc0f;
+            font-size: 20px;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+    
+.back-btn{position:fixed;top:8px;left:8px;color:#9bbc0f;font-family:'Courier New',monospace;font-size:12px;text-decoration:none;z-index:1000;opacity:.7;padding:4px 8px;border:1px solid #9bbc0f;border-radius:4px;background:rgba(0,0,0,.5)}.back-btn:hover{opacity:1}
+.how-btn{position:fixed;top:8px;right:8px;color:#9bbc0f;font-family:'Courier New',monospace;font-size:12px;z-index:1000;opacity:.7;padding:4px 8px;border:1px solid #9bbc0f;border-radius:4px;background:rgba(0,0,0,.5);cursor:pointer}.how-btn:hover{opacity:1}
+.how-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:2000;justify-content:center;align-items:center}
+.how-overlay.show{display:flex}
+.how-box{background:#1a1a1a;border:2px solid #9bbc0f;border-radius:12px;padding:24px;max-width:320px;width:90%;color:#9bbc0f;font-family:'Courier New',monospace;font-size:14px;position:relative}
+.how-box h3{font-size:18px;margin-bottom:12px;text-align:center}
+.how-box p{margin:8px 0;line-height:1.5;color:#c8c8c8}
+.how-box .close-how{position:absolute;top:8px;right:12px;color:#9bbc0f;font-size:20px;cursor:pointer;background:none;border:none}
+</style>
+
+    <style>
+        @media (max-width: 500px) {
+            .game-shell { transform: scale(var(--shell-scale, 1)); transform-origin: top center; }
+        }
+    </style>
+    <script>
+    function scaleGame() {
+        const shell = document.querySelector('.game-shell');
+        if (!shell) return;
+        const vw = window.innerWidth;
+        const shellW = shell.offsetWidth;
+        if (shellW > vw - 16) {
+            const s = (vw - 16) / shellW;
+            shell.style.setProperty('--shell-scale', s);
+            shell.style.transform = 'scale(' + s + ')';
+            shell.style.transformOrigin = 'top center';
+            shell.style.marginBottom = '-' + (shell.offsetHeight * (1 - s)) + 'px';
+        } else {
+            shell.style.transform = '';
+            shell.style.marginBottom = '';
+        }
+    }
+    window.addEventListener('resize', scaleGame);
+    window.addEventListener('load', function() { setTimeout(scaleGame, 100); });
+    document.addEventListener('DOMContentLoaded', function() { setTimeout(scaleGame, 200); });
+    
+    document.body.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+    document.body.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+    // Ensure all buttons work with touch
+    document.querySelectorAll('button, .btn, .control-btn').forEach(function(btn) {
+        if (!btn._touchFixed) {
+            btn._touchFixed = true;
+            var handlers = btn.onclick;
+            if (handlers) {
+                btn.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    btn.click();
+                }, { passive: false });
+            }
+        }
+    });
+</script>
+    
+</head>
+<body>
+    <a href="index.html" class="back-btn">← Back to Games</a>
+    <div class="how-btn" id="howBtn">?</div>
+    <div class="how-overlay" id="howOverlay">
+        <div class="how-box">
+            <button class="close-how" id="closeHow">×</button>
+            <h3>How to Play</h3>
+            <p><strong>Objective:</strong> Catch falling oil drops with workers before they hit the ground!</p>
+            <p><strong>Controls:</strong></p>
+            <p>• Arrow Keys ← → or Buttons to move the top worker</p>
+            <p>• Swipe left/right on canvas for mobile</p>
+            <p><strong>Scoring:</strong></p>
+            <p>• +10 points for successfully passing oil to bottom</p>
+            <p>• 3 misses = Game Over</p>
+        </div>
+    </div>
+    <div class="game-shell">
+        <div class="game-title">OIL PANIC</div>
+        <div class="screen-bezel">
+            <div class="score-display">
+                <div>
+                    <span id="score-label">SCORE:</span>
+                    <span id="score">000</span>
+                </div>
+                <div class="miss-indicators">
+                    <span>MISS:</span>
+                    <div class="miss-dot" id="miss1"></div>
+                    <div class="miss-dot" id="miss2"></div>
+                    <div class="miss-dot" id="miss3"></div>
+                </div>
+            </div>
+            <canvas id="game" width="240" height="320"></canvas>
+        </div>
+        <div class="controls">
+            <button class="control-btn" id="leftBtn">
+                <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+            <div class="center-controls">
+                <button class="game-btn" id="startBtn">GAME<br>A</button>
+                <button class="game-btn" id="gameBBtn">GAME<br>B</button>
+            </div>
+            <button class="control-btn" id="rightBtn">
+                <svg viewBox="0 0 24 24"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
+            </button>
+        </div>
+        <div class="brand">&copy; 2024 RETRO LCD GAMES</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width;
+        const H = canvas.height;
+
+        // Game & Watch LCD Colors
+        const LCD_BG = '#2a2a2a';
+        const LCD_ON = '#9bbc0f';
+        const LCD_OFF = '#3a4a2a';
+        const LCD_GHOST = '#2a3a1a';
+
+        // Game state
+        let gameState = 'title'; // title, playing, gameover
+        let score = 0;
+        let misses = 0;
+        let gameMode = 'A'; // A = slower, B = faster
+        let frameCount = 0;
+
+        // Worker positions (3 workers on 3 platforms)
+        const PLATFORM_Y = [100, 180, 260];
+        const POSITIONS = [60, 120, 180]; // left, center, right X positions
+
+        // Workers
+        let workers = [
+            { pos: 1, bucket: 0, pouring: false, pourFrame: 0 },
+            { pos: 1, bucket: 0, pouring: false, pourFrame: 0 },
+            { pos: 1, bucket: 0, pouring: false, pourFrame: 0 }
+        ];
+
+        // Oil drops
+        let drops = [];
+
+        // Pouring drops (from worker to worker)
+        let pourDrops = [];
+
+        // Pipes
+        const PIPES = [60, 120, 180];
+        let pipeTimers = [0, 0, 0];
+        let nextDropTime = [0, 0, 0];
+
+        // Input state
+        let moveLeft = false;
+        let moveRight = false;
+        let moveCooldown = 0;
+
+        // Pixel art data for workers (8x12 pixels, scaled up)
+        function drawWorker(x, y, hasBucket, bucketLevel, pouring) {
+            const p = 4; // pixel size
+            const color = LCD_ON;
+
+            // Worker body
+            ctx.fillStyle = color;
+
+            // Head (4x4)
+            ctx.fillRect(x - 2*p, y - 6*p, 4*p, 4*p);
+
+            // Body (4x6)
+            ctx.fillRect(x - 2*p, y - 2*p, 4*p, 6*p);
+
+            // Arms
+            ctx.fillRect(x - 4*p, y - 1*p, 2*p, 3*p);
+            ctx.fillRect(x + 2*p, y - 1*p, 2*p, 3*p);
+
+            // Legs
+            ctx.fillRect(x - 2*p, y + 4*p, 2*p, 3*p);
+            ctx.fillRect(x, y + 4*p, 2*p, 3*p);
+
+            // Bucket
+            if (hasBucket) {
+                // Draw bucket in hands
+                const bucketY = y;
+                ctx.fillRect(x - 3*p, bucketY, 6*p, 3*p);
+
+                // Oil level in bucket (up to 3)
+                for (let i = 0; i < bucketLevel; i++) {
+                    ctx.fillRect(x - 2*p + i*2*p, bucketY + 1*p, 1.5*p, 1.5*p);
+                }
+            }
+
+            // Pouring animation
+            if (pouring) {
+                ctx.fillRect(x - 1*p, y + 3*p, 2*p, 8*p);
+            }
+        }
+
+        function drawPlatform(y) {
+            ctx.fillStyle = LCD_ON;
+            // Platform is a simple line with supports
+            ctx.fillRect(30, y, 180, 4);
+            // Left support
+            ctx.fillRect(30, y, 8, 20);
+            // Right support
+            ctx.fillRect(202, y, 8, 20);
+        }
+
+        function drawPipe(x) {
+            ctx.fillStyle = LCD_ON;
+            // Pipe body
+            ctx.fillRect(x - 8, 10, 16, 30);
+            // Pipe opening
+            ctx.fillRect(x - 12, 35, 24, 8);
+            // Drip indicator
+            ctx.fillRect(x - 4, 43, 8, 4);
+        }
+
+        function drawDrop(x, y) {
+            ctx.fillStyle = LCD_ON;
+            // Teardrop shape (pixelated)
+            ctx.fillRect(x - 2, y, 4, 4);
+            ctx.fillRect(x - 4, y + 4, 8, 8);
+        }
+
+        function drawPourDrop(x, y) {
+            ctx.fillStyle = LCD_ON;
+            ctx.fillRect(x - 3, y, 6, 6);
+            ctx.fillRect(x - 4, y + 6, 8, 4);
+        }
+
+        function drawGameOver() {
+            ctx.fillStyle = LCD_ON;
+            ctx.font = 'bold 24px "Courier New"';
+            ctx.textAlign = 'center';
+            ctx.fillText('GAME', W/2, H/2 - 20);
+            ctx.fillText('OVER', W/2, H/2 + 10);
+
+            ctx.font = '12px "Courier New"';
+            ctx.fillText('PRESS GAME A OR B', W/2, H/2 + 50);
+        }
+
+        function drawTitle() {
+            ctx.fillStyle = LCD_ON;
+            ctx.font = 'bold 20px "Courier New"';
+            ctx.textAlign = 'center';
+            ctx.fillText('OIL PANIC', W/2, H/2 - 30);
+
+            ctx.font = '14px "Courier New"';
+            ctx.fillText('PRESS GAME A', W/2, H/2 + 10);
+            ctx.fillText('OR GAME B', W/2, H/2 + 30);
+
+            ctx.font = '10px "Courier New"';
+            ctx.fillText('A = EASY  B = HARD', W/2, H/2 + 60);
+        }
+
+        function drawScore() {
+            document.getElementById('score').textContent = score.toString().padStart(3, '0');
+
+            // Update miss indicators
+            for (let i = 1; i <= 3; i++) {
+                const dot = document.getElementById('miss' + i);
+                dot.classList.toggle('active', i <= misses);
+            }
+        }
+
+        function drawGhostElements() {
+            // Draw ghost/LCD-off style static elements for authenticity
+            ctx.globalAlpha = 0.1;
+            ctx.fillStyle = LCD_ON;
+
+            // Ghost workers in all positions
+            for (let row = 0; row < 3; row++) {
+                for (let pos = 0; pos < 3; pos++) {
+                    drawWorker(POSITIONS[pos], PLATFORM_Y[row], true, 0, false);
+                }
+            }
+
+            ctx.globalAlpha = 1;
+        }
+
+        function spawnDrop(pipeIndex) {
+            drops.push({
+                x: PIPES[pipeIndex],
+                y: 50,
+                speed: gameMode === 'A' ? 1 : 1.5,
+                column: pipeIndex
+            });
+        }
+
+        function updateDrops() {
+            for (let i = drops.length - 1; i >= 0; i--) {
+                const drop = drops[i];
+                drop.y += drop.speed;
+
+                // Check collision with workers
+                let caught = false;
+                for (let w = 0; w < 3; w++) {
+                    const worker = workers[w];
+                    const workerX = POSITIONS[worker.pos];
+
+                    if (Math.abs(drop.x - workerX) < 20 &&
+                        drop.y >= PLATFORM_Y[w] - 20 &&
+                        drop.y <= PLATFORM_Y[w] + 10 &&
+                        !worker.pouring) {
+
+                        // Caught!
+                        if (worker.bucket < 3) {
+                            worker.bucket++;
+                            caught = true;
+
+                            // Check if bucket is full
+                            if (worker.bucket >= 3) {
+                                if (w < 2) {
+                                    // Transfer to next worker
+                                    worker.pouring = true;
+                                    worker.pourFrame = frameCount;
+                                    pourDrops.push({
+                                        x: workerX,
+                                        y: PLATFORM_Y[w] + 30,
+                                        targetWorker: w + 1,
+                                        amount: 3
+                                    });
+                                } else {
+                                    // Bottom worker - score!
+                                    score += 10;
+                                    worker.bucket = 0;
+                                    if (score % 50 === 0 && frameCount > 120) {
+                                        // Speed up slightly at milestones
+                                    }
+                                }
+                            }
+                        } else {
+                            // Bucket full but not pouring yet - drop passes
+                            continue;
+                        }
+                        drops.splice(i, 1);
+                        break;
+                    }
+                }
+
+                // Check if drop passed bottom
+                if (!caught && drop.y > H - 30) {
+                    drops.splice(i, 1);
+                    misses++;
+                    if (misses >= 3) {
+                        gameState = 'gameover';
+                    }
+                }
+            }
+        }
+
+        function updatePourDrops() {
+            for (let i = pourDrops.length - 1; i >= 0; i--) {
+                const pd = pourDrops[i];
+                pd.y += 2;
+
+                const targetY = PLATFORM_Y[pd.targetWorker];
+                if (pd.y >= targetY - 10) {
+                    // Reached target worker
+                    const targetWorker = workers[pd.targetWorker];
+                    if (targetWorker.bucket < 3) {
+                        targetWorker.bucket = Math.min(3, targetWorker.bucket + pd.amount);
+
+                        if (targetWorker.bucket >= 3 && pd.targetWorker < 2) {
+                            // Chain pour
+                            targetWorker.pouring = true;
+                            targetWorker.pourFrame = frameCount;
+                            pourDrops.push({
+                                x: POSITIONS[targetWorker.pos],
+                                y: PLATFORM_Y[pd.targetWorker] + 30,
+                                targetWorker: pd.targetWorker + 1,
+                                amount: 3
+                            });
+                        } else if (targetWorker.bucket >= 3 && pd.targetWorker === 2) {
+                            // Score at bottom
+                            score += 10;
+                            targetWorker.bucket = 0;
+                        }
+                    }
+
+                    // Reset source worker
+                    workers[pd.targetWorker - 1].bucket = 0;
+                    pourDrops.splice(i, 1);
+                }
+            }
+
+            // End pouring animation after delay
+            for (let w = 0; w < 3; w++) {
+                if (workers[w].pouring && frameCount - workers[w].pourFrame > 20) {
+                    workers[w].pouring = false;
+                }
+            }
+        }
+
+        function updatePipes() {
+            const baseInterval = gameMode === 'A' ? 120 : 80;
+
+            for (let i = 0; i < 3; i++) {
+                pipeTimers[i]++;
+
+                // Random drop timing with some variance
+                if (pipeTimers[i] >= nextDropTime[i]) {
+                    spawnDrop(i);
+                    pipeTimers[i] = 0;
+                    nextDropTime[i] = baseInterval + Math.random() * 60;
+
+                    // Occasionally spawn multiple drops
+                    if (score > 30 && Math.random() < 0.2) {
+                        const otherPipe = (i + 1 + Math.floor(Math.random() * 2)) % 3;
+                        setTimeout(() => spawnDrop(otherPipe), 200);
+                    }
+                }
+            }
+        }
+
+        function handleInput() {
+            if (moveCooldown > 0) {
+                moveCooldown--;
+                return;
+            }
+
+            // Only control top worker
+            if (moveLeft && workers[0].pos > 0) {
+                workers[0].pos--;
+                moveCooldown = 8;
+            }
+            if (moveRight && workers[0].pos < 2) {
+                workers[0].pos++;
+                moveCooldown = 8;
+            }
+
+            // AI for lower workers - they try to catch drops
+            for (let w = 1; w < 3; w++) {
+                const worker = workers[w];
+
+                // Find nearest drop heading for this worker
+                let nearestDrop = null;
+                let nearestDist = Infinity;
+
+                for (const drop of drops) {
+                    if (drop.y > PLATFORM_Y[w-1] && drop.y < PLATFORM_Y[w]) {
+                        const dist = Math.abs(drop.x - POSITIONS[worker.pos]);
+                        if (dist < nearestDist) {
+                            nearestDist = dist;
+                            nearestDrop = drop;
+                        }
+                    }
+                }
+
+                // Also track incoming pour drops
+                for (const pd of pourDrops) {
+                    if (pd.targetWorker === w) {
+                        nearestDrop = { x: pd.x, y: pd.y };
+                        nearestDist = Math.abs(pd.x - POSITIONS[worker.pos]);
+                    }
+                }
+
+                // Move towards drop
+                if (nearestDrop && frameCount % 12 === 0) {
+                    const targetPos = nearestDrop.x;
+                    const currentX = POSITIONS[worker.pos];
+
+                    if (targetPos < currentX - 20 && worker.pos > 0) {
+                        worker.pos--;
+                    } else if (targetPos > currentX + 20 && worker.pos < 2) {
+                        worker.pos++;
+                    }
+                }
+            }
+        }
+
+        function render() {
+            // Clear canvas
+            ctx.fillStyle = LCD_BG;
+            ctx.fillRect(0, 0, W, H);
+
+            // Draw ghost elements for LCD authenticity
+            drawGhostElements();
+
+            if (gameState === 'title') {
+                drawTitle();
+                return;
+            }
+
+            if (gameState === 'gameover') {
+                // Draw final state
+                drawPipes();
+                drawPlatforms();
+                drawWorkers();
+                drawGameOver();
+                return;
+            }
+
+            // Draw pipes
+            drawPipes();
+
+            // Draw platforms
+            drawPlatforms();
+
+            // Draw workers
+            drawWorkers();
+
+            // Draw drops
+            for (const drop of drops) {
+                drawDrop(drop.x, drop.y);
+            }
+
+            // Draw pour drops
+            for (const pd of pourDrops) {
+                drawPourDrop(pd.x, pd.y);
+            }
+        }
+
+        function drawPipes() {
+            for (const pipeX of PIPES) {
+                drawPipe(pipeX);
+            }
+        }
+
+        function drawPlatforms() {
+            for (const py of PLATFORM_Y) {
+                drawPlatform(py);
+            }
+        }
+
+        function drawWorkers() {
+            for (let w = 0; w < 3; w++) {
+                const worker = workers[w];
+                const x = POSITIONS[worker.pos];
+                const y = PLATFORM_Y[w];
+                drawWorker(x, y, true, worker.bucket, worker.pouring);
+            }
+        }
+
+        function gameLoop() {
+            frameCount++;
+
+            if (gameState === 'playing') {
+                handleInput();
+                updatePipes();
+                updateDrops();
+                updatePourDrops();
+                drawScore();
+            }
+
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function startGame(mode) {
+            gameMode = mode;
+            gameState = 'playing';
+            score = 0;
+            misses = 0;
+            frameCount = 0;
+            drops = [];
+            pourDrops = [];
+            pipeTimers = [0, 0, 0];
+            nextDropTime = [60, 90, 120];
+
+            workers = [
+                { pos: 1, bucket: 0, pouring: false, pourFrame: 0 },
+                { pos: 1, bucket: 0, pouring: false, pourFrame: 0 },
+                { pos: 1, bucket: 0, pouring: false, pourFrame: 0 }
+            ];
+
+            drawScore();
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') moveLeft = true;
+            if (e.key === 'ArrowRight') moveRight = true;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft') moveLeft = false;
+            if (e.key === 'ArrowRight') moveRight = false;
+        });
+
+        // Touch/mouse controls for buttons
+        function setupButton(btn, action) {
+            btn.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                action(true);
+            });
+            btn.addEventListener('mouseup', () => action(false));
+            btn.addEventListener('mouseleave', () => action(false));
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                action(true);
+            }, { passive: false });
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                action(false);
+            }, { passive: false });
+            btn.addEventListener('touchcancel', (e) => {
+                action(false);
+            });
+        }
+
+        // Prevent page scrolling
+        document.body.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+
+        // Responsive canvas scaling
+        function resizeCanvas() {
+            const gameShell = document.querySelector('.game-shell');
+            const availableWidth = window.innerWidth - 20;
+            const shellWidth = gameShell.scrollWidth;
+
+            if (shellWidth > availableWidth) {
+                const scale = availableWidth / shellWidth;
+                gameShell.style.transform = `scale(${scale})`;
+            } else {
+                gameShell.style.transform = 'scale(1)';
+            }
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(resizeCanvas, 100);
+        });
+
+        setupButton(document.getElementById('leftBtn'), (v) => moveLeft = v);
+        setupButton(document.getElementById('rightBtn'), (v) => moveRight = v);
+
+        document.getElementById('startBtn').addEventListener('click', () => startGame('A'));
+        document.getElementById('gameBBtn').addEventListener('click', () => startGame('B'));
+
+        // Swipe controls for mobile
+        let touchStartX = 0;
+        canvas.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touchX = e.touches[0].clientX;
+            const diff = touchX - touchStartX;
+
+            if (diff > 30) {
+                moveRight = true;
+                moveLeft = false;
+                touchStartX = touchX;
+            } else if (diff < -30) {
+                moveLeft = true;
+                moveRight = false;
+                touchStartX = touchX;
+            }
+        });
+
+        canvas.addEventListener('touchend', () => {
+            moveLeft = false;
+            moveRight = false;
+        });
+
+        // Start game loop
+        gameLoop();
+
+        // Initial resize
+        resizeCanvas();
+
+        // How to Play toggle
+        document.getElementById('howBtn').addEventListener('click', function() {
+            document.getElementById('howOverlay').classList.add('show');
+        });
+        document.getElementById('closeHow').addEventListener('click', function() {
+            document.getElementById('howOverlay').classList.remove('show');
+        });
+        document.getElementById('howOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

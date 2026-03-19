@@ -30,17 +30,23 @@
         <span id="turn">Your turn</span>
     </div>
     <div class="board" id="board"></div>
-    <button onclick="init()">New Game</button>
+    <button onclick="newGame()">New Game</button>
     <script>
-        let board, turn;
+        let board, turn, gameStarted = false;
         const BLACK = 1, WHITE = 2;
         const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+
+        function newGame() {
+            if (gameStarted && !confirm('Game is in progress. Start a new game? Current progress will be lost.')) return;
+            init();
+        }
 
         function init() {
             board = Array(8).fill().map(() => Array(8).fill(0));
             board[3][3] = WHITE; board[3][4] = BLACK;
             board[4][3] = BLACK; board[4][4] = WHITE;
             turn = BLACK;
+            gameStarted = false;
             render();
         }
 
@@ -80,7 +86,8 @@
         function handleClick(r, c) {
             if (turn !== BLACK) return; // Only human plays BLACK
             if (!makeMove(r, c, BLACK)) return;
-            
+
+            gameStarted = true;
             turn = WHITE;
             if (!getValidMoves(WHITE).length) turn = BLACK;
             render();

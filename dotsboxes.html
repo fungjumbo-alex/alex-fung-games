@@ -34,11 +34,16 @@
         <span style="color:#3498db">AI: <b id="p2">0</b></span>
     </div>
     <div class="game" id="game"></div>
-    <button onclick="init()">🔄 New Game</button>
+    <button onclick="newGame()">🔄 New Game</button>
 
     <script>
         const SIZE = 5;
-        let hLines, vLines, boxes, turn, scores, over;
+        let hLines, vLines, boxes, turn, scores, over, gameStarted = false;
+
+        function newGame() {
+            if (gameStarted && !confirm('Game is in progress. Start a new game? Current progress will be lost.')) return;
+            init();
+        }
 
         function init() {
             hLines = Array(SIZE).fill().map(() => Array(SIZE - 1).fill(false));
@@ -47,6 +52,7 @@
             turn = 1;
             scores = { 1: 0, 2: 0 };
             over = false;
+            gameStarted = false;
             document.getElementById('p1').textContent = 0;
             document.getElementById('p2').textContent = 0;
             render();
@@ -97,6 +103,7 @@
 
         function playH(r, c) {
             if (over || turn !== 1 || hLines[r][c]) return;
+            gameStarted = true;
             hLines[r][c] = true;
             if (!checkBoxes()) turn = 2;
             render();
@@ -105,6 +112,7 @@
 
         function playV(r, c) {
             if (over || turn !== 1 || vLines[r][c]) return;
+            gameStarted = true;
             vLines[r][c] = true;
             if (!checkBoxes()) turn = 2;
             render();

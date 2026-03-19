@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Game & Watch: Parachute</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            touch-action: none;
+            padding: 10px;
+        }
+
+        .game-container {
+            background: #2a2a2a;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow:
+                inset 0 2px 10px rgba(0,0,0,0.5),
+                0 10px 30px rgba(0,0,0,0.7);
+            transform-origin: center center;
+            max-width: 100%;
+        }
+
+        canvas {
+            touch-action: none;
+         touch-action: none; }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            color: #9bbc0f;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .title {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .score-display {
+            background: #1a1a1a;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-size: 18px;
+        }
+
+        #gameCanvas {
+            display: block;
+            border-radius: 10px;
+            background: #1a1a1a;
+        }
+
+        .lives-display {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .life {
+            width: 20px;
+            height: 20px;
+            background: #9bbc0f;
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            opacity: 1;
+            transition: opacity 0.3s;
+        }
+
+        .life.lost {
+            opacity: 0.2;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .control-btn {
+            width: 70px;
+            height: 70px;
+            min-width: 50px;
+            min-height: 50px;
+            background: #3a3a3a;
+            border: none;
+            border-radius: 50%;
+            color: #9bbc0f;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow:
+                0 4px 0 #1a1a1a,
+                inset 0 2px 10px rgba(155, 188, 15, 0.2);
+            transition: all 0.1s;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        @media (max-width: 400px) {
+            .game-container {
+                padding: 10px;
+            }
+            .control-btn {
+                width: 55px;
+                height: 55px;
+            }
+        }
+
+        .control-btn:active {
+            transform: translateY(2px);
+            box-shadow:
+                0 2px 0 #1a1a1a,
+                inset 0 2px 10px rgba(155, 188, 15, 0.3);
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #9bbc0f;
+            text-align: center;
+        }
+
+        .overlay h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .overlay p {
+            font-size: 12px;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .start-btn {
+            background: #9bbc0f;
+            color: #2a2a2a;
+            border: none;
+            padding: 15px 40px;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+
+        .start-btn:hover {
+            background: #b8d41a;
+            transform: scale(1.05);
+        }
+
+        .wind-indicator {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #9bbc0f;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        @media (pointer: coarse) {
+        }
+
+        @media (max-width: 500px) {
+            .game-container {
+                padding: 10px;
+                border-radius: 10px;
+            }
+
+            .header {
+                font-size: 12px;
+            }
+
+            .title {
+                font-size: 14px;
+            }
+
+            .control-btn {
+                width: 60px;
+                height: 60px;
+            }
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 8px;
+            left: 8px;
+            color: #9bbc0f;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-decoration: none;
+            z-index: 1000;
+            opacity: 0.7;
+            padding: 4px 8px;
+            border: 1px solid #9bbc0f;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.5);
+        }
+        .back-btn:hover { opacity: 1; }
+        .how-btn {
+            position: fixed;
+            top: 8px;
+            right: 8px;
+            color: #9bbc0f;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            z-index: 1000;
+            opacity: 0.7;
+            padding: 4px 8px;
+            border: 1px solid #9bbc0f;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.5);
+            cursor: pointer;
+        }
+        .how-btn:hover { opacity: 1; }
+        .how-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .how-overlay.show { display: flex; }
+        .how-box {
+            background: #1a1a1a;
+            border: 2px solid #9bbc0f;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 320px;
+            color: #9bbc0f;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            position: relative;
+        }
+        .how-box h3 { font-size: 18px; margin-bottom: 12px; text-align: center; }
+        .how-box p { margin: 8px 0; line-height: 1.5; color: #c8c8c8; }
+        .how-box .close-how {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            color: #9bbc0f;
+            font-size: 20px;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+    
+.back-btn{position:fixed;top:8px;left:8px;color:#9bbc0f;font-family:'Courier New',monospace;font-size:12px;text-decoration:none;z-index:1000;opacity:.7;padding:4px 8px;border:1px solid #9bbc0f;border-radius:4px;background:rgba(0,0,0,.5)}.back-btn:hover{opacity:1}
+.how-btn{position:fixed;top:8px;right:8px;color:#9bbc0f;font-family:'Courier New',monospace;font-size:12px;z-index:1000;opacity:.7;padding:4px 8px;border:1px solid #9bbc0f;border-radius:4px;background:rgba(0,0,0,.5);cursor:pointer}.how-btn:hover{opacity:1}
+.how-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:2000;justify-content:center;align-items:center}
+.how-overlay.show{display:flex}
+.how-box{background:#1a1a1a;border:2px solid #9bbc0f;border-radius:12px;padding:24px;max-width:320px;width:90%;color:#9bbc0f;font-family:'Courier New',monospace;font-size:14px;position:relative}
+.how-box h3{font-size:18px;margin-bottom:12px;text-align:center}
+.how-box p{margin:8px 0;line-height:1.5;color:#c8c8c8}
+.how-box .close-how{position:absolute;top:8px;right:12px;color:#9bbc0f;font-size:20px;cursor:pointer;background:none;border:none}
+</style>
+
+    <style>
+        @media (max-width: 500px) {
+            .game-shell { transform: scale(var(--shell-scale, 1)); transform-origin: top center; }
+        }
+    </style>
+    <script>
+    function scaleGame() {
+        const shell = document.querySelector('.game-shell');
+        if (!shell) return;
+        const vw = window.innerWidth;
+        const shellW = shell.offsetWidth;
+        if (shellW > vw - 16) {
+            const s = (vw - 16) / shellW;
+            shell.style.setProperty('--shell-scale', s);
+            shell.style.transform = 'scale(' + s + ')';
+            shell.style.transformOrigin = 'top center';
+            shell.style.marginBottom = '-' + (shell.offsetHeight * (1 - s)) + 'px';
+        } else {
+            shell.style.transform = '';
+            shell.style.marginBottom = '';
+        }
+    }
+    window.addEventListener('resize', scaleGame);
+    window.addEventListener('load', function() { setTimeout(scaleGame, 100); });
+    document.addEventListener('DOMContentLoaded', function() { setTimeout(scaleGame, 200); });
+    
+    document.body.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+    document.body.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+    // Ensure all buttons work with touch
+    document.querySelectorAll('button, .btn, .control-btn').forEach(function(btn) {
+        if (!btn._touchFixed) {
+            btn._touchFixed = true;
+            var handlers = btn.onclick;
+            if (handlers) {
+                btn.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    btn.click();
+                }, { passive: false });
+            }
+        }
+    });
+</script>
+    
+</head>
+<body>
+    <a href="index.html" class="back-btn">← Back to Games</a>
+    <div class="how-btn" id="howBtn">?</div>
+    <div class="how-overlay" id="howOverlay">
+        <div class="how-box">
+            <button class="close-how" id="closeHow">×</button>
+            <h3>How to Play</h3>
+            <p><strong>Objective:</strong> Catch falling paratroopers with your boat!</p>
+            <p><strong>Controls:</strong></p>
+            <p>• Arrow Keys ← → or A/D to move boat</p>
+            <p>• Touch buttons for mobile</p>
+            <p><strong>Scoring:</strong></p>
+            <p>• +10 points per paratrooper caught</p>
+            <p>• Watch the wind indicator!</p>
+            <p>• 3 misses = Game Over</p>
+        </div>
+    </div>
+    <div class="game-container">
+        <div class="header">
+            <span class="title">PARACHUTE</span>
+            <span class="score-display">SCORE: <span id="score">0</span></span>
+        </div>
+
+        <div style="position: relative;">
+            <canvas id="gameCanvas" width="360" height="480"></canvas>
+
+            <div class="wind-indicator" id="windIndicator">
+                WIND: <span id="windArrow">→</span>
+            </div>
+
+            <div class="overlay" id="startOverlay">
+                <h1>Parachute</h1>
+                <p>Game & Watch</p>
+                <button class="start-btn" id="startBtn">START</button>
+                <p style="margin-top: 15px; font-size: 10px;">
+                    Arrow Keys or Touch Controls
+                </p>
+            </div>
+
+            <div class="overlay" id="gameOverOverlay" style="display: none;">
+                <h1>Game Over</h1>
+                <p>Final Score: <span id="finalScore">0</span></p>
+                <button class="start-btn" id="restartBtn">RETRY</button>
+            </div>
+        </div>
+
+        <div class="lives-display" id="livesDisplay">
+            <div class="life" id="life1"></div>
+            <div class="life" id="life2"></div>
+            <div class="life" id="life3"></div>
+        </div>
+
+        <div class="controls" id="controls">
+            <button class="control-btn" id="leftBtn">◀</button>
+            <button class="control-btn" id="rightBtn">▶</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Colors
+        const LCD_BG = '#1a1a1a';
+        const LCD_ON = '#9bbc0f';
+        const LCD_OFF = '#2a3a1a';
+
+        // Game state
+        let gameRunning = false;
+        let score = 0;
+        let lives = 3;
+        let highScore = 0;
+
+        // Game objects
+        let helicopter = { x: 180, y: 30, direction: 1 };
+        let boat = { x: 180, width: 60, speed: 5 };
+        let paratroopers = [];
+        let splashes = [];
+        let wind = 0;
+        let windTimer = 0;
+
+        // Controls
+        let keys = { left: false, right: false };
+
+        // Pixel art definitions (scaled)
+        const PIXEL_SIZE = 3;
+
+        // Draw pixel art from pattern
+        function drawPixelArt(pattern, x, y, scale = PIXEL_SIZE) {
+            ctx.fillStyle = LCD_ON;
+            for (let row = 0; row < pattern.length; row++) {
+                for (let col = 0; col < pattern[row].length; col++) {
+                    if (pattern[row][col]) {
+                        ctx.fillRect(
+                            x + col * scale,
+                            y + row * scale,
+                            scale,
+                            scale
+                        );
+                    }
+                }
+            }
+        }
+
+        // Helicopter pattern
+        const helicopterPattern = [
+            [0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+            [0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0],
+        ];
+
+        // Paratrooper pattern
+        const paratrooperPattern = [
+            [0,0,1,1,1,1,0,0],
+            [0,1,1,1,1,1,1,0],
+            [0,0,1,1,1,1,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,1,1,1,1,0,0],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [0,1,1,0,0,1,1,0],
+        ];
+
+        // Boat pattern
+        const boatPattern = [
+            [0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0],
+            [0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        ];
+
+        // Splash pattern
+        const splashPattern = [
+            [1,0,0,0,0,1],
+            [0,1,0,0,1,0],
+            [0,0,0,0,0,0],
+            [0,1,0,0,1,0],
+            [1,0,0,0,0,1],
+        ];
+
+        // Water line
+        function drawWater() {
+            ctx.fillStyle = LCD_OFF;
+            for (let x = 0; x < canvas.width; x += 6) {
+                ctx.fillRect(x, canvas.height - 40, 4, 2);
+            }
+        }
+
+        // Draw helicopter
+        function drawHelicopter() {
+            drawPixelArt(helicopterPattern, helicopter.x - 31, helicopter.y, 3);
+        }
+
+        // Draw paratrooper
+        function drawParatrooper(p) {
+            drawPixelArt(paratrooperPattern, p.x - 12, p.y, 3);
+        }
+
+        // Draw boat
+        function drawBoat() {
+            drawPixelArt(boatPattern, boat.x - boat.width/2, canvas.height - 55, 3);
+        }
+
+        // Draw splash
+        function drawSplash(s) {
+            const alpha = Math.max(0, 1 - s.timer / 30);
+            ctx.globalAlpha = alpha;
+            drawPixelArt(splashPattern, s.x - 9, s.y, 3);
+            ctx.globalAlpha = 1;
+        }
+
+        // Update wind
+        function updateWind() {
+            windTimer++;
+            if (windTimer > 180) { // Change wind every ~3 seconds
+                wind = (Math.random() - 0.5) * 3;
+                windTimer = 0;
+                updateWindDisplay();
+            }
+        }
+
+        function updateWindDisplay() {
+            const windArrow = document.getElementById('windArrow');
+            if (wind < -0.5) {
+                windArrow.textContent = '←';
+            } else if (wind > 0.5) {
+                windArrow.textContent = '→';
+            } else {
+                windArrow.textContent = '·';
+            }
+        }
+
+        // Update helicopter
+        function updateHelicopter() {
+            helicopter.x += helicopter.direction * 1.5;
+
+            if (helicopter.x > canvas.width - 40) {
+                helicopter.direction = -1;
+            } else if (helicopter.x < 40) {
+                helicopter.direction = 1;
+            }
+
+            // Spawn paratroopers
+            if (Math.random() < 0.015 + score * 0.0001) {
+                spawnParatrooper();
+            }
+        }
+
+        // Spawn paratrooper
+        function spawnParatrooper() {
+            paratroopers.push({
+                x: helicopter.x,
+                y: helicopter.y + 30,
+                speedY: 1 + Math.random() * 0.5
+            });
+        }
+
+        // Update paratroopers
+        function updateParatroopers() {
+            for (let i = paratroopers.length - 1; i >= 0; i--) {
+                let p = paratroopers[i];
+                p.y += p.speedY;
+                p.x += wind;
+
+                // Keep in bounds horizontally
+                p.x = Math.max(15, Math.min(canvas.width - 15, p.x));
+
+                // Check if caught by boat
+                if (p.y > canvas.height - 60 && p.y < canvas.height - 40) {
+                    if (Math.abs(p.x - boat.x) < boat.width / 2 + 10) {
+                        // Caught!
+                        paratroopers.splice(i, 1);
+                        score += 10;
+                        updateScore();
+                        continue;
+                    }
+                }
+
+                // Check if hit water
+                if (p.y > canvas.height - 35) {
+                    // Missed!
+                    splashes.push({ x: p.x, y: canvas.height - 45, timer: 0 });
+                    paratroopers.splice(i, 1);
+                    loseLife();
+                }
+            }
+        }
+
+        // Update splashes
+        function updateSplashes() {
+            for (let i = splashes.length - 1; i >= 0; i--) {
+                splashes[i].timer++;
+                if (splashes[i].timer > 30) {
+                    splashes.splice(i, 1);
+                }
+            }
+        }
+
+        // Update boat
+        function updateBoat() {
+            if (keys.left) {
+                boat.x -= boat.speed;
+            }
+            if (keys.right) {
+                boat.x += boat.speed;
+            }
+
+            // Keep boat in bounds
+            boat.x = Math.max(boat.width/2, Math.min(canvas.width - boat.width/2, boat.x));
+        }
+
+        // Lose life
+        function loseLife() {
+            lives--;
+            updateLivesDisplay();
+
+            if (lives <= 0) {
+                gameOver();
+            }
+        }
+
+        // Update score display
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+        }
+
+        // Update lives display
+        function updateLivesDisplay() {
+            for (let i = 1; i <= 3; i++) {
+                const lifeEl = document.getElementById('life' + i);
+                if (i > lives) {
+                    lifeEl.classList.add('lost');
+                } else {
+                    lifeEl.classList.remove('lost');
+                }
+            }
+        }
+
+        // Game over
+        function gameOver() {
+            gameRunning = false;
+            if (score > highScore) {
+                highScore = score;
+            }
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('gameOverOverlay').style.display = 'flex';
+        }
+
+        // Reset game
+        function resetGame() {
+            score = 0;
+            lives = 3;
+            paratroopers = [];
+            splashes = [];
+            helicopter.x = 180;
+            helicopter.direction = 1;
+            boat.x = 180;
+            wind = 0;
+            windTimer = 0;
+            updateScore();
+            updateLivesDisplay();
+            updateWindDisplay();
+        }
+
+        // Clear canvas
+        function clearCanvas() {
+            ctx.fillStyle = LCD_BG;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Game loop
+        function gameLoop() {
+            if (!gameRunning) return;
+
+            clearCanvas();
+
+            updateWind();
+            updateHelicopter();
+            updateParatroopers();
+            updateSplashes();
+            updateBoat();
+
+            drawWater();
+            drawHelicopter();
+
+            paratroopers.forEach(drawParatrooper);
+            splashes.forEach(drawSplash);
+
+            drawBoat();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Start game
+        function startGame() {
+            resetGame();
+            gameRunning = true;
+            document.getElementById('startOverlay').style.display = 'none';
+            document.getElementById('gameOverOverlay').style.display = 'none';
+            gameLoop();
+        }
+
+        // Event listeners
+        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('startBtn').addEventListener('touchstart', (e) => { e.preventDefault(); startGame(); }, { passive: false });
+        document.getElementById('restartBtn').addEventListener('click', startGame);
+        document.getElementById('restartBtn').addEventListener('touchstart', (e) => { e.preventDefault(); startGame(); }, { passive: false });
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') {
+                keys.left = true;
+            }
+            if (e.key === 'ArrowRight' || e.key === 'd') {
+                keys.right = true;
+            }
+            if (e.key === ' ' && !gameRunning) {
+                startGame();
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') {
+                keys.left = false;
+            }
+            if (e.key === 'ArrowRight' || e.key === 'd') {
+                keys.right = false;
+            }
+        });
+
+        // Touch controls
+        const leftBtn = document.getElementById('leftBtn');
+        const rightBtn = document.getElementById('rightBtn');
+
+        leftBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            keys.left = true;
+        }, { passive: false });
+        leftBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            keys.left = false;
+        }, { passive: false });
+        leftBtn.addEventListener('touchcancel', (e) => { keys.left = false; });
+        leftBtn.addEventListener('mousedown', () => keys.left = true);
+        leftBtn.addEventListener('mouseup', () => keys.left = false);
+        leftBtn.addEventListener('mouseleave', () => keys.left = false);
+
+        rightBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            keys.right = true;
+        }, { passive: false });
+        rightBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            keys.right = false;
+        }, { passive: false });
+        rightBtn.addEventListener('touchcancel', (e) => { keys.right = false; });
+        rightBtn.addEventListener('mousedown', () => keys.right = true);
+        rightBtn.addEventListener('mouseup', () => keys.right = false);
+        rightBtn.addEventListener('mouseleave', () => keys.right = false);
+
+        // Prevent page scrolling
+        document.body.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+
+        // Responsive canvas scaling
+        function resizeCanvas() {
+            const container = document.querySelector('.game-container');
+            const availableWidth = window.innerWidth - 20;
+            const containerWidth = container.scrollWidth;
+
+            if (containerWidth > availableWidth) {
+                const scale = availableWidth / containerWidth;
+                container.style.transform = `scale(${scale})`;
+            } else {
+                container.style.transform = 'scale(1)';
+            }
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(resizeCanvas, 100);
+        });
+
+        // Initial draw
+        clearCanvas();
+        drawWater();
+        drawBoat();
+
+        // Initial resize
+        resizeCanvas();
+
+        // How to Play toggle
+        document.getElementById('howBtn').addEventListener('click', function() {
+            document.getElementById('howOverlay').classList.add('show');
+        });
+        document.getElementById('closeHow').addEventListener('click', function() {
+            document.getElementById('howOverlay').classList.remove('show');
+        });
+        document.getElementById('howOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

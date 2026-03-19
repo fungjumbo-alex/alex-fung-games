@@ -329,7 +329,8 @@
                 this.won = false;
                 this.keepPlaying = false;
                 this.tileId = 0;
-                
+                this.gameStarted = false;
+
                 this.init();
             }
 
@@ -340,7 +341,8 @@
                 this.won = false;
                 this.keepPlaying = false;
                 this.tileId = 0;
-                
+                this.gameStarted = false;
+
                 this.updateScore();
                 this.addRandomTile();
                 this.addRandomTile();
@@ -351,6 +353,7 @@
             }
 
             restart() {
+                if (this.gameStarted && !confirm('Game is in progress. Start a new game? Current progress will be lost.')) return;
                 this.init();
             }
 
@@ -406,6 +409,7 @@
                 const moved = this.move(direction);
                 
                 if (moved) {
+                    this.gameStarted = true;
                     this.addRandomTile();
                     this.render();
                     

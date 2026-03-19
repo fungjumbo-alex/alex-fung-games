@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gomoku</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #0f0f23 100%); min-height: 100vh; color: #fff; padding: 50px 10px 10px; display: flex; flex-direction: column; align-items: center; }
+        h1 { font-size: 1.3em; margin-bottom: 10px; }
+        .status { margin-bottom: 10px; font-size: 1em; color: #4a90d9; }
+        .board { display: grid; grid-template-columns: repeat(15, 1fr); gap: 0; background: #d4a86a; padding: 5px; border-radius: 5px; max-width: 95vw; }
+        .cell { width: 20px; height: 20px; border: 1px solid #b8956a; cursor: pointer; position: relative; }
+        .cell:hover { background: rgba(0,0,0,0.1); }
+        .cell::after { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #b8956a; }
+        .cell::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: #b8956a; }
+        .stone { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; z-index: 1; }
+        .stone.black { background: radial-gradient(circle at 30% 30%, #555, #000); }
+        .stone.white { background: radial-gradient(circle at 30% 30%, #fff, #ccc); }
+        .stone.last { box-shadow: 0 0 0 2px #e74c3c; }
+        button { margin-top: 15px; padding: 10px 25px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #4a90d9; color: white; }
+        @media (min-width: 400px) {
+            .cell { width: 24px; height: 24px; }
+            .stone { width: 20px; height: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <h1>⚫ Gomoku (Five in a Row)</h1>
+    <div class="status" id="status">Your turn (Black)</div>
+    <div class="board" id="board"></div>
+    <button onclick="reset()">New Game</button>
+    <script>
+        const SIZE = 15;
+        let board = [], currentPlayer = 1, gameOver = false, lastMove = null, gameStarted = false;
+
+        function reset() {
+            if (gameStarted && !confirm('Game is in progress. Start a new game? Current progress will be lost.')) return;
+            init();
+        }
+
+        function init() {
+            board = Array(SIZE).fill().map(() => Array(SIZE).fill(0));
+            currentPlayer = 1;
+            gameOver = false;
+            lastMove = null;
+            gameStarted = false;
+            render();
+            document.getElementById('status').textContent = 'Your turn (Black)';
+        }
+
+        function render() {
+            const container = document.getElementById('board');
+            container.innerHTML = '';
+            for (let y = 0; y < SIZE; y++) {
+                for (let x = 0; x < SIZE; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.onclick = () => play(x, y);
+                    if (board[y][x]) {
+                        const stone = document.createElement('div');
+                        stone.className = `stone ${board[y][x] === 1 ? 'black' : 'white'}${lastMove && lastMove.x === x && lastMove.y === y ? ' last' : ''}`;
+                        cell.appendChild(stone);
+                    }
+                    container.appendChild(cell);
+                }
+            }
+        }
+
+        function play(x, y) {
+            if (gameOver || board[y][x]) return;
+            gameStarted = true;
+            board[y][x] = currentPlayer;
+            lastMove = { x, y };
+            
+            if (checkWin(x, y)) {
+                gameOver = true;
+                render();
+                document.getElementById('status').textContent = currentPlayer === 1 ? '🎉 You win!' : 'AI wins!';
+                return;
+            }
+            
+            currentPlayer = 3 - currentPlayer;
+            render();
+            
+            if (currentPlayer === 2) {
+                document.getElementById('status').textContent = 'AI thinking...';
+                setTimeout(aiMove, 300);
+            } else {
+                document.getElementById('status').textContent = 'Your turn (Black)';
+            }
+        }
+
+        function aiMove() {
+            if (gameOver) return;
+            const move = findBestMove();
+            if (move) play(move.x, move.y);
+        }
+
+        function findBestMove() {
+            let best = null, bestScore = -Infinity;
+            
+            for (let y = 0; y < SIZE; y++) {
+                for (let x = 0; x < SIZE; x++) {
+                    if (board[y][x]) continue;
+                    if (!hasNeighbor(x, y)) continue;
+                    
+                    const score = evaluateMove(x, y);
+                    if (score > bestScore) {
+                        bestScore = score;
+                        best = { x, y };
+                    }
+                }
+            }
+            
+            return best || { x: 7, y: 7 };
+        }
+
+        function hasNeighbor(x, y) {
+            for (let dy = -2; dy <= 2; dy++) {
+                for (let dx = -2; dx <= 2; dx++) {
+                    const nx = x + dx, ny = y + dy;
+                    if (nx >= 0 && nx < SIZE && ny >= 0 && ny < SIZE && board[ny][nx]) return true;
+                }
+            }
+            return false;
+        }
+
+        function evaluateMove(x, y) {
+            let score = 0;
+            const dirs = [[1, 0], [0, 1], [1, 1], [1, -1]];
+            
+            for (const [dx, dy] of dirs) {
+                // AI's potential
+                board[y][x] = 2;
+                score += evaluateLine(x, y, dx, dy, 2) * 1.1;
+                // Block player
+                board[y][x] = 1;
+                score += evaluateLine(x, y, dx, dy, 1);
+                board[y][x] = 0;
+            }
+            
+            // Center preference
+            score += (7 - Math.abs(x - 7)) + (7 - Math.abs(y - 7));
+            return score;
+        }
+
+        function evaluateLine(x, y, dx, dy, player) {
+            let count = 1, open = 0;
+            
+            for (let i = 1; i < 5; i++) {
+                const nx = x + dx * i, ny = y + dy * i;
+                if (nx < 0 || nx >= SIZE || ny < 0 || ny >= SIZE) break;
+                if (board[ny][nx] === player) count++;
+                else { if (board[ny][nx] === 0) open++; break; }
+            }
+            for (let i = 1; i < 5; i++) {
+                const nx = x - dx * i, ny = y - dy * i;
+                if (nx < 0 || nx >= SIZE || ny < 0 || ny >= SIZE) break;
+                if (board[ny][nx] === player) count++;
+                else { if (board[ny][nx] === 0) open++; break; }
+            }
+            
+            if (count >= 5) return 100000;
+            if (count === 4 && open === 2) return 10000;
+            if (count === 4 && open === 1) return 1000;
+            if (count === 3 && open === 2) return 500;
+            if (count === 3 && open === 1) return 50;
+            if (count === 2 && open === 2) return 10;
+            return count;
+        }
+
+        function checkWin(x, y) {
+            const dirs = [[1, 0], [0, 1], [1, 1], [1, -1]];
+            const player = board[y][x];
+            
+            for (const [dx, dy] of dirs) {
+                let count = 1;
+                for (let i = 1; i < 5; i++) {
+                    const nx = x + dx * i, ny = y + dy * i;
+                    if (nx < 0 || nx >= SIZE || ny < 0 || ny >= SIZE || board[ny][nx] !== player) break;
+                    count++;
+                }
+                for (let i = 1; i < 5; i++) {
+                    const nx = x - dx * i, ny = y - dy * i;
+                    if (nx < 0 || nx >= SIZE || ny < 0 || ny >= SIZE || board[ny][nx] !== player) break;
+                    count++;
+                }
+                if (count >= 5) return true;
+            }
+            return false;
+        }
+
+        function reset() { init(); }
+        init();
+    </script>
+</body>
+</html>

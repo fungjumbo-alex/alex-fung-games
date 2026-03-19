@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Scrabble</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin:0; padding:6px; font-family:Arial,sans-serif; background:#2c3e50; color:#fff; touch-action:none; min-height:100vh; }
+    #header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+    #back-btn { 
+      display:inline-flex; align-items:center; gap:4px;
+      padding:6px 12px; background:rgba(255,255,255,0.1); 
+      border-radius:6px; text-decoration:none; color:#fff; 
+      font-size:0.9em; transition:background 0.2s;
+    }
+    #back-btn:hover { background:rgba(255,255,255,0.2); }
+    h1 { text-align:center; margin:0; font-size:1.3em; letter-spacing:3px; flex:1; }
+    
+    #game-container { display:flex; flex-direction:column; align-items:center; gap:10px; }
+    
+    #info { display:flex; justify-content:space-between; width:100%; max-width:600px; padding:8px 12px; background:rgba(0,0,0,0.3); border-radius:8px; }
+    .player-info { text-align:center; }
+    .player-info.active { background:rgba(52,152,219,0.3); border-radius:4px; padding:4px 8px; }
+    .player-info .name { font-weight:bold; font-size:0.9em; }
+    .player-info .score { font-size:1.4em; color:#f1c40f; }
+    
+    #board-container { position:relative; width:100%; max-width:380px; margin:0 auto; padding:0 6px; box-sizing:border-box; aspect-ratio:1; }
+    #board { 
+      display:grid; grid-template-columns:repeat(15,1fr); grid-template-rows:repeat(15,1fr);
+      background:#d4c4a8; border:3px solid #c0392b; 
+      width:100%; height:100%;
+      box-shadow:0 4px 20px rgba(0,0,0,0.4);
+    }
+    
+    .cell { 
+      border:1px solid #e8dcc8; 
+      display:flex; align-items:center; justify-content:center; 
+      font-weight:bold; font-size:clamp(8px,2.5vmin,16px); 
+      cursor:pointer; user-select:none; position:relative;
+      background:#d4c4a8;
+      text-align:center;
+      line-height:1.1;
+      width:100%; height:100%;
+    }
+    
+    .cell.tw { background:#e74c3c; color:#fff; }
+    .cell.dw { background:#f5b7b1; color:#000; }
+    .cell.tl { background:#3498db; color:#fff; }
+    .cell.dl { background:#85c1e9; color:#000; }
+    .cell.center { background:#f1c40f; }
+    .cell.center::after { content:"★"; position:absolute; font-size:clamp(16px,4vmin,28px); color:#000; }
+    
+    .cell .label { font-size:clamp(5px,1.5vmin,9px); text-transform:uppercase; letter-spacing:0.5px; }
+    .cell.tile-placed { background:#f5f5dc !important; color:#000 !important; }
+    .cell.tile-placed .label { display:none; }
+    .cell .letter { font-size:clamp(14px,4vmin,24px); font-weight:bold; }
+    .cell .points { position:absolute; bottom:1px; right:2px; font-size:clamp(6px,1.5vmin,10px); }
+    
+    .cell.selected { box-shadow:inset 0 0 0 3px #3498db; }
+    
+    #rack-container { background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; width:100%; max-width:600px; }
+    #rack { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; min-height:44px; }
+    
+    .tile { 
+      width:40px; height:44px; 
+      background:linear-gradient(145deg,#f5f5dc,#e8e0c8); 
+      border:2px solid #c9b896; border-radius:4px; 
+      display:flex; align-items:center; justify-content:center; 
+      font-weight:bold; font-size:20px; 
+      box-shadow:2px 2px 4px rgba(0,0,0,0.2);
+      cursor:pointer; user-select:none;
+      color:#000;
+      position:relative;
+    }
+    .tile .points { position:absolute; bottom:2px; right:3px; font-size:9px; color:#666; }
+    .tile.selected { border-color:#3498db; box-shadow:0 0 10px #3498db; transform:scale(1.05); }
+    .tile:hover { transform:translateY(-2px); }
+    
+    #ai-rack { display:flex; gap:4px; justify-content:center; flex-wrap:wrap; min-height:36px; margin-top:8px; }
+    .ai-tile { width:32px; height:36px; background:#c0392b; border-radius:3px; box-shadow:1px 1px 3px rgba(0,0,0,0.3); }
+    
+    #controls { display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    button { 
+      padding:10px 20px; font-size:1em; 
+      background:#3498db; color:#fff; border:none; border-radius:6px; 
+      cursor:pointer; font-weight:bold;
+      transition:background 0.2s;
+    }
+    button:hover { background:#2980b9; }
+    button:disabled { background:#7f8c8d; cursor:not-allowed; }
+    button.danger { background:#e74c3c; }
+    button.danger:hover { background:#c0392b; }
+    
+    #msg { text-align:center; margin:10px 0; font-weight:bold; min-height:1.2em; color:#f1c40f; font-size:1.1em; }
+    
+    #tiles-left { text-align:center; font-size:0.9em; color:#bdc3c7; margin-top:5px; }
+    
+    @media (max-width:500px) {
+      body { padding:4px; }
+      .tile { width:34px; height:38px; font-size:16px; }
+      .tile .points { font-size:8px; }
+      button { padding:8px 12px; font-size:0.85em; }
+      #info { padding:6px 8px; }
+      .player-info .score { font-size:1.2em; }
+      #rack-container { padding:8px; }
+      #ai-rack { min-height:32px; }
+      .ai-tile { width:28px; height:32px; }
+      h1 { font-size:1.1em; letter-spacing:2px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <div style="display:flex;align-items:center;justify-content:space-between;width:100%;max-width:600px;margin-bottom:8px;">
+      <a href="index.html" id="back-btn">← Back</a>
+      <h1>SCRABBLE</h1>
+      <div style="width:70px;"></div>
+    </div>
+    
+    <div id="info">
+      <div class="player-info active" id="p1-info">
+        <div class="name">You</div>
+        <div class="score" id="score1">0</div>
+      </div>
+      <div id="turn-indicator">Your Turn</div>
+      <div class="player-info" id="p2-info">
+        <div class="name">AI</div>
+        <div class="score" id="score2">0</div>
+      </div>
+    </div>
+    
+    <div id="board-container">
+      <div id="board"></div>
+    </div>
+    
+    <div id="tiles-left">Tiles remaining: <span id="remaining">86</span></div>
+    
+    <div id="rack-container">
+      <div id="rack"></div>
+      <div id="ai-rack"></div>
+    </div>
+    
+    <div id="msg"></div>
+    
+    <div id="controls">
+      <button id="submit">Play Word</button>
+      <button id="clear">Clear</button>
+      <button id="pass">Pass</button>
+      <button id="shuffle">🔀</button>
+      <button id="new" class="danger">New Game</button>
+    </div>
+  </div>
+
+  <script>
+    // Small word list for demo - loads full dictionary asynchronously
+    const WORD_LIST = new Set(`aa ab ad ae ag ah ai al am an ar as at aw ax ay ba be bi bo by da de do ed ef eh el em en er es et ex fa go ha he hi ho id if in is it jo ka ki la li lo ma me mi mm mo mu my na no nu od oe of oh oi om on op or os ow ox oy pa pi qi re sh si so ta ti to uh um un up us ut we wo xi xu ya ye yo za`.trim().split(/\s+/));
+    
+    // Common 2-4 letter words for AI
+    const AI_WORDS = ['aa','ab','ad','ae','ag','ah','ai','al','am','an','ar','as','at','aw','ax','ay','ba','be','bi','bo','by','da','de','do','ed','ef','eh','el','em','en','er','es','et','ex','fa','go','ha','he','hi','ho','id','if','in','is','it','jo','ka','ki','la','li','lo','ma','me','mi','mo','mu','my','na','ne','no','nu','od','oe','of','oh','oi','om','on','op','or','os','ow','ox','oy','pa','pe','pi','qi','re','sh','si','so','ta','ti','to','uh','um','un','up','us','we','wo','xi','ya','ye','yo','za','ace','act','add','age','ago','aid','aim','air','all','and','ant','any','ape','arc','are','ark','arm','art','ash','ask','ate','awe','axe','bad','bag','ban','bar','bat','bay','bed','bee','bet','bid','big','bin','bit','bow','box','boy','bud','bug','bun','bus','but','buy','cab','can','cap','car','cat','cow','cry','cub','cup','cut','dad','dam','day','den','dew','did','die','dig','dim','dip','dog','dot','dry','due','dug','dye','ear','eat','egg','ego','elf','elk','elm','end','era','eve','eye','fan','far','fat','fax','fed','fee','few','fig','fin','fir','fit','fix','fly','foe','fog','for','fox','fry','fun','fur','gag','gap','gas','gay','gel','gem','get','gig','gin','god','got','gum','gun','gut','guy','gym','had','ham','has','hat','hay','hem','hen','her','hew','hid','him','hip','his','hit','hog','hop','hot','how','hub','hue','hug','hum','hut','ice','icy','ill','imp','ink','inn','ion','ire','irk','its','ivy','jab','jag','jam','jar','jaw','jay','jet','jig','job','jog','jot','joy','jug','jut','keg','ken','key','kid','kin','kit','lab','lad','lag','lap','law','lay','lea','led','leg','let','lid','lie','lip','lit','log','lot','low','lug','mad','man','map','mar','mat','maw','may','men','met','mid','mix','mob','mom','mop','mow','mud','mug','nab','nag','nap','net','new','nib','nil','nip','nit','nod','nor','not','now','nub','nut','oak','oar','oat','odd','ode','off','oft','oil','old','one','opt','orb','ore','our','out','owe','owl','own','pad','pal','pan','pap','par','pat','paw','pay','pea','peg','pen','pep','per','pet','pew','pie','pig','pin','pit','ply','pod','pop','pot','pow','pro','pry','pub','pug','pun','pup','put','rag','ram','ran','rap','rat','raw','ray','red','ref','rep','rib','rid','rig','rim','rip','rob','rod','roe','rot','row','rub','rug','rum','run','rut','rye','sac','sad','sag','sap','sat','saw','say','sea','set','sew','she','shy','sin','sip','sir','sis','sit','six','ski','sky','sly','sob','sod','son','sop','sot','sow','soy','spa','spy','sty','sub','sue','sum','sun','sup','tab','tad','tag','tan','tap','tar','tat','tax','tea','ten','the','thy','tic','tie','tin','tip','toe','tog','tom','ton','too','top','tot','tow','toy','try','tub','tug','tun','two','ugh','ump','ups','urn','use','van','vat','vet','via','vie','vow','wad','wag','war','was','wax','way','web','wed','wee','wet','who','why','wig','win','wit','woe','wok','won','woo','wow','yak','yam','yap','yaw','yea','yen','yes','yet','yew','yin','you','zap','zed','zee','zen','zig','zip','zit','zoo'];
+
+    const TILE_SCORES = {a:1,b:3,c:3,d:2,e:1,f:4,g:2,h:4,i:1,j:8,k:5,l:1,m:3,n:1,o:1,p:3,q:10,r:1,s:1,t:1,u:1,v:4,w:4,x:8,y:4,z:10};
+    const TILE_COUNTS = {a:9,b:2,c:2,d:4,e:12,f:2,g:3,h:2,i:9,j:1,k:1,l:4,m:2,n:6,o:8,p:2,q:1,r:6,s:4,t:6,u:4,v:2,w:2,x:1,y:2,z:1};
+
+    const BONUS = {
+      tw: [[0,0],[0,7],[0,14],[7,0],[7,14],[14,0],[14,7],[14,14]],
+      dw: [[1,1],[2,2],[3,3],[4,4],[1,13],[2,12],[3,11],[4,10],[13,1],[12,2],[11,3],[10,4],[13,13],[12,12],[11,11],[10,10]],
+      tl: [[1,5],[1,9],[5,1],[5,5],[5,9],[5,13],[9,1],[9,5],[9,9],[9,13],[13,5],[13,9]],
+      dl: [[0,3],[0,11],[2,6],[2,8],[3,0],[3,7],[3,14],[6,2],[6,6],[6,8],[6,12],[7,3],[7,11],[8,2],[8,6],[8,8],[8,12],[11,0],[11,7],[11,14],[12,6],[12,8],[14,3],[14,11]]
+    };
+
+    const BOARD_SIZE = 15;
+    let bag = [], board = [], playerRack = [], aiRack = [], scores = [0,0];
+    let turn = 0, selectedTile = null, placedTiles = [], isFirstMove = true, gameOver = false, gameStarted = false;
+
+    function makeBag() {
+      const b = [];
+      Object.entries(TILE_COUNTS).forEach(([l, c]) => { for (let i=0;i<c;i++) b.push(l); });
+      for (let i=b.length-1; i>0; i--) {
+        const j = Math.floor(Math.random()*(i+1));
+        [b[i],b[j]] = [b[j],b[i]];
+      }
+      return b;
+    }
+
+    function newGame() {
+      if (gameStarted && !confirm('Game is in progress. Start a new game? Current progress will be lost.')) return;
+      bag = makeBag();
+      board = Array.from({length:BOARD_SIZE}, () => Array(BOARD_SIZE).fill(null));
+      playerRack = []; aiRack = [];
+      scores = [0,0]; turn = 0; selectedTile = null; placedTiles = []; isFirstMove = true; gameOver = false; gameStarted = false;
+      drawTiles(playerRack, 7);
+      drawTiles(aiRack, 7);
+      render(); updateInfo(); setMsg('Your turn! Place tiles and click Play Word');
+    }
+
+    function drawTiles(rack, n) {
+      for (let i=0; i<n && bag.length>0; i++) rack.push(bag.pop());
+      document.getElementById('remaining').textContent = bag.length;
+    }
+
+    function inBounds(r,c) { return r>=0 && r<BOARD_SIZE && c>=0 && c<BOARD_SIZE; }
+
+    function getBonusType(r,c) {
+      for (const [type, cells] of Object.entries(BONUS)) {
+        if (cells.some(([cr,cc]) => cr===r && cc===c)) return type;
+      }
+      return null;
+    }
+
+    function getWordAt(row, col, dr, dc) {
+      let letters=[], cells=[];
+      let r=row, c=col;
+      while (inBounds(r,c) && board[r][c]) {
+        letters.push(board[r][c]);
+        cells.push([r,c]);
+        r+=dr; c+=dc;
+      }
+      return letters.length > 1 ? { word: letters.join(''), cells } : null;
+    }
+
+    function getWordsForMove() {
+      if (placedTiles.length===0) return [];
+      const words=[];
+      const set = new Set(placedTiles.map(t => `${t[0]},${t[1]}`));
+      placedTiles.forEach(([r,c]) => {
+        let startC=c; while (startC>0 && board[r][startC-1]) startC--;
+        const hWord = getWordAt(r,startC,0,1);
+        if (hWord && hWord.cells.some(([cr,cc]) => set.has(`${cr},${cc}`))) words.push(hWord);
+        let startR=r; while (startR>0 && board[startR-1][c]) startR--;
+        const vWord = getWordAt(startR,c,1,0);
+        if (vWord && vWord.cells.some(([cr,cc]) => set.has(`${cr},${cc}`))) words.push(vWord);
+      });
+      const seen = new Set();
+      return words.filter(w => { if (seen.has(w.word)) return false; seen.add(w.word); return true; });
+    }
+
+    function scoreWord(word, cells) {
+      let score=0, wordMult=1;
+      cells.forEach(([r,c], i) => {
+        const tileScore = TILE_SCORES[word[i]] || 0;
+        const bonus = getBonusType(r,c);
+        const isNew = placedTiles.some(([pr,pc]) => pr===r && pc===c);
+        if (isNew) {
+          if (bonus==='dl') score += tileScore*2;
+          else if (bonus==='tl') score += tileScore*3;
+          else score += tileScore;
+          if (bonus==='dw' || bonus==='tw') wordMult *= (bonus==='tw'?3:2);
+        } else {
+          score += tileScore;
+        }
+      });
+      return score * wordMult;
+    }
+
+    function isValidPlacement() {
+      if (placedTiles.length === 0) return {valid:false, msg:'Place some tiles first!'};
+      
+      const rows = [...new Set(placedTiles.map(t => t[0]))];
+      const cols = [...new Set(placedTiles.map(t => t[1]))];
+      if (rows.length > 1 && cols.length > 1) return {valid:false, msg:'Tiles must be in one line!'};
+      
+      const isHorizontal = rows.length === 1;
+      if (isHorizontal) {
+        const row = rows[0];
+        const cs = placedTiles.map(t => t[1]).sort((a,b) => a-b);
+        for (let i = cs[0]; i <= cs[cs.length-1]; i++) {
+          if (!board[row][i]) return {valid:false, msg:'Gap in word!'};
+        }
+      } else {
+        const col = cols[0];
+        const rs = placedTiles.map(t => t[0]).sort((a,b) => a-b);
+        for (let i = rs[0]; i <= rs[rs.length-1]; i++) {
+          if (!board[i][col]) return {valid:false, msg:'Gap in word!'};
+        }
+      }
+      
+      if (isFirstMove && !placedTiles.some(([r,c]) => r===7 && c===7)) {
+        return {valid:false, msg:'First word must cover center ★!'};
+      }
+      
+      if (!isFirstMove) {
+        const connects = placedTiles.some(([r,c]) => {
+          return [[r-1,c],[r+1,c],[r,c-1],[r,c+1]].some(([nr,nc]) => 
+            inBounds(nr,nc) && board[nr][nc] && !placedTiles.some(([pr,pc]) => pr===nr && pc===nc)
+          );
+        });
+        if (!connects) return {valid:false, msg:'Word must connect to existing tiles!'};
+      }
+      
+      const words = getWordsForMove();
+      if (words.length === 0) return {valid:false, msg:'No valid words found!'};
+      
+      for (const w of words) {
+        if (!WORD_LIST.has(w.word.toLowerCase())) {
+          return {valid:false, msg:`"${w.word.toUpperCase()}" is not a valid word!`};
+        }
+      }
+      
+      return {valid:true, words};
+    }
+
+    function submitWord() {
+      if (gameOver || turn !== 0) return;
+      
+      const result = isValidPlacement();
+      if (!result.valid) { setMsg(result.msg); return; }
+      
+      let turnScore = 0;
+      result.words.forEach(w => { turnScore += scoreWord(w.word, w.cells); });
+      if (placedTiles.length === 7) turnScore += 50;
+      
+      scores[0] += turnScore;
+      placedTiles.forEach(([r,c,letter]) => { board[r][c] = letter; });
+      placedTiles = [];
+      drawTiles(playerRack, 7 - playerRack.length);
+      isFirstMove = false;
+      
+      setMsg(`Scored ${turnScore} points!`);
+      turn = 1;
+      updateInfo();
+      render();
+      
+      if (playerRack.length === 0 && bag.length === 0) {
+        gameOver = true;
+        endGame();
+      } else {
+        setTimeout(aiTurn, 800);
+      }
+    }
+
+    function aiTurn() {
+      if (gameOver) return;
+      setMsg('AI is thinking...');
+      
+      // Find a word AI can play
+      let bestMove = null;
+      
+      // Try each common word
+      for (const word of AI_WORDS) {
+        const move = tryWord(word);
+        if (move && (!bestMove || move.score > bestMove.score)) {
+          bestMove = move;
+        }
+      }
+      
+      if (!bestMove) {
+        setMsg('AI passes');
+        turn = 0;
+        updateInfo();
+        render();
+        return;
+      }
+      
+      // Play the move
+      bestMove.cells.forEach(([r,c,letter]) => { board[r][c] = letter; });
+      scores[1] += bestMove.score;
+      bestMove.cells.forEach(([r,c,letter]) => {
+        const idx = aiRack.indexOf(letter);
+        if (idx > -1) aiRack.splice(idx, 1);
+      });
+      drawTiles(aiRack, 7 - aiRack.length);
+      turn = 0;
+      isFirstMove = false;
+      
+      setMsg(`AI played "${bestMove.word.toUpperCase()}" for ${bestMove.score} points!`);
+      updateInfo();
+      render();
+      
+      if (aiRack.length === 0 && bag.length === 0) {
+        gameOver = true;
+        endGame();
+      }
+    }
+    
+    function tryWord(word) {
+      const letters = word.split('');
+      const rack = aiRack.slice();
+      
+      // Check if we can make this word
+      for (const l of letters) {
+        const idx = rack.indexOf(l);
+        if (idx < 0) return null;
+        rack.splice(idx, 1);
+      }
+      
+      // Try to place it
+      if (isFirstMove) {
+        const len = letters.length;
+        const start = 7 - Math.floor(len/2);
+        if (start >= 0 && start + len <= 15) {
+          const cells = [];
+          for (let i = 0; i < len; i++) {
+            cells.push([7, start + i, letters[i]]);
+          }
+          const oldPlaced = placedTiles;
+          placedTiles = cells;
+          const score = scoreWord(word, cells);
+          placedTiles = oldPlaced;
+          return {word, cells, score};
+        }
+      } else {
+        // Try to connect to existing tiles
+        for (let r = 0; r < 15; r++) {
+          for (let c = 0; c < 15; c++) {
+            // Skip if not adjacent to existing tile
+            if (!board[r][c]) {
+              const adj = [[r-1,c],[r+1,c],[r,c-1],[r,c+1]];
+              if (!adj.some(([nr,nc]) => inBounds(nr,nc) && board[nr][nc])) continue;
+            }
+            
+            // Try horizontal
+            if (c + letters.length <= 15) {
+              const cells = [];
+              let fits = true;
+              let usesExisting = false;
+              for (let i = 0; i < letters.length; i++) {
+                const cc = c + i;
+                if (board[r][cc]) {
+                  if (board[r][cc] !== letters[i]) { fits = false; break; }
+                  usesExisting = true;
+                } else {
+                  cells.push([r, cc, letters[i]]);
+                }
+              }
+              if (fits && cells.length > 0 && cells.length < letters.length) {
+                const oldPlaced = placedTiles;
+                placedTiles = cells;
+                const result = isValidPlacement();
+                if (result.valid) {
+                  let score = 0;
+                  result.words.forEach(w => score += scoreWord(w.word, w.cells));
+                  placedTiles = oldPlaced;
+                  return {word, cells, score};
+                }
+                placedTiles = oldPlaced;
+              }
+            }
+            
+            // Try vertical
+            if (r + letters.length <= 15) {
+              const cells = [];
+              let fits = true;
+              let usesExisting = false;
+              for (let i = 0; i < letters.length; i++) {
+                const rr = r + i;
+                if (board[rr][c]) {
+                  if (board[rr][c] !== letters[i]) { fits = false; break; }
+                  usesExisting = true;
+                } else {
+                  cells.push([rr, c, letters[i]]);
+                }
+              }
+              if (fits && cells.length > 0 && cells.length < letters.length) {
+                const oldPlaced = placedTiles;
+                placedTiles = cells;
+                const result = isValidPlacement();
+                if (result.valid) {
+                  let score = 0;
+                  result.words.forEach(w => score += scoreWord(w.word, w.cells));
+                  placedTiles = oldPlaced;
+                  return {word, cells, score};
+                }
+                placedTiles = oldPlaced;
+              }
+            }
+          }
+        }
+      }
+      return null;
+    }
+
+    function endGame() {
+      const winner = scores[0] > scores[1] ? 'You win!' : scores[1] > scores[0] ? 'AI wins!' : "It's a tie!";
+      setMsg(`Game over! ${winner} Final: You ${scores[0]} - AI ${scores[1]}`);
+    }
+
+    function passTurn() {
+      if (gameOver || turn !== 0) return;
+      placedTiles = [];
+      turn = 1;
+      setMsg('You passed. AI\'s turn...');
+      updateInfo();
+      render();
+      setTimeout(aiTurn, 500);
+    }
+
+    function setMsg(text) { 
+      document.getElementById('msg').textContent = text;
+      if (text && !text.includes('AI')) setTimeout(() => setMsg(''), 3000);
+    }
+
+    function updateInfo() {
+      document.getElementById('score1').textContent = scores[0];
+      document.getElementById('score2').textContent = scores[1];
+      document.getElementById('p1-info').classList.toggle('active', turn === 0);
+      document.getElementById('p2-info').classList.toggle('active', turn === 1);
+      document.getElementById('turn-indicator').textContent = turn === 0 ? 'Your Turn' : 'AI Turn';
+    }
+
+    function getCellLabel(type) {
+      if (type === 'tw') return 'TRIPLE<br>WORD';
+      if (type === 'dw') return 'DOUBLE<br>WORD';
+      if (type === 'tl') return 'TRIPLE<br>LETTER';
+      if (type === 'dl') return 'DOUBLE<br>LETTER';
+      return '';
+    }
+
+    function cellHTML(r,c) {
+      const letter = board[r][c];
+      const isPlaced = placedTiles.some(([pr,pc]) => pr===r && pc===c);
+      const bonus = getBonusType(r,c);
+      const isCenter = r===7 && c===7;
+      
+      let cls = 'cell';
+      if (bonus && !letter) cls += ' ' + bonus;
+      if (isCenter && !letter) cls += ' center';
+      if (letter) cls += ' tile-placed';
+      if (isPlaced) cls += ' selected';
+      
+      if (letter) {
+        const points = TILE_SCORES[letter] || 0;
+        return `<div class="${cls}" data-r="${r}" data-c="${c}"><span class="letter">${letter.toUpperCase()}</span><span class="points">${points}</span></div>`;
+      } else if (isCenter) {
+        return `<div class="${cls}" data-r="${r}" data-c="${c}"></div>`;
+      } else if (bonus) {
+        return `<div class="${cls}" data-r="${r}" data-c="${c}"><span class="label">${getCellLabel(bonus)}</span></div>`;
+      }
+      return `<div class="${cls}" data-r="${r}" data-c="${c}"></div>`;
+    }
+
+    function renderBoard() {
+      const el = document.getElementById('board');
+      el.innerHTML = '';
+      for (let r=0; r<15; r++) {
+        for (let c=0; c<15; c++) {
+          const div = document.createElement('div');
+          div.innerHTML = cellHTML(r,c);
+          div.firstChild.addEventListener('click', () => cellClick(r,c));
+          el.appendChild(div.firstChild);
+        }
+      }
+    }
+
+    function renderRack() {
+      const el = document.getElementById('rack');
+      el.innerHTML = '';
+      playerRack.forEach((letter, idx) => {
+        const tile = document.createElement('div');
+        tile.className = 'tile' + (selectedTile===idx ? ' selected' : '');
+        const points = TILE_SCORES[letter] || 0;
+        tile.innerHTML = `${letter.toUpperCase()}<span class="points">${points}</span>`;
+        tile.addEventListener('click', () => rackClick(idx));
+        el.appendChild(tile);
+      });
+      
+      const aiEl = document.getElementById('ai-rack');
+      aiEl.innerHTML = '';
+      aiRack.forEach(() => {
+        const tile = document.createElement('div');
+        tile.className = 'ai-tile';
+        aiEl.appendChild(tile);
+      });
+    }
+
+    function render() { renderBoard(); renderRack(); }
+
+    function cellClick(r,c) {
+      if (turn !== 0 || gameOver) return;
+      
+      const placedIdx = placedTiles.findIndex(([pr,pc]) => pr===r && pc===c);
+      if (placedIdx >= 0) {
+        const [,,letter] = placedTiles[placedIdx];
+        playerRack.push(letter);
+        board[r][c] = null;
+        placedTiles.splice(placedIdx, 1);
+        render();
+        return;
+      }
+      
+      if (board[r][c]) return;
+      if (selectedTile === null) return;
+      
+      const letter = playerRack[selectedTile];
+      gameStarted = true;
+      placedTiles.push([r,c,letter]);
+      board[r][c] = letter;
+      playerRack.splice(selectedTile, 1);
+      selectedTile = null;
+      render();
+    }
+
+    function rackClick(idx) {
+      if (turn !== 0 || gameOver) return;
+      selectedTile = selectedTile === idx ? null : idx;
+      render();
+    }
+
+    function shuffleRack() {
+      for (let i=playerRack.length-1; i>0; i--) {
+        const j = Math.floor(Math.random()*(i+1));
+        [playerRack[i],playerRack[j]] = [playerRack[j],playerRack[i]];
+      }
+      selectedTile = null;
+      render();
+    }
+
+    function clearPlacement() {
+      placedTiles.forEach(([r,c,letter]) => {
+        board[r][c] = null;
+        playerRack.push(letter);
+      });
+      placedTiles = [];
+      selectedTile = null;
+      render();
+    }
+
+    // Load full dictionary
+    async function loadDict() {
+      try {
+        const resp = await fetch('words/sowpods.txt');
+        if (!resp.ok) return;
+        const txt = await resp.text();
+        const words = txt.trim().toLowerCase().split(/\s+/);
+        WORD_LIST.clear();
+        words.forEach(w => WORD_LIST.add(w));
+        console.log('Full dictionary loaded:', WORD_LIST.size, 'words');
+      } catch (e) {
+        console.warn('Using basic word list');
+      }
+    }
+
+    function init() {
+      newGame();
+      document.getElementById('submit').addEventListener('click', submitWord);
+      document.getElementById('clear').addEventListener('click', clearPlacement);
+      document.getElementById('pass').addEventListener('click', passTurn);
+      document.getElementById('shuffle').addEventListener('click', shuffleRack);
+      document.getElementById('new').addEventListener('click', newGame);
+      loadDict();
+    }
+    window.onload = init;
+  </script>
+</body>
+</html>

@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Game & Watch - Green House</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            touch-action: none;
+        }
+        .game-shell {
+            background: linear-gradient(145deg, #4a4a4a, #2a2a2a);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .game-title {
+            text-align: center;
+            color: #9bbc0f;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(155, 188, 15, 0.5);
+            letter-spacing: 2px;
+        }
+        .screen-frame {
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 15px;
+            border: 3px solid #1a1a1a;
+        }
+        #gameCanvas {
+            display: block;
+            background: #2a2a2a;
+            image-rendering: pixelated;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .d-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 40px);
+            grid-template-rows: repeat(3, 40px);
+            gap: 2px;
+        }
+        .d-pad button {
+            background: #3a3a3a;
+            border: none;
+            border-radius: 5px;
+            color: #9bbc0f;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        .d-pad button:hover {
+            background: #4a4a4a;
+        }
+        .d-pad button:active {
+            background: #5a5a5a;
+            transform: scale(0.95);
+        }
+        .d-pad .empty {
+            background: transparent;
+        }
+        .action-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #3a3a3a;
+            border: 3px solid #2a2a2a;
+            color: #9bbc0f;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        .action-btn:active {
+            background: #4a4a4a;
+            transform: scale(0.95);
+        }
+        .info {
+            color: #9bbc0f;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 15px;
+            opacity: 0.7;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 8px;
+            left: 8px;
+            color: #9bbc0f;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-decoration: none;
+            z-index: 1000;
+            opacity: 0.7;
+            padding: 4px 8px;
+            border: 1px solid #9bbc0f;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.5);
+        }
+        .back-btn:hover { opacity: 1; }
+        .how-btn {
+            position: fixed;
+            top: 8px;
+            right: 8px;
+            color: #9bbc0f;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            z-index: 1000;
+            opacity: 0.7;
+            padding: 4px 8px;
+            border: 1px solid #9bbc0f;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.5);
+            cursor: pointer;
+        }
+        .how-btn:hover { opacity: 1; }
+        .how-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .how-overlay.show { display: flex; }
+        .how-box {
+            background: #1a1a1a;
+            border: 2px solid #9bbc0f;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 320px;
+            color: #9bbc0f;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            position: relative;
+        }
+        .how-box h3 { font-size: 18px; margin-bottom: 12px; text-align: center; }
+        .how-box p { margin: 8px 0; line-height: 1.5; color: #c8c8c8; }
+        .how-box .close-how {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            color: #9bbc0f;
+            font-size: 20px;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+    
+.back-btn{position:fixed;top:8px;left:8px;color:#9bbc0f;font-family:'Courier New',monospace;font-size:12px;text-decoration:none;z-index:1000;opacity:.7;padding:4px 8px;border:1px solid #9bbc0f;border-radius:4px;background:rgba(0,0,0,.5)}.back-btn:hover{opacity:1}
+.how-btn{position:fixed;top:8px;right:8px;color:#9bbc0f;font-family:'Courier New',monospace;font-size:12px;z-index:1000;opacity:.7;padding:4px 8px;border:1px solid #9bbc0f;border-radius:4px;background:rgba(0,0,0,.5);cursor:pointer}.how-btn:hover{opacity:1}
+.how-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:2000;justify-content:center;align-items:center}
+.how-overlay.show{display:flex}
+.how-box{background:#1a1a1a;border:2px solid #9bbc0f;border-radius:12px;padding:24px;max-width:320px;width:90%;color:#9bbc0f;font-family:'Courier New',monospace;font-size:14px;position:relative}
+.how-box h3{font-size:18px;margin-bottom:12px;text-align:center}
+.how-box p{margin:8px 0;line-height:1.5;color:#c8c8c8}
+.how-box .close-how{position:absolute;top:8px;right:12px;color:#9bbc0f;font-size:20px;cursor:pointer;background:none;border:none}
+</style>
+
+    <style>
+        @media (max-width: 500px) {
+            .game-shell { transform: scale(var(--shell-scale, 1)); transform-origin: top center; }
+        }
+    </style>
+    <script>
+    function scaleGame() {
+        const shell = document.querySelector('.game-shell');
+        if (!shell) return;
+        const vw = window.innerWidth;
+        const shellW = shell.offsetWidth;
+        if (shellW > vw - 16) {
+            const s = (vw - 16) / shellW;
+            shell.style.setProperty('--shell-scale', s);
+            shell.style.transform = 'scale(' + s + ')';
+            shell.style.transformOrigin = 'top center';
+            shell.style.marginBottom = '-' + (shell.offsetHeight * (1 - s)) + 'px';
+        } else {
+            shell.style.transform = '';
+            shell.style.marginBottom = '';
+        }
+    }
+    window.addEventListener('resize', scaleGame);
+    window.addEventListener('load', function() { setTimeout(scaleGame, 100); });
+    document.addEventListener('DOMContentLoaded', function() { setTimeout(scaleGame, 200); });
+    
+    document.body.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+    document.body.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+    // Ensure all buttons work with touch
+    document.querySelectorAll('button, .btn, .control-btn').forEach(function(btn) {
+        if (!btn._touchFixed) {
+            btn._touchFixed = true;
+            var handlers = btn.onclick;
+            if (handlers) {
+                btn.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    btn.click();
+                }, { passive: false });
+            }
+        }
+    });
+</script>
+    
+</head>
+<body>
+    <a href="index.html" class="back-btn">← Back to Games</a>
+    <div class="how-btn" id="howBtn">?</div>
+    <div class="how-overlay" id="howOverlay">
+        <div class="how-box">
+            <button class="close-how" id="closeHow">×</button>
+            <h3>How to Play</h3>
+            <p><strong>Objective:</strong> Spray bugs before they eat your plants!</p>
+            <p><strong>Controls:</strong></p>
+            <p>• Arrow Keys to move between floors and positions</p>
+            <p>• Space or SPRAY button to spray bugs</p>
+            <p><strong>Scoring:</strong></p>
+            <p>• +10 points per bug killed</p>
+            <p>• Protect all 3 plants!</p>
+            <p>• 3 plants eaten = Game Over</p>
+        </div>
+    </div>
+    <div class="game-shell">
+        <div class="game-title">GREEN HOUSE</div>
+        <div class="screen-frame">
+            <canvas id="gameCanvas" width="280" height="320"></canvas>
+        </div>
+        <div class="controls">
+            <div class="d-pad">
+                <div class="empty"></div>
+                <button id="upBtn">▲</button>
+                <div class="empty"></div>
+                <button id="leftBtn">◄</button>
+                <div class="empty"></div>
+                <button id="rightBtn">►</button>
+                <div class="empty"></div>
+                <button id="downBtn">▼</button>
+                <div class="empty"></div>
+            </div>
+            <button class="action-btn" id="sprayBtn">SPRAY</button>
+        </div>
+        <div class="info">Arrow Keys to Move | Space to Spray</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Game & Watch LCD Colors
+        const LCD_BG = '#2a2a2a';
+        const LCD_ON = '#9bbc0f';
+        const LCD_DIM = '#4a5a0a';
+
+        // Game constants
+        const FLOOR_COUNT = 3;
+        const FLOOR_HEIGHT = 90;
+        const PLANT_X = 140;
+        const PLAYER_WIDTH = 24;
+        const PLAYER_HEIGHT = 20;
+        const BUG_WIDTH = 16;
+        const BUG_HEIGHT = 12;
+        const SPRAY_RANGE = 50;
+
+        // Game state
+        let gameState = {
+            player: {
+                floor: 1,
+                x: 140,
+                spraying: false,
+                sprayTimer: 0
+            },
+            bugs: [],
+            plants: [true, true, true], // 3 plants, one per floor
+            misses: 0,
+            score: 0,
+            gameOver: false,
+            gameStarted: false,
+            lastBugSpawn: 0,
+            bugSpawnInterval: 2000,
+            level: 1
+        };
+
+        // LCD-style pixel font rendering
+        function drawLCDText(text, x, y, size = 1) {
+            ctx.fillStyle = LCD_ON;
+            ctx.font = `${size * 8}px monospace`;
+            ctx.textAlign = 'center';
+            ctx.fillText(text, x, y);
+        }
+
+        // Draw house structure
+        function drawHouse() {
+            ctx.strokeStyle = LCD_DIM;
+            ctx.lineWidth = 2;
+
+            // Floor dividers
+            for (let i = 1; i < FLOOR_COUNT; i++) {
+                ctx.beginPath();
+                ctx.moveTo(20, i * FLOOR_HEIGHT + 40);
+                ctx.lineTo(canvas.width - 20, i * FLOOR_HEIGHT + 40);
+                ctx.stroke();
+            }
+
+            // Walls
+            ctx.beginPath();
+            ctx.moveTo(20, 40);
+            ctx.lineTo(20, FLOOR_COUNT * FLOOR_HEIGHT + 40);
+            ctx.moveTo(canvas.width - 20, 40);
+            ctx.lineTo(canvas.width - 20, FLOOR_COUNT * FLOOR_HEIGHT + 40);
+            ctx.stroke();
+
+            // Roof
+            ctx.beginPath();
+            ctx.moveTo(10, 40);
+            ctx.lineTo(canvas.width / 2, 15);
+            ctx.lineTo(canvas.width - 10, 40);
+            ctx.stroke();
+        }
+
+        // Draw plants (flowers in pots)
+        function drawPlants() {
+            for (let floor = 0; floor < FLOOR_COUNT; floor++) {
+                if (!gameState.plants[floor]) continue;
+
+                const y = floor * FLOOR_HEIGHT + 60;
+
+                // Pot
+                ctx.fillStyle = LCD_ON;
+                ctx.fillRect(PLANT_X - 12, y + 20, 24, 16);
+                ctx.fillRect(PLANT_X - 8, y + 16, 16, 4);
+
+                // Stem
+                ctx.fillRect(PLANT_X - 2, y + 5, 4, 15);
+
+                // Leaves
+                ctx.fillRect(PLANT_X - 10, y + 8, 8, 4);
+                ctx.fillRect(PLANT_X + 2, y + 8, 8, 4);
+
+                // Flower
+                ctx.fillRect(PLANT_X - 6, y, 4, 4);
+                ctx.fillRect(PLANT_X + 2, y, 4, 4);
+                ctx.fillRect(PLANT_X - 2, y - 4, 4, 4);
+            }
+        }
+
+        // Draw player (exterminator with spray can)
+        function drawPlayer() {
+            const floor = gameState.player.floor;
+            const x = gameState.player.x;
+            const y = floor * FLOOR_HEIGHT + 65;
+
+            ctx.fillStyle = LCD_ON;
+
+            // Body
+            ctx.fillRect(x - 8, y + 5, 16, 12);
+
+            // Head
+            ctx.fillRect(x - 6, y - 3, 12, 10);
+
+            // Hat
+            ctx.fillRect(x - 8, y - 7, 16, 4);
+
+            // Legs
+            ctx.fillRect(x - 6, y + 17, 4, 6);
+            ctx.fillRect(x + 2, y + 17, 4, 6);
+
+            // Spray can (held to the side)
+            ctx.fillRect(x - 14, y + 8, 6, 10);
+            ctx.fillRect(x + 8, y + 8, 6, 10);
+
+            // Spray effect
+            if (gameState.player.spraying) {
+                ctx.fillStyle = LCD_DIM;
+                // Spray to the left
+                for (let i = 0; i < 3; i++) {
+                    ctx.fillRect(x - 20 - i * 12, y + 10, 8, 4);
+                }
+                // Spray to the right
+                for (let i = 0; i < 3; i++) {
+                    ctx.fillRect(x + 16 + i * 12, y + 10, 8, 4);
+                }
+            }
+        }
+
+        // Draw bugs (spiders)
+        function drawBugs() {
+            gameState.bugs.forEach(bug => {
+                const y = bug.floor * FLOOR_HEIGHT + 70;
+                ctx.fillStyle = LCD_ON;
+
+                // Body
+                ctx.fillRect(bug.x - 6, y, 12, 8);
+
+                // Head
+                ctx.fillRect(bug.x - 4, y - 4, 8, 5);
+
+                // Legs (animated)
+                const legOffset = bug.animFrame ? 2 : -2;
+                ctx.fillRect(bug.x - 10, y + legOffset, 4, 2);
+                ctx.fillRect(bug.x + 6, y + legOffset, 4, 2);
+                ctx.fillRect(bug.x - 12, y + 4 - legOffset, 4, 2);
+                ctx.fillRect(bug.x + 8, y + 4 - legOffset, 4, 2);
+            });
+        }
+
+        // Draw missed plant indicators
+        function drawMisses() {
+            ctx.fillStyle = LCD_ON;
+            for (let i = 0; i < 3; i++) {
+                const x = canvas.width - 30 - i * 20;
+                if (i < gameState.misses) {
+                    // X mark for miss
+                    ctx.fillRect(x - 4, 20, 12, 3);
+                    ctx.fillRect(x + 4, 20, 12, 3);
+                } else {
+                    // Circle for remaining life
+                    ctx.beginPath();
+                    ctx.arc(x, 22, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        // Draw score
+        function drawScore() {
+            ctx.fillStyle = LCD_ON;
+            ctx.font = '12px monospace';
+            ctx.textAlign = 'left';
+            ctx.fillText('SCORE', 25, 25);
+            ctx.fillText(gameState.score.toString().padStart(4, '0'), 25, 38);
+        }
+
+        // Draw game over / start screen
+        function drawOverlay() {
+            if (!gameState.gameStarted) {
+                ctx.fillStyle = LCD_BG;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = LCD_ON;
+                ctx.font = '16px monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText('GREEN HOUSE', canvas.width / 2, 120);
+                ctx.font = '12px monospace';
+                ctx.fillText('TAP OR PRESS SPACE', canvas.width / 2, 180);
+                ctx.fillText('TO START', canvas.width / 2, 200);
+                return true;
+            }
+
+            if (gameState.gameOver) {
+                ctx.fillStyle = LCD_BG;
+                ctx.globalAlpha = 0.8;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = LCD_ON;
+                ctx.font = '16px monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText('GAME OVER', canvas.width / 2, 140);
+                ctx.font = '12px monospace';
+                ctx.fillText('SCORE: ' + gameState.score, canvas.width / 2, 170);
+                ctx.fillText('TAP OR PRESS SPACE', canvas.width / 2, 220);
+                ctx.fillText('TO RESTART', canvas.width / 2, 240);
+                return true;
+            }
+            return false;
+        }
+
+        // Spawn a new bug
+        function spawnBug() {
+            const floor = Math.floor(Math.random() * FLOOR_COUNT);
+            const fromLeft = Math.random() > 0.5;
+            const speed = 0.5 + (gameState.level * 0.1);
+
+            gameState.bugs.push({
+                floor: floor,
+                x: fromLeft ? 30 : canvas.width - 30,
+                direction: fromLeft ? 1 : -1,
+                speed: speed,
+                animFrame: false,
+                animTimer: 0
+            });
+        }
+
+        // Update bugs
+        function updateBugs(deltaTime) {
+            gameState.bugs.forEach((bug, index) => {
+                // Move toward plant
+                bug.x += bug.direction * bug.speed;
+
+                // Animate legs
+                bug.animTimer += deltaTime;
+                if (bug.animTimer > 200) {
+                    bug.animFrame = !bug.animFrame;
+                    bug.animTimer = 0;
+                }
+
+                // Check if reached plant
+                if (Math.abs(bug.x - PLANT_X) < 15) {
+                    // Plant eaten!
+                    gameState.plants[bug.floor] = false;
+                    gameState.misses++;
+                    gameState.bugs.splice(index, 1);
+
+                    if (gameState.misses >= 3) {
+                        gameState.gameOver = true;
+                    } else {
+                        // Respawn plant after delay
+                        setTimeout(() => {
+                            if (!gameState.gameOver) {
+                                gameState.plants[bug.floor] = true;
+                            }
+                        }, 3000);
+                    }
+                }
+            });
+        }
+
+        // Check spray collision
+        function checkSpray() {
+            if (!gameState.player.spraying) return;
+
+            const playerFloor = gameState.player.floor;
+            const playerX = gameState.player.x;
+
+            gameState.bugs = gameState.bugs.filter(bug => {
+                if (bug.floor !== playerFloor) return true;
+
+                const distance = Math.abs(bug.x - playerX);
+                if (distance < SPRAY_RANGE) {
+                    gameState.score += 10;
+                    // Increase level every 100 points
+                    if (gameState.score % 100 === 0) {
+                        gameState.level++;
+                        gameState.bugSpawnInterval = Math.max(800, 2000 - gameState.level * 150);
+                    }
+                    return false; // Bug killed
+                }
+                return true;
+            });
+        }
+
+        // Main game loop
+        let lastTime = 0;
+        function gameLoop(currentTime) {
+            const deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+
+            // Clear canvas
+            ctx.fillStyle = LCD_BG;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (!drawOverlay()) {
+                // Game is running
+                drawHouse();
+                drawPlants();
+                drawBugs();
+                drawPlayer();
+                drawMisses();
+                drawScore();
+
+                // Spawn bugs
+                if (currentTime - gameState.lastBugSpawn > gameState.bugSpawnInterval) {
+                    spawnBug();
+                    gameState.lastBugSpawn = currentTime;
+                }
+
+                // Update game state
+                updateBugs(deltaTime);
+                checkSpray();
+
+                // Update spray animation
+                if (gameState.player.spraying) {
+                    gameState.player.sprayTimer -= deltaTime;
+                    if (gameState.player.sprayTimer <= 0) {
+                        gameState.player.spraying = false;
+                    }
+                }
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Input handling
+        function handleMove(direction) {
+            if (!gameState.gameStarted || gameState.gameOver) return;
+
+            switch (direction) {
+                case 'up':
+                    if (gameState.player.floor > 0) {
+                        gameState.player.floor--;
+                    }
+                    break;
+                case 'down':
+                    if (gameState.player.floor < FLOOR_COUNT - 1) {
+                        gameState.player.floor++;
+                    }
+                    break;
+                case 'left':
+                    gameState.player.x = Math.max(50, gameState.player.x - 15);
+                    break;
+                case 'right':
+                    gameState.player.x = Math.min(canvas.width - 50, gameState.player.x + 15);
+                    break;
+            }
+        }
+
+        function handleSpray() {
+            if (gameState.gameOver) {
+                // Restart game
+                resetGame();
+                gameState.gameStarted = true;
+                gameState.gameOver = false;
+                return;
+            }
+
+            if (!gameState.gameStarted) {
+                gameState.gameStarted = true;
+                return;
+            }
+
+            gameState.player.spraying = true;
+            gameState.player.sprayTimer = 300;
+        }
+
+        function resetGame() {
+            gameState = {
+                player: {
+                    floor: 1,
+                    x: 140,
+                    spraying: false,
+                    sprayTimer: 0
+                },
+                bugs: [],
+                plants: [true, true, true],
+                misses: 0,
+                score: 0,
+                gameOver: false,
+                gameStarted: false,
+                lastBugSpawn: 0,
+                bugSpawnInterval: 2000,
+                level: 1
+            };
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            switch (e.key) {
+                case 'ArrowUp':
+                    e.preventDefault();
+                    handleMove('up');
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    handleMove('down');
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    handleMove('left');
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    handleMove('right');
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    handleSpray();
+                    break;
+            }
+        });
+
+        // Button controls with touch support
+        document.getElementById('upBtn').addEventListener('click', () => handleMove('up'));
+        document.getElementById('downBtn').addEventListener('click', () => handleMove('down'));
+        document.getElementById('leftBtn').addEventListener('click', () => handleMove('left'));
+        document.getElementById('rightBtn').addEventListener('click', () => handleMove('right'));
+        document.getElementById('sprayBtn').addEventListener('click', handleSpray);
+
+        // Touch handlers for buttons
+        document.getElementById('upBtn').addEventListener('touchstart', (e) => { e.preventDefault(); handleMove('up'); }, { passive: false });
+        document.getElementById('downBtn').addEventListener('touchstart', (e) => { e.preventDefault(); handleMove('down'); }, { passive: false });
+        document.getElementById('leftBtn').addEventListener('touchstart', (e) => { e.preventDefault(); handleMove('left'); }, { passive: false });
+        document.getElementById('rightBtn').addEventListener('touchstart', (e) => { e.preventDefault(); handleMove('right'); }, { passive: false });
+        document.getElementById('sprayBtn').addEventListener('touchstart', (e) => { e.preventDefault(); handleSpray(); }, { passive: false });
+
+        // Touch controls for mobile
+        let touchStartX = 0;
+        let touchStartY = 0;
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+
+            if (Math.abs(deltaX) < 20 && Math.abs(deltaY) < 20) {
+                handleSpray();
+            } else if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                handleMove(deltaX > 0 ? 'right' : 'left');
+            } else {
+                handleMove(deltaY > 0 ? 'down' : 'up');
+            }
+        });
+
+        // Start game loop
+        requestAnimationFrame(gameLoop);
+
+        // How to Play toggle
+        document.getElementById('howBtn').addEventListener('click', function() {
+            document.getElementById('howOverlay').classList.add('show');
+        });
+        document.getElementById('closeHow').addEventListener('click', function() {
+            document.getElementById('howOverlay').classList.remove('show');
+        });
+        document.getElementById('howOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

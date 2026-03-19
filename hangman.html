@@ -27,11 +27,11 @@
     <div class="hangman" id="hangman"></div>
     <div class="word" id="word">_ _ _ _ _</div>
     <div class="keyboard" id="keyboard"></div>
-    <button onclick="init()">🔄 New Game</button>
+    <button onclick="newGame()">🔄 New Game</button>
 
     <script>
         const WORDS = ['APPLE', 'BRAVE', 'CRANE', 'DREAM', 'EAGLE', 'FLAME', 'GRAPE', 'HOUSE', 'IMAGE', 'JUICE', 'KNIFE', 'LEMON', 'MANGO', 'NIGHT', 'OCEAN', 'PIANO', 'QUEEN', 'RIVER', 'STORM', 'TIGER', 'ULTRA', 'VOICE', 'WATER', 'YOUTH', 'ZEBRA', 'BRAIN', 'CLOUD', 'DANCE', 'EARTH', 'FROST'];
-        let word, guessed, wrong, over;
+        let word, guessed, wrong, over, gameStarted = false;
         const STAGES = [
             '  +---+\n  |   |\n      |\n      |\n      |\n      |\n=========',
             '  +---+\n  |   |\n  O   |\n      |\n      |\n      |\n=========',
@@ -42,11 +42,17 @@
             '  +---+\n  |   |\n  O   |\n /|\\  |\n / \\  |\n      |\n========='
         ];
 
+        function newGame() {
+            if (gameStarted && !confirm('Game is in progress. Start a new game? Current progress will be lost.')) return;
+            init();
+        }
+
         function init() {
             word = WORDS[Math.floor(Math.random() * WORDS.length)];
             guessed = new Set();
             wrong = 0;
             over = false;
+            gameStarted = false;
             document.getElementById('wrong').textContent = '0';
             renderKeyboard();
             render();
@@ -70,6 +76,7 @@
         function guess(letter) {
             if (over || guessed.has(letter)) return;
             guessed.add(letter);
+            gameStarted = true;
             
             if (word.includes(letter)) {
                 // Correct

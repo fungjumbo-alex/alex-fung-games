@@ -30,11 +30,16 @@
         <div class="board-container"><div>Your Ships</div><div class="board" id="playerBoard"></div></div>
         <div class="board-container"><div>Enemy (Click to fire)</div><div class="board" id="enemyBoard"></div></div>
     </div>
-    <button onclick="init()">🔄 New Game</button>
+    <button onclick="newGame()">🔄 New Game</button>
 
     <script>
         const SIZE = 8;
-        let playerBoard, enemyBoard, playerShips, enemyShips, turn;
+        let playerBoard, enemyBoard, playerShips, enemyShips, turn, gameStarted = false;
+
+        function newGame() {
+            if (gameStarted && !confirm('Game is in progress. Start a new game? Current progress will be lost.')) return;
+            init();
+        }
 
         function init() {
             playerBoard = createBoard();
@@ -42,6 +47,7 @@
             playerShips = 5;
             enemyShips = 5;
             turn = 'player';
+            gameStarted = false;
             document.getElementById('status').textContent = 'Your turn - Click enemy board to fire!';
             document.getElementById('yourShips').textContent = 5;
             document.getElementById('aiShips').textContent = 5;
@@ -107,7 +113,8 @@
 
         function fire(r, c) {
             if (turn !== 'player' || enemyBoard[r][c] >= 2) return;
-            
+
+            gameStarted = true;
             if (enemyBoard[r][c] === 1) {
                 enemyBoard[r][c] = 2;
                 enemyShips--;

@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Game & Watch: Manhole</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .game-device {
+            background: linear-gradient(145deg, #3d3d3d 0%, #2a2a2a 50%, #1f1f1f 100%);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow:
+                0 10px 30px rgba(0,0,0,0.5),
+                inset 0 2px 3px rgba(255,255,255,0.1);
+        }
+
+        .game-title {
+            text-align: center;
+            color: #9bbc0f;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(155, 188, 15, 0.5);
+            letter-spacing: 2px;
+        }
+
+        .screen-bezel {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 10px;
+            border: 3px solid #222;
+        }
+
+        #gameCanvas {
+            display: block;
+            border-radius: 4px;
+            image-rendering: pixelated;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(145deg, #4a4a4a, #333);
+            color: #9bbc0f;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow:
+                0 4px 8px rgba(0,0,0,0.3),
+                inset 0 1px 2px rgba(255,255,255,0.1);
+            transition: transform 0.1s, box-shadow 0.1s;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .btn-action {
+            width: 60px;
+            height: 60px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .instructions {
+            color: #666;
+            font-size: 10px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 400px) {
+            .game-device {
+                padding: 10px;
+                border-radius: 15px;
+            }
+            .btn {
+                width: 45px;
+                height: 45px;
+            }
+            .btn-action {
+                width: 55px;
+                height: 55px;
+            }
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 8px;
+            left: 8px;
+            color: #9bbc0f;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-decoration: none;
+            z-index: 1000;
+            opacity: 0.7;
+            padding: 4px 8px;
+            border: 1px solid #9bbc0f;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.5);
+        }
+        .back-btn:hover { opacity: 1; }
+        .how-btn {
+            position: fixed;
+            top: 8px;
+            right: 8px;
+            color: #9bbc0f;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            z-index: 1000;
+            opacity: 0.7;
+            padding: 4px 8px;
+            border: 1px solid #9bbc0f;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.5);
+            cursor: pointer;
+        }
+        .how-btn:hover { opacity: 1; }
+        .how-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .how-overlay.show { display: flex; }
+        .how-box {
+            background: #1a1a1a;
+            border: 2px solid #9bbc0f;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 320px;
+            color: #9bbc0f;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            position: relative;
+        }
+        .how-box h3 { font-size: 18px; margin-bottom: 12px; text-align: center; }
+        .how-box p { margin: 8px 0; line-height: 1.5; color: #c8c8c8; }
+        .how-box .close-how {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            color: #9bbc0f;
+            font-size: 20px;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+    
+.back-btn{position:fixed;top:8px;left:8px;color:#9bbc0f;font-family:'Courier New',monospace;font-size:12px;text-decoration:none;z-index:1000;opacity:.7;padding:4px 8px;border:1px solid #9bbc0f;border-radius:4px;background:rgba(0,0,0,.5)}.back-btn:hover{opacity:1}
+.how-btn{position:fixed;top:8px;right:8px;color:#9bbc0f;font-family:'Courier New',monospace;font-size:12px;z-index:1000;opacity:.7;padding:4px 8px;border:1px solid #9bbc0f;border-radius:4px;background:rgba(0,0,0,.5);cursor:pointer}.how-btn:hover{opacity:1}
+.how-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:2000;justify-content:center;align-items:center}
+.how-overlay.show{display:flex}
+.how-box{background:#1a1a1a;border:2px solid #9bbc0f;border-radius:12px;padding:24px;max-width:320px;width:90%;color:#9bbc0f;font-family:'Courier New',monospace;font-size:14px;position:relative}
+.how-box h3{font-size:18px;margin-bottom:12px;text-align:center}
+.how-box p{margin:8px 0;line-height:1.5;color:#c8c8c8}
+.how-box .close-how{position:absolute;top:8px;right:12px;color:#9bbc0f;font-size:20px;cursor:pointer;background:none;border:none}
+</style>
+
+    <style>
+        @media (max-width: 500px) {
+            .game-shell { transform: scale(var(--shell-scale, 1)); transform-origin: top center; }
+        }
+    </style>
+    <script>
+    function scaleGame() {
+        const shell = document.querySelector('.game-shell');
+        if (!shell) return;
+        const vw = window.innerWidth;
+        const shellW = shell.offsetWidth;
+        if (shellW > vw - 16) {
+            const s = (vw - 16) / shellW;
+            shell.style.setProperty('--shell-scale', s);
+            shell.style.transform = 'scale(' + s + ')';
+            shell.style.transformOrigin = 'top center';
+            shell.style.marginBottom = '-' + (shell.offsetHeight * (1 - s)) + 'px';
+        } else {
+            shell.style.transform = '';
+            shell.style.marginBottom = '';
+        }
+    }
+    window.addEventListener('resize', scaleGame);
+    window.addEventListener('load', function() { setTimeout(scaleGame, 100); });
+    document.addEventListener('DOMContentLoaded', function() { setTimeout(scaleGame, 200); });
+    
+    document.body.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+    document.body.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+    // Ensure all buttons work with touch
+    document.querySelectorAll('button, .btn, .control-btn').forEach(function(btn) {
+        if (!btn._touchFixed) {
+            btn._touchFixed = true;
+            var handlers = btn.onclick;
+            if (handlers) {
+                btn.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    btn.click();
+                }, { passive: false });
+            }
+        }
+    });
+</script>
+    
+</head>
+<body>
+    <a href="index.html" class="back-btn">← Back to Games</a>
+    <div class="how-btn" id="howBtn">?</div>
+    <div class="how-overlay" id="howOverlay">
+        <div class="how-box">
+            <button class="close-how" id="closeHow">×</button>
+            <h3>How to Play</h3>
+            <p><strong>Objective:</strong> Cover manholes to save pedestrians from falling!</p>
+            <p><strong>Controls:</strong></p>
+            <p>• Arrow Keys ← → to select manhole</p>
+            <p>• Space or COVER button to place cover</p>
+            <p><strong>Scoring:</strong></p>
+            <p>• +10 points for saving pedestrians</p>
+            <p>• +5 points when pedestrians cross safely</p>
+            <p>• 3 misses = Game Over</p>
+        </div>
+    </div>
+    <div class="game-device">
+        <div class="game-title">MANHOLE</div>
+        <div class="screen-bezel">
+            <canvas id="gameCanvas" width="280" height="320"></canvas>
+        </div>
+        <div class="controls">
+            <button class="btn" id="btnLeft">&#9664;</button>
+            <button class="btn btn-action" id="btnCover">COVER</button>
+            <button class="btn" id="btnRight">&#9654;</button>
+        </div>
+        <div class="instructions">
+            Arrow Keys: Move | Space: Cover | Tap buttons for mobile
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // LCD Colors
+        const LCD_BG = '#2a2a2a';
+        const LCD_ON = '#9bbc0f';
+        const LCD_DIM = '#4a5523';
+        const LCD_GHOST = '#3a4420';
+
+        // Game constants
+        const MANHOLE_WIDTH = 60;
+        const MANHOLE_HEIGHT = 50;
+        const MANHOLE_Y = 200;
+        const MANHOLE_GAP = 40;
+        const MANHOLE_LEFT_X = (canvas.width / 2) - MANHOLE_WIDTH - (MANHOLE_GAP / 2);
+        const MANHOLE_RIGHT_X = (canvas.width / 2) + (MANHOLE_GAP / 2);
+
+        // Game state
+        let gameState = {
+            playerPos: 0, // 0 = left, 1 = right
+            covers: [false, false], // cover on/off for each manhole
+            pedestrians: [],
+            misses: 0,
+            score: 0,
+            gameOver: false,
+            gameStarted: false,
+            difficulty: 1,
+            spawnTimer: 0,
+            spawnInterval: 120
+        };
+
+        // Pedestrian types
+        const PEDESTRIAN_TYPES = [
+            { speed: 1, frames: ['walk1', 'walk2'] },
+            { speed: 1.5, frames: ['walk1', 'walk2'] },
+            { speed: 2, frames: ['run1', 'run2'] }
+        ];
+
+        class Pedestrian {
+            constructor() {
+                this.direction = Math.random() < 0.5 ? 1 : -1; // 1 = left to right, -1 = right to left
+                this.lane = Math.floor(Math.random() * 2); // 0 = top lane, 1 = bottom lane
+                this.typeIndex = Math.min(Math.floor(Math.random() * gameState.difficulty), 2);
+                this.type = PEDESTRIAN_TYPES[this.typeIndex];
+
+                // Set initial position based on direction
+                if (this.direction === 1) {
+                    this.x = -20;
+                } else {
+                    this.x = canvas.width + 20;
+                }
+
+                // Lane Y positions
+                this.y = this.lane === 0 ? 100 : 150;
+                this.targetManhole = this.lane; // Which manhole this pedestrian will cross
+
+                this.frame = 0;
+                this.frameTimer = 0;
+                this.falling = false;
+                this.fallFrame = 0;
+                this.saved = false;
+                this.crossedManhole = false;
+            }
+
+            update() {
+                if (this.saved || this.falling) {
+                    if (this.falling) {
+                        this.fallFrame++;
+                        if (this.fallFrame > 20) {
+                            return false; // Remove
+                        }
+                    }
+                    return true;
+                }
+
+                this.x += this.direction * this.type.speed;
+
+                // Animation
+                this.frameTimer++;
+                if (this.frameTimer > 8) {
+                    this.frame = (this.frame + 1) % 2;
+                    this.frameTimer = 0;
+                }
+
+                // Check if crossing manhole
+                const manholeX = this.targetManhole === 0 ? MANHOLE_LEFT_X : MANHOLE_RIGHT_X;
+                const manholeCenter = manholeX + MANHOLE_WIDTH / 2;
+
+                if (!this.crossedManhole) {
+                    if (Math.abs(this.x - manholeCenter) < 15) {
+                        this.crossedManhole = true;
+                        // Check if cover is on
+                        if (gameState.covers[this.targetManhole]) {
+                            this.saved = true;
+                            gameState.score += 10;
+                        } else {
+                            this.falling = true;
+                            gameState.misses++;
+                            if (gameState.misses >= 3) {
+                                gameState.gameOver = true;
+                            }
+                        }
+                    }
+                }
+
+                // Remove if off screen
+                if ((this.direction === 1 && this.x > canvas.width + 30) ||
+                    (this.direction === -1 && this.x < -30)) {
+                    if (!this.saved && !this.falling) {
+                        gameState.score += 5; // Survived without falling
+                    }
+                    return false;
+                }
+
+                return true;
+            }
+
+            draw() {
+                ctx.save();
+
+                if (this.falling) {
+                    // Falling animation
+                    const fallOffset = this.fallFrame * 3;
+                    ctx.globalAlpha = Math.max(0, 1 - this.fallFrame / 20);
+                    this.drawPerson(this.x, this.y + fallOffset, true);
+                } else if (this.saved) {
+                    // Walking over cover (slightly raised)
+                    this.drawPerson(this.x, this.y - 5, false);
+                } else {
+                    this.drawPerson(this.x, this.y, false);
+                }
+
+                ctx.restore();
+            }
+
+            drawPerson(x, y, falling) {
+                ctx.fillStyle = LCD_ON;
+
+                if (falling) {
+                    // Tumbling pose
+                    ctx.fillRect(x - 6, y - 8, 12, 8);
+                    ctx.fillRect(x - 4, y, 8, 10);
+                    // Arms spread
+                    ctx.fillRect(x - 10, y, 6, 3);
+                    ctx.fillRect(x + 4, y, 6, 3);
+                } else {
+                    // Walking pose
+                    const legOffset = this.frame === 0 ? 0 : 2;
+
+                    // Head
+                    ctx.fillRect(x - 4, y - 12, 8, 8);
+
+                    // Body
+                    ctx.fillRect(x - 5, y - 4, 10, 12);
+
+                    // Legs
+                    if (this.frame === 0) {
+                        ctx.fillRect(x - 4, y + 8, 3, 8);
+                        ctx.fillRect(x + 1, y + 8, 3, 8);
+                    } else {
+                        ctx.fillRect(x - 5, y + 8, 3, 6);
+                        ctx.fillRect(x + 2, y + 8, 3, 10);
+                    }
+                }
+            }
+        }
+
+        function drawPixelRect(x, y, w, h, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(Math.floor(x), Math.floor(y), w, h);
+        }
+
+        function drawManhole(x, y, index) {
+            // Hole
+            ctx.fillStyle = LCD_DIM;
+            ctx.fillRect(x, y, MANHOLE_WIDTH, MANHOLE_HEIGHT);
+
+            // Hole details (dark interior)
+            ctx.fillStyle = LCD_BG;
+            ctx.fillRect(x + 4, y + 4, MANHOLE_WIDTH - 8, MANHOLE_HEIGHT - 8);
+
+            // Grid pattern in hole
+            ctx.fillStyle = LCD_GHOST;
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 2; j++) {
+                    ctx.fillRect(x + 8 + i * 16, y + 8 + j * 18, 12, 14);
+                }
+            }
+
+            // Cover (if on)
+            if (gameState.covers[index]) {
+                ctx.fillStyle = LCD_ON;
+                ctx.fillRect(x + 2, y + 2, MANHOLE_WIDTH - 4, MANHOLE_HEIGHT - 4);
+
+                // Cover pattern
+                ctx.fillStyle = LCD_DIM;
+                ctx.fillRect(x + 8, y + 8, MANHOLE_WIDTH - 16, MANHOLE_HEIGHT - 16);
+
+                // Cross pattern
+                ctx.fillStyle = LCD_ON;
+                ctx.fillRect(x + MANHOLE_WIDTH/2 - 2, y + 8, 4, MANHOLE_HEIGHT - 16);
+                ctx.fillRect(x + 8, y + MANHOLE_HEIGHT/2 - 2, MANHOLE_WIDTH - 16, 4);
+            }
+        }
+
+        function drawPlayer() {
+            const x = gameState.playerPos === 0 ? MANHOLE_LEFT_X : MANHOLE_RIGHT_X;
+            const centerX = x + MANHOLE_WIDTH / 2;
+
+            // Player indicator (arrow pointing down)
+            ctx.fillStyle = LCD_ON;
+            ctx.beginPath();
+            ctx.moveTo(centerX, MANHOLE_Y - 30);
+            ctx.lineTo(centerX - 8, MANHOLE_Y - 42);
+            ctx.lineTo(centerX + 8, MANHOLE_Y - 42);
+            ctx.closePath();
+            ctx.fill();
+
+            // Worker figure
+            const workerY = MANHOLE_Y - 65;
+            ctx.fillRect(centerX - 5, workerY - 8, 10, 8); // Head
+            ctx.fillRect(centerX - 6, workerY, 12, 14); // Body
+            ctx.fillRect(centerX - 8, workerY + 14, 4, 8); // Left leg
+            ctx.fillRect(centerX + 4, workerY + 14, 4, 8); // Right leg
+            ctx.fillRect(centerX - 10, workerY + 4, 4, 3); // Left arm
+            ctx.fillRect(centerX + 6, workerY + 4, 4, 3); // Right arm
+        }
+
+        function drawStreet() {
+            // Street background
+            ctx.fillStyle = LCD_DIM;
+            ctx.fillRect(0, 80, canvas.width, 180);
+
+            // Lane markings
+            ctx.fillStyle = LCD_GHOST;
+            for (let i = 0; i < canvas.width; i += 30) {
+                ctx.fillRect(i, 125, 15, 3);
+                ctx.fillRect(i, 175, 15, 3);
+            }
+
+            // Sidewalks
+            ctx.fillStyle = LCD_DIM;
+            ctx.fillRect(0, 60, canvas.width, 25);
+            ctx.fillRect(0, 255, canvas.width, 25);
+
+            // Sidewalk details
+            ctx.fillStyle = LCD_GHOST;
+            for (let i = 0; i < canvas.width; i += 20) {
+                ctx.fillRect(i, 60, 1, 25);
+                ctx.fillRect(i, 255, 1, 25);
+            }
+        }
+
+        function drawUI() {
+            // Score
+            ctx.fillStyle = LCD_ON;
+            ctx.font = '12px monospace';
+            ctx.textAlign = 'left';
+            ctx.fillText('SCORE', 10, 25);
+            ctx.fillText(gameState.score.toString().padStart(4, '0'), 10, 40);
+
+            // Misses
+            ctx.textAlign = 'right';
+            ctx.fillText('MISS', canvas.width - 10, 25);
+            for (let i = 0; i < 3; i++) {
+                ctx.fillStyle = i < gameState.misses ? LCD_ON : LCD_GHOST;
+                ctx.fillRect(canvas.width - 50 + i * 14, 30, 10, 10);
+            }
+
+            // Difficulty indicator
+            ctx.fillStyle = LCD_DIM;
+            ctx.font = '8px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('LEVEL ' + gameState.difficulty, canvas.width / 2, 20);
+        }
+
+        function drawGameOver() {
+            ctx.fillStyle = LCD_ON;
+            ctx.font = 'bold 20px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 20);
+
+            ctx.font = '12px monospace';
+            ctx.fillText('SCORE: ' + gameState.score, canvas.width / 2, canvas.height / 2 + 10);
+
+            ctx.font = '10px monospace';
+            ctx.fillStyle = LCD_DIM;
+            ctx.fillText('TAP OR PRESS SPACE', canvas.width / 2, canvas.height / 2 + 40);
+        }
+
+        function drawStartScreen() {
+            ctx.fillStyle = LCD_ON;
+            ctx.font = 'bold 16px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('MANHOLE', canvas.width / 2, canvas.height / 2 - 40);
+
+            ctx.font = '10px monospace';
+            ctx.fillStyle = LCD_DIM;
+            ctx.fillText('GAME & WATCH', canvas.width / 2, canvas.height / 2 - 20);
+
+            ctx.font = '12px monospace';
+            ctx.fillStyle = LCD_ON;
+            ctx.fillText('TAP OR PRESS', canvas.width / 2, canvas.height / 2 + 20);
+            ctx.fillText('SPACE TO START', canvas.width / 2, canvas.height / 2 + 40);
+
+            // Demo pedestrians
+            ctx.fillStyle = LCD_GHOST;
+            ctx.fillRect(40, 100, 8, 20);
+            ctx.fillRect(220, 150, 8, 20);
+        }
+
+        function spawnPedestrian() {
+            gameState.pedestrians.push(new Pedestrian());
+        }
+
+        function updateDifficulty() {
+            // Increase difficulty based on score
+            gameState.difficulty = Math.min(5, 1 + Math.floor(gameState.score / 100));
+            gameState.spawnInterval = Math.max(40, 120 - (gameState.difficulty - 1) * 20);
+        }
+
+        function resetGame() {
+            gameState = {
+                playerPos: 0,
+                covers: [false, false],
+                pedestrians: [],
+                misses: 0,
+                score: 0,
+                gameOver: false,
+                gameStarted: true,
+                difficulty: 1,
+                spawnTimer: 0,
+                spawnInterval: 120
+            };
+        }
+
+        function gameLoop() {
+            // Clear canvas
+            ctx.fillStyle = LCD_BG;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (!gameState.gameStarted) {
+                drawStreet();
+                drawManhole(MANHOLE_LEFT_X, MANHOLE_Y, 0);
+                drawManhole(MANHOLE_RIGHT_X, MANHOLE_Y, 1);
+                drawStartScreen();
+            } else if (gameState.gameOver) {
+                drawStreet();
+                drawManhole(MANHOLE_LEFT_X, MANHOLE_Y, 0);
+                drawManhole(MANHOLE_RIGHT_X, MANHOLE_Y, 1);
+                gameState.pedestrians.forEach(p => p.draw());
+                drawUI();
+                drawGameOver();
+            } else {
+                // Spawn pedestrians
+                gameState.spawnTimer++;
+                if (gameState.spawnTimer >= gameState.spawnInterval) {
+                    spawnPedestrian();
+                    gameState.spawnTimer = 0;
+                }
+
+                // Update difficulty
+                updateDifficulty();
+
+                // Update pedestrians
+                gameState.pedestrians = gameState.pedestrians.filter(p => p.update());
+
+                // Draw everything
+                drawStreet();
+                drawManhole(MANHOLE_LEFT_X, MANHOLE_Y, 0);
+                drawManhole(MANHOLE_RIGHT_X, MANHOLE_Y, 1);
+                gameState.pedestrians.forEach(p => p.draw());
+                drawPlayer();
+                drawUI();
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Controls
+        function moveLeft() {
+            if (gameState.gameStarted && !gameState.gameOver) {
+                gameState.playerPos = 0;
+            }
+        }
+
+        function moveRight() {
+            if (gameState.gameStarted && !gameState.gameOver) {
+                gameState.playerPos = 1;
+            }
+        }
+
+        function toggleCover() {
+            if (!gameState.gameStarted) {
+                resetGame();
+                return;
+            }
+
+            if (gameState.gameOver) {
+                resetGame();
+                return;
+            }
+
+            gameState.covers[gameState.playerPos] = !gameState.covers[gameState.playerPos];
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            switch(e.code) {
+                case 'ArrowLeft':
+                    moveLeft();
+                    e.preventDefault();
+                    break;
+                case 'ArrowRight':
+                    moveRight();
+                    e.preventDefault();
+                    break;
+                case 'Space':
+                    toggleCover();
+                    e.preventDefault();
+                    break;
+            }
+        });
+
+        // Button controls
+        document.getElementById('btnLeft').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            moveLeft();
+        });
+        document.getElementById('btnLeft').addEventListener('click', moveLeft);
+
+        document.getElementById('btnRight').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            moveRight();
+        });
+        document.getElementById('btnRight').addEventListener('click', moveRight);
+
+        document.getElementById('btnCover').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            toggleCover();
+        });
+        document.getElementById('btnCover').addEventListener('click', toggleCover);
+
+        // Prevent zoom on double tap
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // Canvas tap to start/restart
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (!gameState.gameStarted || gameState.gameOver) {
+                resetGame();
+                gameState.gameStarted = true;
+            }
+        }, { passive: false });
+
+        // Start game loop
+        gameLoop();
+
+        // How to Play toggle
+        document.getElementById('howBtn').addEventListener('click', function() {
+            document.getElementById('howOverlay').classList.add('show');
+        });
+        document.getElementById('closeHow').addEventListener('click', function() {
+            document.getElementById('howOverlay').classList.remove('show');
+        });
+        document.getElementById('howOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

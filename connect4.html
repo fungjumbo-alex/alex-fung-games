@@ -26,18 +26,24 @@
     <h1>🔴 Connect Four 🟡</h1>
     <div class="info" id="info">Your turn</div>
     <div class="board-container"><div class="board" id="board"></div></div>
-    <button onclick="init()">🔄 New Game</button>
+    <button onclick="newGame()">🔄 New Game</button>
 
     <script>
         const ROWS = 6, COLS = 7;
-        let board, turn, over, wins;
+        let board, turn, over, wins, gameStarted = false;
         let scores = { red: 0, yellow: 0 };
+
+        function newGame() {
+            if (gameStarted && !confirm('Game is in progress. Start a new game? Current progress will be lost.')) return;
+            init();
+        }
 
         function init() {
             board = Array(ROWS).fill().map(() => Array(COLS).fill(null));
             turn = 'red';
             over = false;
             wins = [];
+            gameStarted = false;
             document.getElementById('info').textContent = 'Your turn';
             render();
         }
@@ -86,7 +92,8 @@
             if (over || turn !== 'red') return;
             const row = getRow(col);
             if (row < 0) return;
-            
+
+            gameStarted = true;
             board[row][col] = 'red';
             if (checkWin(row, col, 'red')) {
                 over = true;

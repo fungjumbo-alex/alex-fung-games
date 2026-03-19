@@ -21,11 +21,16 @@
     <h1>🃏 Memory Match</h1>
     <div class="info">Moves: <b id="moves">0</b> | Pairs: <b id="pairs">0</b>/8</div>
     <div class="grid" id="grid"></div>
-    <button onclick="init()">New Game</button>
+    <button onclick="newGame()">New Game</button>
     <script>
         const emojis = ['🍎','🍊','🍋','🍇','🍓','🍒','🥝','🍑'];
-        let cards, flipped, matched, moves;
+        let cards, flipped, matched, moves, gameStarted = false;
         let lockBoard = false;
+
+        function newGame() {
+            if (gameStarted && !confirm('Game is in progress. Start a new game? Current progress will be lost.')) return;
+            init();
+        }
 
         function init() {
             const deck = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
@@ -33,6 +38,7 @@
             flipped = [];
             matched = 0;
             moves = 0;
+            gameStarted = false;
             lockBoard = false;
             document.getElementById('moves').textContent = 0;
             document.getElementById('pairs').textContent = 0;
@@ -59,6 +65,7 @@
 
         function flip(i) {
             if (lockBoard || cards[i].flipped || cards[i].matched) return;
+            gameStarted = true;
             cards[i].flipped = true;
             flipped.push(i);
             render();

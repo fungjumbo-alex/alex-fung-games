@@ -4,70 +4,670 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎮 Alex's Games</title>
+    
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f0f1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Games">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; padding: 15px; color: #fff; }
-        .container { max-width: 900px; margin: 0 auto; }
-        h1 { text-align: center; font-size: 2em; margin-bottom: 5px; }
-        .stats { text-align: center; margin-bottom: 20px; font-size: 0.9em; color: #888; }
-        .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
-        .game-card { background: rgba(255,255,255,0.05); border-radius: 10px; padding: 10px; transition: all 0.2s; text-decoration: none; color: #fff; display: flex; flex-direction: column; align-items: center; text-align: center; }
-        .game-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-3px); }
-        .game-icon { font-size: 1.8em; margin-bottom: 4px; }
-        .game-title { font-size: 0.8em; font-weight: bold; }
-        .category { margin-top: 18px; margin-bottom: 8px; font-size: 1em; color: #4a90d9; border-bottom: 2px solid #4a90d9; padding-bottom: 4px; }
+        
+        :root {
+            --bg-primary: #0a0a12;
+            --bg-secondary: #12121f;
+            --bg-card: rgba(255,255,255,0.04);
+            --bg-card-hover: rgba(255,255,255,0.08);
+            --border: rgba(255,255,255,0.06);
+            --text-primary: #f0f0f5;
+            --text-secondary: #8888aa;
+            --accent: #6c5ce7;
+            --accent-glow: rgba(108, 92, 231, 0.3);
+            --arcade-color: #ff6b6b;
+            --puzzle-color: #ffd93d;
+            --cards-color: #6bcb77;
+            --board-color: #4d96ff;
+            --new-badge: #00d2d3;
+            --radius: 16px;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        
+        /* Ambient background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at 20% 20%, rgba(108, 92, 231, 0.08) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 80%, rgba(77, 150, 255, 0.05) 0%, transparent 50%),
+                        radial-gradient(ellipse at 50% 50%, rgba(255, 107, 107, 0.03) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 24px 16px 40px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        
+        .header h1 {
+            font-size: 2.2em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, #a0a0cc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+        
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95em;
+            font-weight: 400;
+        }
+        
+        /* Search */
+        .search-wrapper {
+            position: relative;
+            max-width: 400px;
+            margin: 0 auto 24px;
+        }
+        
+        .search-wrapper svg {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95em;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        .search-input::placeholder { color: var(--text-secondary); }
+        
+        .search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        
+        /* Stats */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-pill {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.82em;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .stat-pill .count {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+        
+        /* Category Tabs */
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+        
+        .category-tabs::-webkit-scrollbar { display: none; }
+        
+        .tab {
+            padding: 8px 18px;
+            border-radius: 10px;
+            font-size: 0.88em;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            user-select: none;
+        }
+        
+        .tab:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+        
+        .tab.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+        
+        .tab[data-cat="arcade"].active { background: var(--arcade-color); border-color: var(--arcade-color); box-shadow: 0 4px 16px rgba(255,107,107,0.3); }
+        .tab[data-cat="puzzle"].active { background: var(--puzzle-color); border-color: var(--puzzle-color); color: #1a1a2e; box-shadow: 0 4px 16px rgba(255,217,61,0.3); }
+        .tab[data-cat="cards"].active { background: var(--cards-color); border-color: var(--cards-color); color: #1a1a2e; box-shadow: 0 4px 16px rgba(107,203,119,0.3); }
+        .tab[data-cat="board"].active { background: var(--board-color); border-color: var(--board-color); box-shadow: 0 4px 16px rgba(77,150,255,0.3); }
+        .tab[data-cat="favorites"].active { background: linear-gradient(135deg, #ffd93d, #ff9f43); border-color: #ffd93d; color: #1a1a2e; box-shadow: 0 4px 16px rgba(255,217,61,0.3); }
+        
+        /* Favorite button */
+        .fav-btn {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            color: rgba(255,255,255,0.4);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3;
+            transition: all 0.2s;
+            line-height: 1;
+        }
+        
+        .fav-btn:hover {
+            background: rgba(0,0,0,0.7);
+            transform: scale(1.15);
+        }
+        
+        .fav-btn.active {
+            color: #ffd93d;
+            background: rgba(255,217,61,0.2);
+            text-shadow: 0 0 8px rgba(255,217,61,0.5);
+        }
+        
+        .fav-btn.active .fav-star { font-style: normal; }
+        
+        .game-card.is-fav {
+            border-color: rgba(255,217,61,0.2);
+        }
+        
+        @media (max-width: 480px) {
+            .fav-btn { width: 24px; height: 24px; font-size: 12px; top: 4px; left: 4px; }
+        }
+        
+        /* Games Grid */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+        }
+        
+        .game-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 8px 14px;
+            text-decoration: none;
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: var(--radius);
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+        
+        .game-card[data-category="arcade"]::before { background: radial-gradient(circle at 50% 30%, rgba(255,107,107,0.1), transparent 70%); }
+        .game-card[data-category="puzzle"]::before { background: radial-gradient(circle at 50% 30%, rgba(255,217,61,0.1), transparent 70%); }
+        .game-card[data-category="cards"]::before { background: radial-gradient(circle at 50% 30%, rgba(107,203,119,0.1), transparent 70%); }
+        .game-card[data-category="board"]::before { background: radial-gradient(circle at 50% 30%, rgba(77,150,255,0.1), transparent 70%); }
+        
+        .game-card:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-4px);
+            border-color: rgba(255,255,255,0.12);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+        }
+        
+        .game-card:hover::before { opacity: 1; }
+        
+        .game-card:active {
+            transform: translateY(-1px) scale(0.97);
+        }
+        
+        .game-icon {
+            font-size: 2.2em;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+        
+        .game-title {
+            font-size: 0.78em;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+            line-height: 1.3;
+            letter-spacing: 0.01em;
+        }
+        
+        .new-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--new-badge);
+            color: #0a0a12;
+            font-size: 0.55em;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            z-index: 2;
+        }
+        
+        /* Category Sections */
+        .category-section {
+            margin-bottom: 28px;
+            animation: fadeInUp 0.4s ease-out;
+        }
+        
+        .category-section.hidden { display: none; }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        
+        .section-header .section-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1em;
+        }
+        
+        .section-header .section-icon.arcade { background: rgba(255,107,107,0.15); }
+        .section-header .section-icon.puzzle { background: rgba(255,217,61,0.15); }
+        .section-header .section-icon.cards { background: rgba(107,203,119,0.15); }
+        .section-header .section-icon.board { background: rgba(77,150,255,0.15); }
+        
+        .section-header h2 {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .section-header .section-count {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            font-weight: 500;
+            margin-left: auto;
+        }
+        
+        /* No results */
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+        
+        .no-results .no-results-icon { font-size: 3em; margin-bottom: 12px; }
+        .no-results p { font-size: 1em; }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .game-card { animation: fadeInUp 0.3s ease-out backwards; }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px 0;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 0.82em;
+        }
+        
+        .footer a { color: var(--accent); text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+        
+        /* Mobile tweaks */
+        @media (max-width: 480px) {
+            .container { padding: 16px 12px 30px; }
+            .header h1 { font-size: 1.7em; }
+            .games-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; }
+            .game-card { padding: 12px 6px 10px; border-radius: 12px; }
+            .game-icon { font-size: 1.8em; margin-bottom: 6px; }
+            .game-title { font-size: 0.72em; }
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎮 Alex's Games</h1>
-        <div class="stats">30 games</div>
+        <div class="header">
+            <h1>🎮 Alex's Games</h1>
+            <div class="subtitle">66 free browser games — no downloads needed</div>
+        </div>
         
-        <div class="category">🎯 Arcade</div>
-        <div class="games-grid">
-            <a href="snake.html" class="game-card"><div class="game-icon">🐍</div><div class="game-title">Snake</div></a>
-            <a href="tetris.html" class="game-card"><div class="game-icon">🧱</div><div class="game-title">Tetris</div></a>
-            <a href="breakout.html" class="game-card"><div class="game-icon">💥</div><div class="game-title">Breakout</div></a>
-            <a href="pong.html" class="game-card"><div class="game-icon">🏓</div><div class="game-title">Pong</div></a>
-            <a href="flappy.html" class="game-card"><div class="game-icon">🐦</div><div class="game-title">Flappy</div></a>
-            <a href="whack.html" class="game-card"><div class="game-icon">🔨</div><div class="game-title">Whack</div></a>
-            <a href="invaders.html" class="game-card"><div class="game-icon">👾</div><div class="game-title">Invaders</div></a>
-            <a href="frogger.html" class="game-card"><div class="game-icon">🐸</div><div class="game-title">Frogger</div></a>
+        <div class="search-wrapper">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" class="search-input" id="searchInput" placeholder="Search games..." autocomplete="off">
         </div>
-
-        <div class="category">🧩 Puzzle</div>
-        <div class="games-grid">
-            <a href="2048.html" class="game-card"><div class="game-icon">🔢</div><div class="game-title">2048</div></a>
-            <a href="minesweeper.html" class="game-card"><div class="game-icon">💣</div><div class="game-title">Minesweeper</div></a>
-            <a href="sudoku.html" class="game-card"><div class="game-icon">🧩</div><div class="game-title">Sudoku</div></a>
-            <a href="wordle.html" class="game-card"><div class="game-icon">📝</div><div class="game-title">Wordle</div></a>
-            <a href="puzzle15.html" class="game-card"><div class="game-icon">🔲</div><div class="game-title">15 Puzzle</div></a>
-            <a href="memory.html" class="game-card"><div class="game-icon">🃏</div><div class="game-title">Memory</div></a>
-            <a href="simon.html" class="game-card"><div class="game-icon">🎵</div><div class="game-title">Simon</div></a>
-            <a href="bubble.html" class="game-card"><div class="game-icon">🫧</div><div class="game-title">Bubble</div></a>
-            <a href="mastermind.html" class="game-card"><div class="game-icon">🔐</div><div class="game-title">Mastermind</div></a>
+        
+        <div class="stats-bar">
+            <span class="stat-pill"><span class="count">66</span> games</span>
+            <span class="stat-pill"><span class="count">4</span> categories</span>
+            <span class="stat-pill">✨ <span class="count">40</span> new</span>
         </div>
-
-        <div class="category">🎴 Cards</div>
-        <div class="games-grid">
-            <a href="blackjack.html" class="game-card"><div class="game-icon">🃏</div><div class="game-title">Blackjack</div></a>
-            <a href="big2.html" class="game-card"><div class="game-icon">🎴</div><div class="game-title">鋤大D</div></a>
-            <a href="yahtzee.html" class="game-card"><div class="game-icon">🎲</div><div class="game-title">Yahtzee</div></a>
-            <a href="solitaire.html" class="game-card"><div class="game-icon">♠️</div><div class="game-title">Solitaire</div></a>
+        
+        <div class="category-tabs" id="categoryTabs">
+            <div class="tab" data-cat="favorites">⭐ Favorites</div>
+            <div class="tab active" data-cat="all">🎮 All</div>
+            <div class="tab" data-cat="arcade">🎯 Arcade</div>
+            <div class="tab" data-cat="puzzle">🧩 Puzzle</div>
+            <div class="tab" data-cat="cards">🎴 Cards</div>
+            <div class="tab" data-cat="board">♟️ Board</div>
         </div>
-
-        <div class="category">🎮 Board</div>
-        <div class="games-grid">
-            <a href="tictactoe.html" class="game-card"><div class="game-icon">⭕</div><div class="game-title">Tic-Tac-Toe</div></a>
-            <a href="connect4.html" class="game-card"><div class="game-icon">🔴</div><div class="game-title">Connect 4</div></a>
-            <a href="chinese-chess.html" class="game-card"><div class="game-icon">🏯</div><div class="game-title">象棋</div></a>
-            <a href="checkers.html" class="game-card"><div class="game-icon">⚫</div><div class="game-title">Checkers</div></a>
-            <a href="reversi.html" class="game-card"><div class="game-icon">⚪</div><div class="game-title">Reversi</div></a>
-            <a href="rps.html" class="game-card"><div class="game-icon">✊</div><div class="game-title">RPS</div></a>
-            <a href="hangman.html" class="game-card"><div class="game-icon">🎯</div><div class="game-title">Hangman</div></a>
-            <a href="battleship.html" class="game-card"><div class="game-icon">🚢</div><div class="game-title">Battleship</div></a>
-            <a href="dotsboxes.html" class="game-card"><div class="game-icon">📦</div><div class="game-title">Dots Boxes</div></a>
+        
+        <div id="gamesContainer"></div>
+        
+        <div class="no-results" id="noResults" style="display:none">
+            <div class="no-results-icon">🔍</div>
+            <p>No games found. Try a different search.</p>
+        </div>
+        
+        <div class="footer">
+            Made with ❤️ — tap a game and start playing instantly
         </div>
     </div>
+    
+    <script>
+    const games = [
+        // Arcade
+        { name: 'Snake', icon: '🐍', href: 'snake.html', category: 'arcade' },
+        { name: 'Tetris', icon: '🧱', href: 'tetris.html', category: 'arcade' },
+        { name: 'Breakout', icon: '💥', href: 'breakout.html', category: 'arcade' },
+        { name: 'Pong', icon: '🏓', href: 'pong.html', category: 'arcade' },
+        { name: 'Flappy', icon: '🐦', href: 'flappy.html', category: 'arcade' },
+        { name: 'Whack', icon: '🔨', href: 'whack.html', category: 'arcade' },
+        { name: 'Invaders', icon: '👾', href: 'invaders.html', category: 'arcade' },
+        { name: 'Chopper', icon: '🚁', href: 'chopper.html', category: 'arcade', isNew: true },
+        { name: 'Asteroids', icon: '☄️', href: 'asteroids.html', category: 'arcade', isNew: true },
+        { name: 'Oil Panic', icon: '🛢️', href: 'oil-panic.html', category: 'arcade', isNew: true },
+        { name: 'Fire Attack', icon: '🔥', href: 'fire-attack.html', category: 'arcade', isNew: true },
+        { name: 'Chef', icon: '👨‍🍳', href: 'chef.html', category: 'arcade', isNew: true },
+        // Puzzle
+        { name: '2048', icon: '🔢', href: '2048.html', category: 'puzzle' },
+        { name: 'Minesweeper', icon: '💣', href: 'minesweeper.html', category: 'puzzle' },
+        { name: 'Sudoku', icon: '🧩', href: 'sudoku.html', category: 'puzzle' },
+        { name: 'Wordle', icon: '📝', href: 'wordle.html', category: 'puzzle' },
+        { name: '15 Puzzle', icon: '🔲', href: 'puzzle15.html', category: 'puzzle' },
+        { name: 'Memory', icon: '🃏', href: 'memory.html', category: 'puzzle' },
+        { name: 'Simon', icon: '🎵', href: 'simon.html', category: 'puzzle' },
+        { name: 'Bubble', icon: '🫧', href: 'bubble.html', category: 'puzzle' },
+        { name: 'Mastermind', icon: '🔐', href: 'mastermind.html', category: 'puzzle' },
+        { name: 'Gomoku', icon: '⚫', href: 'gomoku.html', category: 'puzzle', isNew: true },
+        { name: 'Mancala', icon: '🪨', href: 'mancala.html', category: 'puzzle', isNew: true },
+        { name: 'Fruit Merge', icon: '🍉', href: 'fruit-merge.html', category: 'puzzle', isNew: true },
+        { name: 'Tap Match', icon: '👆', href: 'tap-match.html', category: 'puzzle', isNew: true },
+        { name: 'Mahjong', icon: '🀄', href: 'mahjong.html', category: 'puzzle', isNew: true },
+        { name: 'Sound Memory', icon: '🔇', href: 'sound-memory.html', category: 'puzzle', isNew: true },
+        { name: 'Sokoban', icon: '📦', href: 'sokoban.html', category: 'puzzle', isNew: true },
+        { name: 'Tangram', icon: '🔷', href: 'tangram.html', category: 'puzzle', isNew: true },
+        { name: 'Parachute', icon: '🪂', href: 'parachute.html', category: 'puzzle', isNew: true },
+        { name: 'Egg', icon: '🥚', href: 'egg.html', category: 'puzzle', isNew: true },
+        { name: 'Manhole', icon: '🕳️', href: 'manhole.html', category: 'puzzle', isNew: true },
+        { name: 'Green House', icon: '🌿', href: 'green-house.html', category: 'puzzle', isNew: true },
+        { name: 'Gold Cliff', icon: '⛏️', href: 'gold-cliff.html', category: 'puzzle', isNew: true },
+        { name: 'Boggle', icon: '🔤', href: 'boggle.html', category: 'puzzle', isNew: true },
+        // Cards
+        { name: 'Blackjack', icon: '🃏', href: 'blackjack.html', category: 'cards' },
+        { name: '鋤大D', icon: '🎴', href: 'big2.html', category: 'cards' },
+        { name: 'Yahtzee', icon: '🎲', href: 'yahtzee.html', category: 'cards' },
+        { name: 'Solitaire', icon: '♠️', href: 'solitaire.html', category: 'cards' },
+        { name: 'Video Poker', icon: '🎰', href: 'poker.html', category: 'cards', isNew: true },
+        { name: 'Baccarat', icon: '🃏', href: 'baccarat.html', category: 'cards', isNew: true },
+        { name: 'Hearts', icon: '♥️', href: 'hearts.html', category: 'cards', isNew: true },
+        { name: 'Gin Rummy', icon: '🎴', href: 'ginrummy.html', category: 'cards', isNew: true },
+        { name: 'Crazy 8s', icon: '8️⃣', href: 'crazy8.html', category: 'cards', isNew: true },
+        { name: 'UNO', icon: '🎴', href: 'uno.html', category: 'cards', isNew: true },
+        { name: 'Scrabble', icon: '🔤', href: 'scrabble.html', category: 'cards', isNew: true },
+        // Board
+        { name: 'Tic-Tac-Toe', icon: '⭕', href: 'tictactoe.html', category: 'board' },
+        { name: 'Connect 4', icon: '🔴', href: 'connect4.html', category: 'board' },
+        { name: '象棋', icon: '🏯', href: 'chinese-chess.html', category: 'board' },
+        { name: 'Checkers', icon: '⚫', href: 'checkers.html', category: 'board' },
+        { name: 'Reversi', icon: '⚪', href: 'reversi.html', category: 'board' },
+        { name: 'RPS', icon: '✊', href: 'rps.html', category: 'board' },
+        { name: 'Hangman', icon: '🎯', href: 'hangman.html', category: 'board' },
+        { name: 'Battleship', icon: '🚢', href: 'battleship.html', category: 'board' },
+        { name: 'Dots Boxes', icon: '📦', href: 'dotsboxes.html', category: 'board' },
+        { name: 'Dominoes', icon: '🁣', href: 'dominoes.html', category: 'board', isNew: true },
+        { name: 'Backgammon', icon: '🎲', href: 'backgammon.html', category: 'board', isNew: true },
+        { name: 'Ludo', icon: '🎲', href: 'ludo.html', category: 'board', isNew: true },
+        { name: 'FreeCell', icon: '♠️', href: 'freecell.html', category: 'board', isNew: true },
+        { name: 'Snakes & Ladders', icon: '🐍', href: 'snakeladders.html', category: 'board', isNew: true },
+        { name: 'Chess', icon: '♟️', href: 'chess.html', category: 'board', isNew: true },
+        { name: 'Tower Defense', icon: '🏰', href: 'tower.html', category: 'board', isNew: true },
+        { name: 'Helmet', icon: '⛑️', href: 'helmet.html', category: 'board', isNew: true },
+        { name: 'Zelda G&W', icon: '🗡️', href: 'zelda-gw.html', category: 'board', isNew: true },
+    ];
+    
+    const categoryMeta = {
+        arcade: { label: '🎯 Arcade', icon: '🎯', cls: 'arcade' },
+        puzzle: { label: '🧩 Puzzle', icon: '🧩', cls: 'puzzle' },
+        cards: { label: '🎴 Cards', icon: '🎴', cls: 'cards' },
+        board: { label: '♟️ Board', icon: '♟️', cls: 'board' },
+    };
+    
+    let activeCategory = 'all';
+    let searchQuery = '';
+    
+    // === FAVORITES ===
+    function getFavorites() {
+        try { return JSON.parse(localStorage.getItem('gameFavs') || '[]'); }
+        catch { return []; }
+    }
+    
+    function setFavorites(favs) {
+        localStorage.setItem('gameFavs', JSON.stringify(favs));
+        updateFavTabCount();
+    }
+    
+    function toggleFavorite(href, e) {
+        e.preventDefault();
+        e.stopPropagation();
+        let favs = getFavorites();
+        if (favs.includes(href)) {
+            favs = favs.filter(f => f !== href);
+        } else {
+            favs.push(href);
+        }
+        setFavorites(favs);
+        renderGames();
+    }
+    
+    function isFav(href) {
+        return getFavorites().includes(href);
+    }
+    
+    function updateFavTabCount() {
+        const count = getFavorites().length;
+        const tab = document.querySelector('.tab[data-cat="favorites"]');
+        tab.textContent = count > 0 ? `⭐ Favorites (${count})` : '⭐ Favorites';
+    }
+    
+    function getFilteredGames() {
+        const favs = getFavorites();
+        return games.filter(g => {
+            if (activeCategory === 'favorites') return favs.includes(g.href);
+            const matchCat = activeCategory === 'all' || g.category === activeCategory;
+            const matchSearch = !searchQuery || g.name.toLowerCase().includes(searchQuery.toLowerCase());
+            return matchCat && matchSearch;
+        });
+    }
+    
+    function renderGames() {
+        const container = document.getElementById('gamesContainer');
+        const noResults = document.getElementById('noResults');
+        const filtered = getFilteredGames();
+        
+        if (filtered.length === 0) {
+            container.innerHTML = '';
+            if (activeCategory === 'favorites') {
+                noResults.querySelector('p').textContent = 'No favorites yet. Tap the ☆ on any game to save it here.';
+            } else {
+                noResults.querySelector('p').textContent = 'No games found. Try a different search.';
+            }
+            noResults.style.display = 'block';
+            return;
+        }
+        
+        noResults.style.display = 'none';
+        
+        if (activeCategory === 'favorites') {
+            container.innerHTML = `<div class="category-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background:rgba(255,217,61,0.15)">⭐</div>
+                    <h2>Your Favorites</h2>
+                    <span class="section-count">${filtered.length}</span>
+                </div>
+                <div class="games-grid">${filtered.map((g, i) => gameCard(g, i)).join('')}</div>
+            </div>`;
+        } else if (activeCategory === 'all') {
+            // Render by category sections
+            let html = '';
+            for (const [cat, meta] of Object.entries(categoryMeta)) {
+                const catGames = filtered.filter(g => g.category === cat);
+                if (catGames.length === 0) continue;
+                html += `<div class="category-section">
+                    <div class="section-header">
+                        <div class="section-icon ${meta.cls}">${meta.icon}</div>
+                        <h2>${meta.label}</h2>
+                        <span class="section-count">${catGames.length}</span>
+                    </div>
+                    <div class="games-grid">${catGames.map((g, i) => gameCard(g, i)).join('')}</div>
+                </div>`;
+            }
+            container.innerHTML = html;
+        } else {
+            const meta = categoryMeta[activeCategory];
+            container.innerHTML = `<div class="category-section">
+                <div class="section-header">
+                    <div class="section-icon ${meta.cls}">${meta.icon}</div>
+                    <h2>${meta.label}</h2>
+                    <span class="section-count">${filtered.length}</span>
+                </div>
+                <div class="games-grid">${filtered.map((g, i) => gameCard(g, i)).join('')}</div>
+            </div>`;
+        }
+    }
+    
+    function gameCard(g, i) {
+        const badge = g.isNew ? '<div class="new-badge">NEW</div>' : '';
+        const favClass = isFav(g.href) ? 'fav-btn active' : 'fav-btn';
+        const cardClass = isFav(g.href) ? 'game-card is-fav' : 'game-card';
+        const starIcon = isFav(g.href) ? '★' : '☆';
+        return `<a href="${g.href}" class="${cardClass}" data-category="${g.category}" style="animation-delay: ${i * 30}ms">${badge}<button class="${favClass}" onclick="toggleFavorite('${g.href}', event)" aria-label="Toggle favorite">${starIcon}</button><div class="game-icon">${g.icon}</div><div class="game-title">${g.name}</div></a>`;
+    }
+    
+    // Tab clicks
+    document.getElementById('categoryTabs').addEventListener('click', e => {
+        const tab = e.target.closest('.tab');
+        if (!tab) return;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeCategory = tab.dataset.cat;
+        renderGames();
+    });
+    
+    // Search
+    document.getElementById('searchInput').addEventListener('input', e => {
+        searchQuery = e.target.value.trim();
+        renderGames();
+    });
+    
+    // Init
+    updateFavTabCount();
+    renderGames();
+    
+    // PWA
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+            .then(() => console.log('SW registered'))
+            .catch(err => console.log('SW failed', err));
+    }
+    </script>
 </body>
 </html>

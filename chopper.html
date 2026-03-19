@@ -1,0 +1,5975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>🚁 Chopper - Classic Games</title>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* Color Palette - Vibrant & Modern */
+  --coral: #FF6B6B;
+  --coral-light: #FF8E8E;
+  --peach: #FFD4A3;
+  --peach-light: #FFE4C4;
+  --navy: #2C3E50;
+  --navy-dark: #1A252F;
+  --teal: #4ECDC4;
+  --teal-light: #7FE5DD;
+  --yellow: #FFE66D;
+  --yellow-light: #FFF4A3;
+  --green: #95E1D3;
+  --green-dark: #5FB8A8;
+  --purple: #A8E6CF;
+  --blue: #6C5CE7;
+
+  /* Gradients */
+  --gradient-coral: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+  --gradient-peach: linear-gradient(135deg, #FFD4A3 0%, #FFE4C4 100%);
+  --gradient-navy: linear-gradient(135deg, #2C3E50 0%, #1A252F 100%);
+  --gradient-teal: linear-gradient(135deg, #4ECDC4 0%, #7FE5DD 100%);
+  --gradient-yellow: linear-gradient(135deg, #FFE66D 0%, #FFF4A3 100%);
+  --gradient-green: linear-gradient(135deg, #95E1D3 0%, #5FB8A8 100%);
+  --gradient-blue: linear-gradient(135deg, #6C5CE7 0%, #a39bfe 100%);
+  --gradient-purple: linear-gradient(135deg, #a55eea 0%, #d6a2e8 100%);
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
+  --shadow-glow: 0 0 20px rgba(255, 107, 107, 0.3);
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  /* Prevent auto-zoom on double tap for all interactive elements */
+  touch-action: manipulation;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* Use a solid background color on body/html to prevent white flashes */
+  background-color: #667eea;
+  min-height: 100vh;
+  color: white;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Animated Background */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Combine the base gradient and the bubbles animation */
+  background:
+    radial-gradient(circle at 20% 50%, rgba(255, 107, 107, 0.2) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(78, 205, 196, 0.2) 0%, transparent 50%),
+    radial-gradient(circle at 40% 20%, rgba(255, 230, 109, 0.2) 0%, transparent 50%),
+    linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  animation: backgroundShift 15s ease infinite;
+  z-index: -1;
+  /* Ensure background doesn't scroll with content */
+  will-change: transform;
+}
+
+@keyframes backgroundShift {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+    /* Reduced scale slightly for better performance */
+  }
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+}
+
+/* Header */
+header {
+  text-align: center;
+  padding: var(--spacing-xl) 0;
+  animation: fadeInDown 0.6s ease;
+}
+
+header h1 {
+  font-size: 3.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: var(--spacing-sm);
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+header p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+/* Game Grid */
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-xl);
+  animation: fadeInUp 0.8s ease;
+}
+
+/* Game Card */
+.game-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.game-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.game-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.game-card:hover::before {
+  opacity: 1;
+}
+
+.game-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.game-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform var(--transition-normal);
+  color: white;
+  /* Ensure SVG color is white */
+}
+
+.game-icon svg {
+  width: 32px;
+  height: 32px;
+  stroke: currentColor;
+  stroke-width: 2px;
+}
+
+.game-card:hover .game-icon {
+  transform: rotate(5deg) scale(1.1);
+}
+
+.game-card h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.game-card p {
+  opacity: 0.8;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Game Colors */
+.game-card[data-game="tap-match"] .game-icon {
+  background: var(--gradient-coral);
+}
+
+.game-card[data-game="word-guess"] .game-icon {
+  background: var(--gradient-peach);
+}
+
+.game-card[data-game="minesweeper"] .game-icon {
+  background: var(--gradient-navy);
+}
+
+.game-card[data-game="hangman"] .game-icon {
+  background: linear-gradient(135deg, #FF9A76 0%, #FFBC94 100%);
+}
+
+.game-card[data-game="sound-memory"] .game-icon {
+  background: var(--gradient-navy);
+}
+
+.game-card[data-game="snake"] .game-icon {
+  background: var(--gradient-yellow);
+}
+
+.game-card[data-game="fruit-merge"] .game-icon {
+  background: var(--gradient-green);
+}
+
+.game-card[data-game="chopper"] .game-icon {
+  background: var(--gradient-teal);
+}
+
+.game-card[data-game="risk-battles"] .game-icon {
+  background: var(--gradient-navy);
+}
+
+.game-card[data-game="poker"] .game-icon {
+  background: var(--gradient-purple);
+}
+
+.game-card[data-game="mahjong"] .game-icon {
+  background: var(--gradient-coral);
+}
+
+.game-card[data-game="bubble-shooter"] .game-icon {
+  background: var(--gradient-blue);
+}
+
+.game-card[data-game="big2"] .game-icon {
+  background: var(--gradient-peach);
+}
+
+.game-card[data-game="2048"] .game-icon {
+  background: var(--gradient-yellow);
+}
+
+/* Game Container */
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Ensure game container fills viewport without scrolling */
+.game-container {
+  display: none;
+  animation: fadeIn 0.5s ease;
+  position: relative;
+  /* for HUD overlay */
+  height: 100vh;
+  /* fill viewport */
+  overflow: hidden;
+}
+
+.game-container.active {
+  display: block;
+}
+
+#menu-container {
+  max-height: 100vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE/Edge */
+}
+
+#menu-container::-webkit-scrollbar {
+  display: none;
+  /* Chrome/Safari */
+}
+
+/* Hide scrollbar for horizontal controls */
+.game-controls-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.game-controls-bar {
+  scrollbar-width: none;
+}
+
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.game-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.game-controls {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+/* Buttons */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: 'Inter', sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.difficulty-btn.active {
+  background: linear-gradient(135deg, #4ECDC4 0%, #7FE5DD 100%);
+  border-color: #4ECDC4;
+  box-shadow: 0 4px 20px rgba(78, 205, 196, 0.4);
+  transform: scale(1.05);
+}
+
+
+/* Back Button - Circular Icon Style */
+.btn-back-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0;
+  transition: all var(--transition-fast);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.btn-back-icon:hover {
+  background: rgba(0, 0, 0, 0.5);
+  transform: scale(1.1);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.btn-back-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  stroke-width: 2.5;
+}
+
+/* Header Layout Alignment */
+.game-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.btn-back:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Game Board Styles */
+.game-board {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  margin-top: var(--spacing-lg);
+}
+
+.game-stats {
+  display: flex;
+  gap: var(--spacing-lg);
+  justify-content: center;
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.stat {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  min-width: 120px;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin-bottom: 0.25rem;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-10px);
+  }
+
+  75% {
+    transform: translateX(10px);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+
+  /* Prevent horizontal scroll */
+  body {
+    overflow-x: hidden;
+  }
+
+  header h1 {
+    font-size: 2.5rem;
+  }
+
+  header p {
+    font-size: 1rem;
+  }
+
+  .game-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .game-title {
+    font-size: 1.8rem;
+  }
+
+  .container {
+    padding: var(--spacing-sm);
+  }
+
+  .game-board {
+    padding: var(--spacing-sm);
+    overflow-x: auto;
+  }
+
+  /* Ensure game cards are tappable */
+  .game-card {
+    padding: var(--spacing-md);
+    min-height: 80px;
+  }
+
+  .game-card h2 {
+    font-size: 1.5rem;
+  }
+
+  .game-card p {
+    font-size: 0.85rem;
+  }
+
+  /* Button improvements */
+  .btn {
+    padding: 0.875rem 1.25rem;
+    font-size: 1rem;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .game-header {
+    flex-direction: row;
+    /* Keep row layout on mobile */
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .game-controls {
+    width: auto;
+    /* Don't take full width */
+    justify-content: flex-end;
+    /* Align to right */
+    flex-wrap: wrap;
+    flex-grow: 1;
+    /* Allow to grow if needed, or keeping it auto is fine */
+  }
+
+  /* Reduce title size slightly to fit */
+  .game-title {
+    font-size: 1.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Stats adjustments */
+  .game-stats {
+    gap: var(--spacing-sm);
+    font-size: 0.9rem;
+  }
+
+  .stat {
+    min-width: 100px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  /* Card game specific */
+  .card {
+    width: 60px;
+    height: 85px;
+    font-size: 14px;
+  }
+
+  .card-corner {
+    font-size: 14px;
+  }
+
+  .card-center {
+    font-size: 28px;
+  }
+
+  /* Mahjong tiles */
+  .mahjong-tile {
+    width: 35px;
+    height: 45px;
+    font-size: 20px;
+  }
+
+  /* Modal improvements */
+  .game-modal-content {
+    padding: var(--spacing-lg);
+    max-width: 90%;
+  }
+
+  .game-modal-content h2 {
+    font-size: 1.8rem;
+  }
+
+  .instructions-content {
+    padding: var(--spacing-lg);
+    max-width: 90%;
+  }
+
+  .instructions-content h3 {
+    font-size: 1.5rem;
+  }
+
+  .instructions-content li {
+    font-size: 0.9rem;
+  }
+
+  /* Mahjong mobile fixes */
+  #mahjong-board {
+    height: 400px;
+    /* Reduced from 500px for better mobile fit */
+  }
+
+  /* Big 2 mobile fixes - reduce card overlap */
+  #big2-player-hand {
+    gap: -10px !important;
+    /* Override inline style, less cramped than -30px */
+    padding: 10px !important;
+  }
+
+  /* Poker mobile fixes - improve spacing */
+  #poker-controls {
+    gap: var(--spacing-sm) !important;
+    flex-wrap: wrap;
+  }
+
+  #poker-community-cards {
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+
+  #poker-player-hand {
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+
+  /* Bubble Shooter mobile fixes */
+  #bubble-shooter-canvas {
+    max-width: 100%;
+    height: auto;
+  }
+
+  #bubble-shooter-board {
+    height: auto;
+    min-height: 400px;
+  }
+}
+
+
+/* Hidden utility */
+.hidden {
+  display: none !important;
+}
+
+/* Game Instructions Overlay */
+.game-instructions {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+  padding: var(--spacing-lg);
+}
+
+.instructions-content {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  max-width: 500px;
+  width: 100%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: var(--shadow-lg);
+  animation: fadeInUp 0.5s ease;
+}
+
+.instructions-content h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-md);
+  text-align: center;
+}
+
+.instructions-content ul {
+  list-style: none;
+  margin-bottom: var(--spacing-lg);
+}
+
+.instructions-content li {
+  padding: var(--spacing-xs) 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.instructions-content li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--teal);
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.instructions-content strong {
+  color: var(--yellow);
+  font-weight: 600;
+}
+
+.instructions-content .btn {
+  width: 100%;
+  font-size: 1.1rem;
+  padding: 1rem;
+}
+
+@media (max-width: 768px) {
+  .instructions-content {
+    padding: var(--spacing-lg);
+  }
+
+  .instructions-content h3 {
+    font-size: 1.5rem;
+  }
+
+  .instructions-content li {
+    font-size: 0.9rem;
+  }
+}
+
+/* Game Modal */
+.game-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+  padding: var(--spacing-lg);
+}
+
+.game-modal-content {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(30px);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  max-width: 450px;
+  width: 100%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  animation: modalSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(-50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.game-modal-icon {
+  font-size: 5rem;
+  margin-bottom: var(--spacing-md);
+  animation: iconBounce 0.6s ease;
+  display: inline-block;
+}
+
+@keyframes iconBounce {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  25% {
+    transform: scale(1.2);
+  }
+
+  50% {
+    transform: scale(0.9);
+  }
+
+  75% {
+    transform: scale(1.1);
+  }
+}
+
+.game-modal-content h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-sm);
+  background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.game-modal-content p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.6;
+}
+
+.game-modal-content .btn {
+  width: 100%;
+  font-size: 1.2rem;
+  padding: 1rem;
+}
+
+@media (max-width: 768px) {
+  .game-modal-content {
+    padding: var(--spacing-lg);
+  }
+
+  .game-modal-icon {
+    font-size: 4rem;
+  }
+
+  .game-modal-content h2 {
+    font-size: 2rem;
+  }
+
+  .game-modal-content p {
+    font-size: 1rem;
+  }
+
+  .game-modal-content .btn {
+    font-size: 1rem;
+    padding: 0.8rem;
+  }
+}
+
+/* Make canvas responsive on mobile */
+#chopper-canvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Mahjong Styles */
+#mahjong-board {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.mahjong-tile {
+  position: absolute;
+  width: 40px;
+  height: 52px;
+  background: #f0e6d2;
+  border: 1px solid #c0b6a2;
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.5);
+  transition: transform 0.1s, box-shadow 0.1s;
+  user-select: none;
+  z-index: 1;
+}
+
+.mahjong-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.5);
+  z-index: 10;
+}
+
+.mahjong-tile.selected {
+  background: #fff8e0;
+  border-color: #ffd700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.6),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.5);
+  transform: translateY(-4px);
+  z-index: 20;
+}
+
+.mahjong-tile.matched {
+  animation: tileMatch 0.3s forwards;
+}
+
+@keyframes tileMatch {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* Risk Game Styles */
+#risk-map-container {
+  position: relative;
+  user-select: none;
+  transition: border-color 0.5s ease;
+  border-radius: 10px;
+}
+
+.risk-territory-badge {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background: #ccc;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
+  z-index: 10;
+}
+
+.risk-territory-badge:hover {
+  transform: translate(-50%, -50%) scale(1.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+  z-index: 20;
+}
+
+.risk-territory-badge.selected {
+  box-shadow: 0 0 0 3px #FFD700, 0 4px 8px rgba(0, 0, 0, 0.6);
+  transform: translate(-50%, -50%) scale(1.2);
+  z-index: 30;
+}
+
+.badge-count {
+  color: white;
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Action feedback animations */
+.risk-territory-badge.attacking {
+  animation: pulse-attack 0.5s ease-in-out 3;
+}
+
+.risk-territory-badge.defending {
+  animation: pulse-defend 0.5s ease-in-out 3;
+}
+
+.risk-territory-badge.reinforcing {
+  animation: pulse-reinforce 0.3s ease-in-out 2;
+}
+
+.risk-territory-badge.conquered {
+  animation: flash-conquered 0.8s ease-in-out;
+}
+
+@keyframes pulse-attack {
+
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.4);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 4px 8px rgba(0, 0, 0, 0.6);
+  }
+}
+
+@keyframes pulse-defend {
+
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.3);
+    box-shadow: 0 0 20px rgba(255, 165, 0, 0.8), 0 4px 8px rgba(0, 0, 0, 0.6);
+  }
+}
+
+@keyframes pulse-reinforce {
+
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
+  }
+}
+
+@keyframes flash-conquered {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  25% {
+    transform: translate(-50%, -50%) scale(1.5);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 1);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.3);
+  }
+
+  75% {
+    transform: translate(-50%, -50%) scale(1.5);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 1);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+#risk-status-bar {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+}
+
+#risk-message {
+  font-size: 1rem;
+  text-align: center;
+  min-width: 200px;
+}
+
+@media (max-width: 768px) {
+  .risk-territory-badge {
+    width: 24px;
+    height: 24px;
+  }
+
+  .badge-count {
+    font-size: 0.75rem;
+  }
+
+  /* Compact header layout for Risk game on mobile */
+  #risk-battles-game .game-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  #risk-battles-game .game-title {
+    font-size: 1.3rem;
+    margin: 0;
+    margin-left: 100px;
+  }
+
+  #risk-battles-game .game-controls {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  #risk-battles-game #risk-back {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    min-width: auto;
+    z-index: 10;
+  }
+
+  #risk-turn-indicator {
+    font-size: 0.9rem !important;
+    margin-right: 0 !important;
+  }
+
+  #risk-battles-game #risk-reset {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+
+  #risk-status-bar {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+    padding: 6px 8px !important;
+  }
+
+  #risk-player-stats {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)) !important;
+    gap: 5px !important;
+    margin-bottom: 5px !important;
+    font-size: 0.85rem;
+  }
+
+  #risk-phase-display {
+    font-size: 0.8rem !important;
+    padding: 4px 0;
+  }
+
+  #risk-message {
+    font-size: 0.75rem !important;
+    min-width: auto !important;
+    padding: 2px 0;
+  }
+
+  /* Smaller Next Phase button */
+  #risk-end-turn-btn {
+    padding: 6px 12px !important;
+    font-size: 0.85rem !important;
+  }
+
+  #risk-action-btn {
+    padding: 6px 12px !important;
+    font-size: 0.85rem !important;
+  }
+
+  #risk-map-container {
+    margin-bottom: 10px !important;
+    max-width: 100% !important;
+  }
+
+  /* Make the Risk game board more compact on mobile */
+  #risk-battles-game .game-board {
+    gap: 10px !important;
+    padding: 0 10px 20px 10px;
+  }
+
+  /* Ensure map image is fully visible */
+  #risk-map-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+}
+
+
+
+/* Word Guess Keyboard */
+.word-guess-keyboard {
+  max-width: 500px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.keyboard-row {
+  display: flex;
+  gap: 0.3rem;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.key-btn {
+  padding: 1rem;
+  min-width: 2.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.key-btn.wide {
+  min-width: 4rem;
+}
+
+/* Hangman Keyboard */
+.hangman-keyboard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  max-width: 600px;
+  margin: 2rem auto;
+  width: 100%;
+}
+
+.letter-btn {
+  width: 3rem;
+  height: 3rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 700;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+
+  /* Word Guess Mobile */
+  .word-guess-keyboard {
+    padding: 0 5px;
+    /* Add slight padding to container */
+  }
+
+  .keyboard-row {
+    gap: 2px;
+    /* Tighter gap */
+    margin-bottom: 4px;
+  }
+
+  .key-btn {
+    padding: 0.8rem 0;
+    /* Remove horizontal padding */
+    min-width: 0;
+    /* Allow shrinking */
+    flex: 1;
+    /* Distribute space evenly */
+    font-size: 0.85rem;
+    border-radius: 4px;
+    height: 3rem;
+    /* Fixed height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .key-btn.wide {
+    flex: 1.5;
+    /* Enter/Backspace take 1.5x space */
+    font-size: 0.7rem;
+  }
+
+  /* Hangman Mobile */
+  .letter-btn {
+    width: 2rem;
+    /* Smaller keys */
+    height: 2rem;
+    font-size: 0.9rem;
+    border-radius: 4px;
+  }
+
+  canvas {
+    display: block;
+    max-width: 100%;
+    border-radius: 4px;
+    /* Prevent default touch actions (scrolling, zooming) on canvas */
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .hangman-keyboard {
+    gap: 4px;
+  }
+}
+
+.card {
+  width: 70px;
+  height: 100px;
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 5px;
+  box-sizing: border-box;
+  font-family: 'Arial', sans-serif;
+  user-select: none;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.card.selected {
+  transform: translateY(-15px);
+  box-shadow: 0 0 10px #FFC300;
+  border: 2px solid #FFC300;
+}
+
+.card.red {
+  color: #d40000;
+}
+
+.card.black {
+  color: #2d2d2d;
+}
+
+.card-corner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.card-corner.top-left {
+  align-self: flex-start;
+}
+
+.card-corner.bottom-right {
+  align-self: flex-end;
+  transform: rotate(180deg);
+}
+
+.card-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 32px;
+}
+
+.mahjong-tile {
+  position: absolute;
+  width: 40px;
+  height: 50px;
+  background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow:
+    2px 2px 0 #ddd,
+    3px 3px 0 #bbb,
+    4px 4px 5px rgba(0, 0, 0, 0.3);
+  transition: transform 0.1s, box-shadow 0.1s;
+  user-select: none;
+  color: #333;
+}
+
+.mahjong-tile:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    2px 4px 0 #ddd,
+    3px 5px 0 #bbb,
+    4px 6px 8px rgba(0, 0, 0, 0.3);
+  z-index: 1000 !important;
+  /* Bring to front on hover */
+}
+
+.mahjong-tile.selected {
+  background: #e6f7ff;
+  border-color: #1890ff;
+  transform: translateY(-4px);
+  box-shadow:
+    2px 6px 0 #ddd,
+    3px 7px 0 #bbb,
+    4px 8px 10px rgba(24, 144, 255, 0.4);
+}
+
+.mahjong-tile.blocked {
+  filter: brightness(0.7);
+  cursor: not-allowed;
+  pointer-events: none;
+  /* Optional: disable clicks entirely */
+}
+
+.mahjong-tile.hint {
+  box-shadow: 0 0 15px #FFC300, 0 0 5px #FFC300 inset;
+  border-color: #FFC300;
+  z-index: 2000 !important;
+  animation: pulse-hint 1s infinite;
+}
+
+@keyframes pulse-hint {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Bridge Game Styles */
+.bridge-auction-history {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.auction-header {
+  font-weight: bold;
+  color: var(--teal);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 5px;
+}
+
+.auction-item {
+  padding: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.auction-item.empty {
+  background: transparent;
+}
+
+.bridge-bidding-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+}
+
+.turn-indicator {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--yellow);
+}
+
+.bid-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.btn-bid {
+  padding: 8px 12px;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-bid:hover:not(:disabled) {
+  background: var(--teal);
+  transform: scale(1.05);
+}
+
+.btn-bid:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.btn-pass {
+  width: 100%;
+  max-width: 200px;
+  padding: 10px;
+  background: var(--coral);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-pass:hover {
+  background: var(--coral-light);
+}
+
+.bridge-table {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  background: radial-gradient(circle at center, #358f58 0%, #246b40 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
+  border: 8px solid #5d4037;
+}
+
+.bridge-info {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  z-index: 10;
+}
+
+.bridge-hand {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  transition: all 0.3s;
+  z-index: 10;
+}
+
+.bridge-hand .card {
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s, margin 0.2s;
+}
+
+.bridge-hand .card:not(:first-child) {
+  margin-left: -40px;
+}
+
+.bridge-hand .card:hover {
+  transform: translateY(-20px);
+  z-index: 20;
+  margin-right: 10px;
+  /* Make space for hover */
+}
+
+/* Card Back Style */
+.card.back {
+  background: repeating-linear-gradient(45deg,
+      #b71c1c,
+      #b71c1c 10px,
+      #c62828 10px,
+      #c62828 20px);
+  border: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card.back::after {
+  content: '🂠';
+  font-size: 40px;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.hand-label {
+  position: absolute;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 6px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.south .hand-label {
+  bottom: -25px;
+  width: auto;
+  text-align: center;
+}
+
+.north .hand-label {
+  top: -25px;
+  width: auto;
+  text-align: center;
+}
+
+.west .hand-label {
+  left: 50%;
+  top: -30px;
+  transform: translateX(-50%) rotate(-90deg);
+}
+
+.east .hand-label {
+  left: 50%;
+  top: -30px;
+  transform: translateX(-50%) rotate(90deg);
+}
+
+.bridge-hand.south {
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.bridge-hand.north {
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.bridge-hand.west {
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%) rotate(90deg);
+  /* Default flex-direction: row makes it vertical when rotated 90deg */
+}
+
+.bridge-hand.west .card:not(:first-child) {
+  margin-left: -40px;
+  /* Standard overlap */
+  margin-top: 0;
+  /* Reset margin-top */
+}
+
+.bridge-hand.east {
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+}
+
+.bridge-hand.east .card:not(:first-child) {
+  margin-left: -40px;
+  margin-top: 0;
+}
+
+
+
+.bridge-trick-area {
+  width: 200px;
+  height: 200px;
+  position: relative;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.trick-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0 !important;
+  /* Override hand margin */
+}
+
+.trick-card.south {
+  transform: translate(-50%, -50%) translateY(30px);
+}
+
+.trick-card.north {
+  transform: translate(-50%, -50%) translateY(-30px);
+}
+
+.trick-card.west {
+  transform: translate(-50%, -50%) translateX(-30px);
+}
+
+.trick-card.east {
+  transform: translate(-50%, -50%) translateX(30px);
+}
+
+/* Bridge Bidding Hand Display */
+#bridge-bidding-hand {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  margin: 20px 0;
+  min-height: 120px;
+}
+
+#bridge-bidding-hand .card {
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s, margin 0.2s;
+}
+
+#bridge-bidding-hand .card:not(:first-child) {
+  margin-left: -40px;
+}
+
+#bridge-bidding-hand .card:hover {
+  transform: translateY(-10px);
+  z-index: 20;
+  margin-right: 10px;
+}
+
+/* Unit Purchase Buttons */
+.btn-unit {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid #444;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s;
+}
+
+.btn-unit:hover {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: #666;
+  transform: translateY(-2px);
+}
+
+.btn-unit:active {
+  transform: translateY(0);
+}
+
+.btn-unit.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.unit-icon {
+  font-size: 1.2em;
+}
+
+/* Action Buttons (Drop Bomb, Deploy Infantry) */
+.btn-action {
+  background: linear-gradient(145deg, #4a90e2, #357abd);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.1s, box-shadow 0.1s;
+  min-width: 160px;
+  cursor: pointer;
+}
+
+.btn-action:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#btn-drop-bomb {
+  background: linear-gradient(145deg, #e74c3c, #c0392b);
+}
+
+#btn-deploy-infantry {
+  background: linear-gradient(145deg, #2ecc71, #27ae60);
+}
+
+@media (max-width: 768px) {
+  .action-bar {
+    width: 100%;
+    padding: 0 10px;
+  }
+
+  .btn-action {
+    flex: 1;
+    padding: 16px 12px;
+    font-size: 1.1rem;
+    min-width: 0;
+  }
+
+  /* Minimize stats display on mobile */
+  #chopper-game .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 8px;
+    font-size: 0.85rem;
+  }
+
+  #chopper-game .stat {
+    padding: 6px 8px;
+  }
+
+  #chopper-game .stat-label {
+    font-size: 0.7rem;
+    margin-bottom: 2px;
+  }
+
+  #chopper-game .stat-value {
+    font-size: 1rem;
+  }
+
+  /* Make High Score span full width on second row */
+  #chopper-game .stat:last-child {
+    grid-column: 1 / -1;
+  }
+
+  /* Compact game controls bar */
+  .game-controls-bar {
+    gap: 6px !important;
+    padding: 0 8px;
+    margin-bottom: 6px !important;
+  }
+
+  .btn-unit,
+  .btn-action {
+    padding: 8px 10px !important;
+    font-size: 0.9rem !important;
+    min-width: 0 !important;
+    touch-action: none !important;
+    /* Disable all browser gestures */
+    -webkit-user-select: none;
+    /* Prevent text selection */
+    user-select: none;
+  }
+
+  .unit-icon {
+    font-size: 1em !important;
+  }
+
+  /* Prevent scrolling on mobile */
+  /* Prevent scrolling on mobile */
+  #chopper-game {
+    position: fixed;
+    /* Break out of container */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    background: #000;
+    /* Ensure background is opaque */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    /* Remove any padding */
+  }
+
+  #chopper-game .game-board {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 !important;
+    /* Remove padding to fill screen */
+  }
+
+  #chopper-canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+    object-fit: fill;
+    /* Fill the container exactly */
+  }
+}
+
+/* Evenly distributed controls bar */
+.game-controls-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  width: 100%;
+  padding: 8px 4px;
+  margin-top: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.game-controls-bar button {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 2px !important;
+  font-size: 0.7rem !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 48px !important;
+  border-radius: 6px !important;
+  line-height: 1.1;
+  margin: 0 !important;
+}
+
+.game-controls-bar button span:first-child {
+  font-size: 1.1rem;
+  margin-bottom: 1px;
+  display: block;
+}
+
+/* Specific colors for actions to distinguish from units */
+#btn-drop-bomb {
+  background: linear-gradient(145deg, #e74c3c, #c0392b);
+}
+
+#btn-deploy-infantry {
+  background: linear-gradient(145deg, #2ecc71, #27ae60);
+}
+
+/* Force header to be inline on mobile for Chopper */
+#chopper-game .game-header {
+  flex-direction: row !important;
+  justify-content: flex-start !important;
+  gap: 10px;
+}
+
+/* Global Full Screen for Chopper Game */
+#chopper-game {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  background: #000;
+  overflow: hidden;
+  display: none;
+  /* Hidden by default */
+  padding: 0;
+}
+
+#chopper-game.active {
+  display: flex;
+  /* Visible when active */
+  flex-direction: column;
+}
+
+#chopper-game .game-board {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+}
+
+#chopper-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+  object-fit: fill;
+}
+
+/* 2048 Game Styles */
+#game-2048-grid {
+  position: relative;
+  width: 350px;
+  height: 350px;
+  background: #bbada0;
+  border-radius: 6px;
+  margin: 0 auto;
+  padding: 10px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 10px;
+  touch-action: none;
+  /* Prevent browser handling of gestures */
+}
+
+#2048-game .game-board {
+  touch-action: none;
+  /* Ensure the container also ignores gestures */
+}
+
+.grid-cell {
+  width: 100%;
+  height: 100%;
+  background: rgba(238, 228, 218, 0.35);
+  border-radius: 3px;
+  position: static;
+  /* Default */
+}
+
+/* Tiles need to be absolute to move on top? */
+/* In my JS verify: */
+/* I used absolute positioning for tiles based on percentages. */
+/* So the #game-2048-grid needs to be relative, but it also contains .grid-cell which are static? */
+/* If I use the grid layout for .grid-cell, they will take up space. width/height 100% of grid track. */
+/* The tiles are appended to #game-2048-grid. */
+/* They need to be absolute relative to container. */
+
+.tile {
+  width: 100%;
+  height: 100%;
+  border-radius: 3px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #776e65;
+  background: #eee4da;
+  transition: all 0.15s ease;
+  z-index: 10;
+}
+
+.tile-2 {
+  background: #eee4da;
+}
+
+.tile-4 {
+  background: #ede0c8;
+}
+
+.tile-8 {
+  background: #f2b179;
+  color: #f9f6f2;
+}
+
+.tile-16 {
+  background: #f59563;
+  color: #f9f6f2;
+}
+
+.tile-32 {
+  background: #f67c5f;
+  color: #f9f6f2;
+}
+
+.tile-64 {
+  background: #f65e3b;
+  color: #f9f6f2;
+}
+
+.tile-128 {
+  background: #edcf72;
+  color: #f9f6f2;
+  font-size: 1.8rem;
+}
+
+.tile-256 {
+  background: #edcc61;
+  color: #f9f6f2;
+  font-size: 1.8rem;
+}
+
+.tile-512 {
+  background: #edc850;
+  color: #f9f6f2;
+  font-size: 1.8rem;
+}
+
+.tile-1024 {
+  background: #edc53f;
+  color: #f9f6f2;
+  font-size: 1.5rem;
+}
+
+.tile-2048 {
+  background: #edc22e;
+  color: #f9f6f2;
+  font-size: 1.5rem;
+}
+
+@media (max-width: 400px) {
+  #game-2048-grid {
+    width: 300px;
+    height: 300px;
+  }
+}
+    .game-container {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        position: relative !important;
+    }
+    .btn-back-icon { display: none !important; }
+    .back-link {
+        display: inline-block;
+        padding: 8px 16px;
+        margin: 10px;
+        color: #666;
+        text-decoration: none;
+        font-size: 14px;
+    }
+    .back-link:hover { color: #333; }
+    </style>
+</head>
+<body onkeydown="chopperKeyDown(event)" onkeyup="chopperKeyUp(event)">
+    <a href="index.html" style="color:#aaa;text-decoration:none;font-size:16px;position:fixed;top:8px;left:8px;z-index:50;">&larr; Back</a>
+    <div id="chopper-game" class="game-container">
+      <div class="game-header"
+        style="display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 4px 0; margin-bottom: 4px;">
+        <div class="game-header-left">
+          <a href="index.html" id="chopper-back" style="background:rgba(255,255,255,0.15);border:none;padding:6px 12px;border-radius:6px;color:#fff;font-size:18px;text-decoration:none;display:inline-flex;align-items:center;cursor:pointer;z-index:60;">←</a>
+          <h1 class="game-title" style="margin: 0; font-size: 1.1rem;">Rescue Raiders</h1>
+        </div>
+      </div>
+
+
+      <div class="game-instructions hidden" id="chopper-instructions">
+        <div class="instructions-content">
+          <h3>🚁 Rescue Raiders</h3>
+          <ul style="font-size: 0.9rem;">
+            <li><strong>Goal:</strong> Destroy all enemies</li>
+            <li><strong>Desktop:</strong> Arrow keys/WASD, Space to shoot</li>
+            <li><strong>Mobile:</strong> Tilt to move, 💣/🪂 buttons</li>
+            <li><strong>Fuel:</strong> Land on "H" to refuel & repair</li>
+            <li>⚠️ Don't run out of fuel or crash!</li>
+          </ul>
+          <div style="margin-top: 15px;">
+            <p><strong>Select Difficulty:</strong></p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+              <button class="btn btn-secondary difficulty-btn active" data-difficulty="easy">Easy</button>
+              <button class="btn btn-secondary difficulty-btn" data-difficulty="medium">Medium</button>
+              <button class="btn btn-secondary difficulty-btn" data-difficulty="hard">Hard</button>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="margin-top: 15px;"
+            onclick="document.getElementById('chopper-instructions').classList.add('hidden'); window.chopperGame.startLevel();">Let's
+            Play!</button>
+        </div>
+      </div>
+      <div class="game-board" id="chopper-board" style="display: flex; justify-content: center; position: relative;">
+        <canvas id="chopper-canvas" width="800" height="500" tabindex="0"></canvas>
+        <!-- Virtual D-Pad for mobile -->
+        <div id="virtual-dpad" style="position:absolute;bottom:10px;left:10px;touch-action:none;z-index:5;">
+          <div style="display:grid;grid-template-columns:50px 50px 50px;grid-template-rows:50px 50px 50px;gap:2px;">
+            <div></div>
+            <div data-dir="up" style="background:rgba(255,255,255,0.25);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;">▲</div>
+            <div></div>
+            <div data-dir="left" style="background:rgba(255,255,255,0.25);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;">◀</div>
+            <div style="background:rgba(255,255,255,0.1);border-radius:8px;"></div>
+            <div data-dir="right" style="background:rgba(255,255,255,0.25);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;">▶</div>
+            <div></div>
+            <div data-dir="down" style="background:rgba(255,255,255,0.25);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;">▼</div>
+            <div></div>
+          </div>
+        </div>
+        <div id="virtual-fire" style="position:absolute;bottom:30px;right:10px;width:60px;height:60px;background:rgba(231,76,60,0.4);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;touch-action:none;z-index:5;">🔥</div>
+      </div>
+
+      <!-- Controls Bar (Below Play Area) -->
+      <div class="game-controls-bar">
+        <button class="btn btn-unit" id="buy-infantry" title="Infantry ($500)">
+          <span>🏃</span>
+          <span>$500</span>
+        </button>
+        <button class="btn btn-unit" id="buy-tank" title="Tank ($2000)">
+          <span>🚜</span>
+          <span>$2k</span>
+        </button>
+        <button class="btn btn-unit" id="buy-missile" title="Missile ($3000)">
+          <span>🚀</span>
+          <span>$3k</span>
+        </button>
+        <button class="btn btn-unit" id="buy-demo" title="Demo Truck ($5000)">
+          <span>🚛</span>
+          <span>$5k</span>
+        </button>
+        <button id="btn-drop-bomb" class="btn btn-action" title="Drop Bomb">
+          <span>💣</span>
+          <span>Bomb</span>
+        </button>
+        <button id="btn-deploy-infantry" class="btn btn-action" title="Deploy Infantry">
+          <span>🪂</span>
+          <span>Drop</span>
+        </button>
+      </div>
+    </div>
+    <script>
+    // Global Modal Utility
+window.showGameModal = function (icon, title, message, callback, exitCallback) {
+  const modal = document.getElementById('game-modal');
+  const modalIcon = document.getElementById('game-modal-icon');
+  const modalTitle = document.getElementById('game-modal-title');
+  const modalMessage = document.getElementById('game-modal-message');
+  const modalBtn = document.getElementById('game-modal-btn');
+  const exitBtn = document.getElementById('game-modal-exit-btn');
+
+  modalIcon.textContent = icon;
+  modalTitle.textContent = title;
+  modalMessage.textContent = message;
+
+  // Remove previous click handlers
+  const newBtn = modalBtn.cloneNode(true);
+  modalBtn.parentNode.replaceChild(newBtn, modalBtn);
+
+  // Add new click handler
+  newBtn.addEventListener('click', () => {
+    modal.classList.add('hidden');
+    if (callback) callback();
+  });
+
+  // Handle exit button
+  if (exitBtn) {
+    if (exitCallback) {
+      exitBtn.classList.remove('hidden');
+      const newExitBtn = exitBtn.cloneNode(true);
+      exitBtn.parentNode.replaceChild(newExitBtn, exitBtn);
+
+      newExitBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+        exitCallback();
+      });
+    } else {
+      exitBtn.classList.add('hidden');
+    }
+  }
+
+  // Show modal
+  modal.classList.remove('hidden');
+};
+
+// Main App Controller
+class GameApp {
+  constructor() {
+    this.currentGame = null;
+    this.menuContainer = document.getElementById('menu-container');
+    this.init();
+  }
+
+  init() {
+    // Add click handlers for game cards
+    const gameCards = document.querySelectorAll('.game-card');
+    gameCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const gameName = card.dataset.game;
+        window.location.hash = gameName; // Update hash to trigger route handler
+      });
+    });
+
+    // Add back button handlers (Event Delegation)
+    document.addEventListener('click', (e) => {
+      const backBtn = e.target.closest('.btn-back-icon');
+      if (backBtn) {
+        e.preventDefault();
+        window.location.hash = ''; // Return to menu via hash
+      }
+    });
+
+    // Handle routing
+    window.addEventListener('hashchange', () => this.handleRoute());
+    window.addEventListener('load', () => this.handleRoute());
+  }
+
+  handleRoute() {
+    const hash = window.location.hash.slice(1); // Remove '#'
+    if (hash) {
+      this.showGame(hash);
+    } else {
+      this.showMenu();
+    }
+  }
+
+  showGame(gameName) {
+    // Hide menu first
+    this.menuContainer.classList.add('hidden');
+
+    // Hide any currently active game if switching directly between games (edge case)
+    if (this.currentGame && this.currentGame !== gameName) {
+      const currentContainer = document.getElementById(`${this.currentGame}-game`);
+      if (currentContainer) currentContainer.classList.remove('active');
+      this.cleanupGame(this.currentGame);
+    }
+
+    const gameContainer = document.getElementById(`${gameName}-game`);
+    if (gameContainer) {
+      gameContainer.classList.add('active');
+      this.currentGame = gameName;
+
+      // Show instructions if needed (simple check if already active handled by logic/CSS usually, but good to ensure)
+      // Note: Some games hide instructions on start, so we only show if it's a "fresh" entry or we want to persist state?
+      // Default behavior: show instructions when entering a game.
+      const instructions = document.getElementById(`${gameName}-instructions`);
+      if (instructions) {
+        // Only show if we strictly want reset? 
+        // Let's remove 'hidden' class to ensure they see it on entry.
+        instructions.classList.remove('hidden');
+      }
+
+      // Initialize the game
+      this.initializeGame(gameName);
+    } else {
+      // Invalid game hash -> go back to menu
+      console.warn(`Game ${gameName} not found, redirecting to menu.`);
+      window.location.hash = '';
+    }
+  }
+
+  showMenu() {
+    if (this.currentGame) {
+      const gameContainer = document.getElementById(`${this.currentGame}-game`);
+      if (gameContainer) {
+        gameContainer.classList.remove('active');
+      }
+
+      // We don't necessarily need to reset instructions here, they are handled in showGame entry.
+
+      // Clean up game
+      this.cleanupGame(this.currentGame);
+      this.currentGame = null;
+    }
+    this.menuContainer.classList.remove('hidden');
+  }
+
+  initializeGame(gameName) {
+    switch (gameName) {
+      case 'tap-match':
+        if (window.tapMatchGame) window.tapMatchGame.init();
+        break;
+      case 'word-guess':
+        if (window.wordGuessGame) window.wordGuessGame.init();
+        break;
+      case 'minesweeper':
+        if (window.minesweeperGame) window.minesweeperGame.init();
+        break;
+      case 'hangman':
+        if (window.hangmanGame) window.hangmanGame.init();
+        break;
+      case 'sound-memory':
+        if (window.soundMemoryGame) window.soundMemoryGame.init();
+        break;
+      case 'snake':
+        // Snake game is initialized by the user clicking "Start Game"
+        break;
+      case 'mahjong':
+        if (window.mahjongGame) window.mahjongGame.init();
+        break;
+      case 'big2':
+        if (window.big2Game) window.big2Game.init();
+        break;
+      case 'poker':
+        if (window.pokerGame) window.pokerGame.init();
+        break;
+      case 'bubble-shooter':
+        if (window.bubbleShooterGame) window.bubbleShooterGame.init();
+        break;
+      case 'risk-battles':
+        if (window.riskGame) window.riskGame.init();
+        break;
+      case 'fruit-merge':
+        if (window.fruitMergeGame) window.fruitMergeGame.init();
+        break;
+      case 'chopper':
+        if (window.chopperGame) window.chopperGame.init();
+        break;
+      case '2048':
+        if (window.game2048) window.game2048.init();
+        break;
+    }
+  }
+
+  cleanupGame(gameName) {
+    switch (gameName) {
+      case 'tap-match':
+        if (window.tapMatchGame) window.tapMatchGame.cleanup();
+        break;
+      case 'word-guess':
+        if (window.wordGuessGame) window.wordGuessGame.cleanup();
+        break;
+      case 'minesweeper':
+        if (window.minesweeperGame) window.minesweeperGame.cleanup();
+        break;
+      case 'hangman':
+        if (window.hangmanGame) window.hangmanGame.cleanup();
+        break;
+      case 'sound-memory':
+        if (window.soundMemoryGame) window.soundMemoryGame.cleanup();
+        break;
+      case 'snake':
+        if (window.snakeGame) window.snakeGame.cleanup();
+        break;
+      case 'mahjong':
+        // No cleanup needed yet
+        break;
+      case 'big2':
+        // No cleanup needed yet
+        break;
+      case 'poker':
+        // No cleanup needed yet
+        break;
+      case 'chopper':
+        if (window.chopperGame) window.chopperGame.cleanup();
+        break;
+    }
+  }
+}
+
+// Initialize app when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  window.gameApp = new GameApp();
+});
+
+    // Rescue Raiders - RTS/Action Hybrid Game
+// Phase 1: Enhanced Flight & Physics with Fuel System
+
+class Projectile {
+    constructor(x, y, vx, vy, type, owner, damage) {
+        this.x = x;
+        this.y = y;
+        this.vx = vx;
+        this.vy = vy;
+        this.type = type; // 'bullet' or 'bomb'
+        this.owner = owner; // 'player' or 'enemy'
+        this.damage = damage || (type === 'bomb' ? 50 : 10);
+        this.active = true;
+        this.width = type === 'bullet' ? 6 : 8;
+        this.height = type === 'bullet' ? 6 : 8;
+        this.trail = []; // Store previous positions
+    }
+
+    update() {
+        // Store position for trail
+        if (this.type === 'bomb' || this.type === 'missile') {
+            this.trail.push({ x: this.x, y: this.y });
+            if (this.trail.length > 10) this.trail.shift();
+        }
+
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if (this.type === 'bomb') {
+            this.vy += 0.1; // Gravity for bombs
+        }
+
+        // Deactivate if out of bounds (with some buffer)
+        if (this.y > 2000 || this.y < -1000 || this.x < -1000 || this.x > 4000) {
+            this.active = false;
+        }
+
+        // Mark bombs for explosion when they hit ground (handled in game loop)
+        this.hitGround = false;
+    }
+
+    draw(ctx) {
+        // Draw trail
+        if (this.trail.length > 0) {
+            ctx.beginPath();
+            ctx.moveTo(this.trail[0].x, this.trail[0].y);
+            for (let i = 1; i < this.trail.length; i++) {
+                ctx.lineTo(this.trail[i].x, this.trail[i].y);
+            }
+            ctx.strokeStyle = 'rgba(200, 200, 200, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        ctx.fillStyle = this.owner === 'player' ? '#ff0' : '#f00';
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+    }
+}
+
+class Particle {
+    constructor(x, y, color, type = 'default') {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.type = type;
+        this.active = true;
+
+        switch (type) {
+            case 'explosion':
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 3 + 1;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.size = Math.random() * 3 + 2;
+                this.lifetime = 30 + Math.random() * 20;
+                this.gravity = 0;
+                break;
+            case 'smoke':
+                this.vx = (Math.random() - 0.5) * 1;
+                this.vy = -Math.random() * 2 - 1;
+                this.size = Math.random() * 5 + 5;
+                this.lifetime = 60 + Math.random() * 30;
+                this.gravity = 0;
+                break;
+            case 'debris':
+                this.vx = (Math.random() - 0.5) * 5;
+                this.vy = -Math.random() * 5 - 2;
+                this.size = Math.random() * 3 + 2;
+                this.lifetime = 60;
+                this.gravity = 0.2;
+                break;
+            case 'spark':
+                this.vx = (Math.random() - 0.5) * 10;
+                this.vy = (Math.random() - 0.5) * 10;
+                this.size = Math.random() * 2 + 1;
+                this.lifetime = 10;
+                this.gravity = 0;
+                break;
+            default:
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.size = 2;
+                this.lifetime = 30;
+                this.gravity = 0.1;
+        }
+        this.maxLifetime = this.lifetime;
+    }
+
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += this.gravity;
+
+        if (this.type === 'smoke') {
+            this.size += 0.1;
+        } else if (this.type === 'debris') {
+            // Simple ground collision
+            if (this.y > 600) { // Approx ground level
+                this.y = 600;
+                this.vy *= -0.5;
+                this.vx *= 0.8;
+            }
+        }
+
+        this.lifetime--;
+
+        if (this.lifetime <= 0) {
+            this.active = false;
+        }
+    }
+
+    draw(ctx) {
+        const alpha = Math.max(0, this.lifetime / this.maxLifetime);
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = this.color;
+
+        // If rgba, we can try to adjust alpha directly, but globalAlpha is easier for generic support
+        // However, the original code used replace for rgba to handle fade out without affecting other things?
+        // But globalAlpha is fine for particles.
+
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+class Base {
+    constructor(x, y, friendly, game) {
+        this.x = x;
+        this.y = y;
+        this.friendly = friendly;
+        this.game = game;
+        this.width = 80;
+        this.height = 60;
+        this.health = 500;
+        this.maxHealth = 500;
+        this.active = true;
+    }
+
+    takeDamage(amount) {
+        this.health -= amount;
+        if (this.health <= 0) {
+            this.active = false;
+            this.game.handleBaseDestroyed(this);
+            return true;
+        }
+        return false;
+    }
+
+    update() {
+        // AI_DISABLED:         // Spawn units if this is an enemy base
+        // AI_DISABLED:         if (!this.friendly && this.active) {
+        // AI_DISABLED:             if (!this.spawnTimer) this.spawnTimer = 0;
+        // AI_DISABLED:             this.spawnTimer++;
+        // AI_DISABLED: 
+        // AI_DISABLED:             // Spawn every 10 seconds (600 frames)
+        // AI_DISABLED:             if (this.spawnTimer >= 600) {
+        // AI_DISABLED:                 this.spawnTimer = 0;
+        // AI_DISABLED:                 // Random unit type
+        // AI_DISABLED:                 const type = Math.random() > 0.7 ? 'tank' : 'infantry';
+        // AI_DISABLED:                 // Spawn at base location
+        // AI_DISABLED:                 this.game.enemies.push(new GroundUnit(this.x - 20, this.y, type, false));
+        // AI_DISABLED:             }
+        // AI_DISABLED:         }
+    }
+
+    draw(ctx) {
+        if (!this.active) return;
+
+        ctx.fillStyle = this.friendly ? '#2E7D32' : '#C62828';
+        ctx.fillRect(this.x, this.y - this.height, this.width, this.height);
+
+        // Roof/Details
+        ctx.fillStyle = this.friendly ? '#1B5E20' : '#B71C1C';
+        ctx.beginPath();
+        ctx.moveTo(this.x - 10, this.y - this.height);
+        ctx.lineTo(this.x + this.width / 2, this.y - this.height - 20);
+        ctx.lineTo(this.x + this.width + 10, this.y - this.height);
+        ctx.fill();
+
+        // Door
+        ctx.fillStyle = '#333';
+        ctx.fillRect(this.x + this.width / 2 - 15, this.y - 30, 30, 30);
+
+        // Health Bar
+        const hpPct = this.health / this.maxHealth;
+        ctx.fillStyle = '#333';
+        ctx.fillRect(this.x, this.y - this.height - 30, this.width, 6);
+        ctx.fillStyle = hpPct > 0.5 ? '#0f0' : '#f00';
+        ctx.fillRect(this.x, this.y - this.height - 30, this.width * hpPct, 6);
+    }
+}
+
+class Bunker {
+    constructor(x, y, game) {
+        this.x = x;
+        this.y = y;
+        this.game = game;
+        this.width = 40;
+        this.height = 30;
+        this.owner = 'neutral'; // 'neutral', 'friendly', 'enemy'
+        this.captureProgress = 0; // 0 to 100
+        this.captureSpeed = 0.5;
+        this.turretCooldown = 0;
+        this.turretRange = 400;
+        this.active = true;
+    }
+
+    update() {
+        // Capture Logic
+        this.handleCapture();
+
+        // Turret Logic
+        this.handleTurret();
+    }
+
+    handleCapture() {
+        let capturingUnit = null;
+
+        // Check for infantry collision
+        // We check all units, but only infantry can capture
+        const units = [...this.game.friendlyUnits, ...this.game.enemies];
+
+        // Count units from each side in range
+        let friendlyCount = 0;
+        let enemyCount = 0;
+
+        units.forEach(unit => {
+            if (!unit.active || unit.type !== 'infantry') return;
+
+            if (unit.x > this.x - 20 && unit.x < this.x + this.width + 20 &&
+                Math.abs(unit.y - this.y) < 50) {
+
+                if (unit.friendly) friendlyCount++;
+                else enemyCount++;
+            }
+        });
+
+        // Capture logic
+        if (friendlyCount > 0 && enemyCount === 0) {
+            // Friendly capturing
+            if (this.owner === 'friendly') {
+                this.captureProgress = 100; // Already owned
+            } else if (this.owner === 'neutral') {
+                this.captureProgress += this.captureSpeed * friendlyCount;
+                if (this.captureProgress >= 100) {
+                    this.owner = 'friendly';
+                    this.captureProgress = 100;
+                    this.game.createExplosion(this.x + this.width / 2, this.y, 5); // Visual cue
+                }
+            } else { // Enemy owned
+                this.captureProgress -= this.captureSpeed * friendlyCount;
+                if (this.captureProgress <= 0) {
+                    this.owner = 'neutral';
+                    this.captureProgress = 0;
+                }
+            }
+        } else if (enemyCount > 0 && friendlyCount === 0) {
+            // Enemy capturing
+            if (this.owner === 'enemy') {
+                this.captureProgress = 100;
+            } else if (this.owner === 'neutral') {
+                this.captureProgress += this.captureSpeed * enemyCount;
+                if (this.captureProgress >= 100) {
+                    this.owner = 'enemy';
+                    this.captureProgress = 100;
+                    this.game.createExplosion(this.x + this.width / 2, this.y, 5);
+                }
+            } else { // Friendly owned
+                this.captureProgress -= this.captureSpeed * enemyCount;
+                if (this.captureProgress <= 0) {
+                    this.owner = 'neutral';
+                    this.captureProgress = 0;
+                }
+            }
+        } else {
+            // Decay if empty (optional, maybe keep progress?)
+            // For now, let's keep progress so it's not too frustrating
+        }
+
+        // Clamp progress
+        this.captureProgress = Math.max(0, Math.min(100, this.captureProgress));
+    }
+
+    handleTurret() {
+        if (this.owner === 'neutral') return;
+
+        if (this.turretCooldown > 0) {
+            this.turretCooldown--;
+            return;
+        }
+
+        // Target logic
+        let target = null;
+
+        if (this.owner === 'enemy') {
+            // Enemy bunker shoots at player or friendly units
+            // Prioritize player if close
+            const distToPlayer = Math.abs(this.game.player.x - this.x);
+            if (distToPlayer < this.turretRange && this.game.player.active) {
+                target = this.game.player;
+            } else {
+                // Look for friendly units
+                // Simple find nearest
+                let minDist = this.turretRange;
+                this.game.friendlyUnits.forEach(unit => {
+                    if (!unit.active) return;
+                    const dist = Math.abs(unit.x - this.x);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        target = unit;
+                    }
+                });
+            }
+        } else {
+            // Friendly bunker shoots at enemy units
+            let minDist = this.turretRange;
+            this.game.enemies.forEach(unit => {
+                if (!unit.active) return;
+                const dist = Math.abs(unit.x - this.x);
+                if (dist < minDist) {
+                    minDist = dist;
+                    target = unit;
+                }
+            });
+        }
+
+        if (target) {
+            this.shoot(target);
+            this.turretCooldown = 120; // 2 seconds
+        }
+    }
+
+    shoot(target) {
+        // Shoot horizontally toward target
+        const speed = 6;
+        const direction = target.x > this.x ? 1 : -1; // Shoot right or left
+        const vx = speed * direction;
+        const vy = 0; // Horizontal only
+
+        // Create proper Projectile instance so collision detection works
+        const owner = this.owner === 'friendly' ? 'player' : 'enemy';
+        const projectile = new Projectile(
+            this.x + this.width / 2,
+            this.y - 5,  // Lower height so bullets hit infantry
+            vx,
+            vy,
+            'bullet',
+            owner,
+            4 // Bunker damage (25% of original 15)
+        );
+
+        this.game.projectiles.push(projectile);
+        this.game.createMuzzleFlash(this.x + this.width / 2, this.y - 5);
+    }
+
+    draw(ctx) {
+        if (!this.active) return;
+
+        // Color based on owner
+        let color = '#9E9E9E'; // Neutral
+        if (this.owner === 'friendly') color = '#4CAF50';
+        if (this.owner === 'enemy') color = '#F44336';
+
+        // Bunker Body
+        ctx.fillStyle = color;
+        ctx.fillRect(this.x, this.y - this.height, this.width, this.height);
+
+        // Slits
+        ctx.fillStyle = '#333';
+        ctx.fillRect(this.x + 5, this.y - 20, 30, 5);
+
+        // Turret on top
+        ctx.fillStyle = '#555';
+        ctx.beginPath();
+        ctx.arc(this.x + this.width / 2, this.y - this.height, 10, Math.PI, 0);
+        ctx.fill();
+
+        // Capture Progress Bar (if neutral or being captured)
+        if (this.captureProgress > 0 && this.captureProgress < 100) {
+            ctx.fillStyle = '#333';
+            ctx.fillRect(this.x, this.y - this.height - 10, this.width, 4);
+
+            // Bar color depends on who is capturing (based on current owner state transition)
+            // If neutral, color matches who is filling it up.
+            // Simplified: Just show white for progress
+            ctx.fillStyle = '#FFF';
+            ctx.fillRect(this.x, this.y - this.height - 10, this.width * (this.captureProgress / 100), 4);
+        }
+
+        // Flag/Indicator
+        ctx.strokeStyle = '#333';
+        ctx.beginPath();
+        ctx.moveTo(this.x + this.width, this.y - this.height);
+        ctx.lineTo(this.x + this.width, this.y - this.height - 20);
+        ctx.stroke();
+
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(this.x + this.width, this.y - this.height - 20);
+        ctx.lineTo(this.x + this.width + 15, this.y - this.height - 15);
+        ctx.lineTo(this.x + this.width, this.y - this.height - 10);
+        ctx.fill();
+    }
+}
+
+class GroundUnit {
+    constructor(x, y, type, friendly = true) {
+        this.x = x;
+        this.y = y;
+        this.type = type; // 'infantry', 'tank', 'missile', 'demo'
+        this.friendly = friendly;
+        this.active = true;
+        this.state = 'move'; // move, attack, idle
+        this.target = null;
+
+        // Stats based on type
+        this.width = 20;
+        this.height = 20;
+        this.attackRange = 100;
+        this.attackCooldown = 0;
+        this.attackInterval = 60;
+        this.damage = 1;
+
+        switch (type) {
+            case 'infantry':
+                this.health = 5;
+                this.speed = 0.5; // Standardized speed
+                this.cost = 5;
+                this.width = 10;
+                this.height = 10;
+                this.attackRange = 100;
+                this.damage = 1;
+                this.attackInterval = 45;
+                break;
+            case 'tank':
+                this.health = 30;
+                this.speed = 0.5;
+                this.cost = 20;
+                this.width = 30;
+                this.height = 16;
+                this.attackRange = 150;
+                this.damage = 5;
+                this.attackInterval = 90;
+                break;
+            case 'missile':
+                this.health = 15;
+                this.speed = 0.5;
+                this.cost = 30;
+                this.width = 24;
+                this.height = 16;
+                this.attackRange = 300; // Long range vs air
+                this.damage = 10;
+                this.attackInterval = 10; // Fast fire rate like auto-fire
+                break;
+            case 'demo':
+                this.health = 40;
+                this.speed = 0.5; // Standardized speed
+                this.cost = 100;
+                this.width = 36;
+                this.height = 20;
+                this.attackRange = 50;
+                this.damage = 50; // Huge damage to buildings
+                this.attackInterval = 180;
+                break;
+        }
+        this.maxHealth = this.health;
+    }
+
+    update(targets, game) {
+        if (!this.active) return;
+
+        // Handle parachuting
+        if (this.parachuting) {
+            const groundY = game.canvas.height - 50;
+            if (this.y < groundY) {
+                // Fall slowly
+                this.y += this.fallSpeed;
+            } else {
+                // Landed - stop parachuting
+                this.y = groundY;
+                this.parachuting = false;
+                game.createDustPuff(this.x, this.y); // Landing dust
+            }
+            return; // Don't do normal AI while parachuting
+        }
+
+        // Cooldowns
+        if (this.attackCooldown > 0) this.attackCooldown--;
+
+        // AI State Machine
+        this.target = this.findTarget(targets);
+
+        if (this.target) {
+            const dist = Math.abs(this.target.x - this.x);
+            // Check if target is a Base (larger hitbox)
+            const targetWidth = this.target instanceof Base ? this.target.width : 0;
+
+            if (dist <= this.attackRange + targetWidth / 2) {
+                this.state = 'attack';
+            } else {
+                this.state = 'move';
+            }
+        } else {
+            this.state = 'move';
+        }
+
+        // Collision Avoidance (Spacing)
+        let blocked = false;
+        const safeDistance = 30; // Minimum pixels between units
+        const allies = this.friendly ? game.friendlyUnits : game.enemies;
+
+        for (const ally of allies) {
+            if (ally === this || !ally.active || ally.parachuting) continue;
+
+            // Check if ally is directly ahead
+            if (this.friendly) {
+                // Moving Right: Ally is to the right (x > this.x) and close
+                if (ally.x > this.x && ally.x < this.x + safeDistance) {
+                    blocked = true;
+                    break;
+                }
+            } else {
+                // Moving Left: Ally is to the left (x < this.x) and close
+                if (ally.x < this.x && ally.x > this.x - safeDistance) {
+                    blocked = true;
+                    break;
+                }
+            }
+        }
+
+        // Execute State
+        if (this.state === 'move' && !blocked) {
+            if (this.friendly) {
+                this.x += this.speed;
+            } else {
+                this.x -= this.speed;
+            }
+            // Keep in bounds
+            if (this.x < 0) this.x = 0;
+            if (this.x > game.levelWidth) this.x = game.levelWidth;
+
+            // Demo Truck Logic: Detonate on base contact
+            if (this.type === 'demo') {
+                const targetBase = this.friendly ? game.enemyBase : game.friendlyBase;
+                if (targetBase && targetBase.active) {
+                    const dist = Math.abs(this.x - targetBase.x);
+                    // Check if touching base (approximate width)
+                    if (dist < (this.width + targetBase.width) / 2) {
+                        // Detonate!
+                        game.createExplosion(this.x, this.y, 30); // Big explosion
+                        this.active = false; // Truck destroyed
+                        targetBase.takeDamage(targetBase.maxHealth); // Instantly destroy base
+                        console.log('Demo Truck detonated on base!');
+                    }
+                }
+            }
+        } else if (this.state === 'attack') {
+            if (this.attackCooldown <= 0 && this.target) {
+                this.attack(this.target, game);
+                this.attackCooldown = this.attackInterval;
+            }
+        }
+    }
+
+    findTarget(targets) {
+        let nearest = null;
+        let minDist = Infinity;
+
+        targets.forEach(target => {
+            if (!target.active || target.friendly === this.friendly) return;
+
+            // Calculate distance
+            const dist = Math.abs(target.x - this.x);
+
+            // Prioritize Base if close enough (Demo trucks love bases)
+            if (this.type === 'demo' && target instanceof Base) {
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearest = target;
+                }
+                return;
+            }
+
+            // Missiles prioritize helicopters
+            if (this.type === 'missile') {
+                const isHelicopter = target.type === 'helicopter' || target instanceof EnemyHelicopter;
+                if (isHelicopter && dist < 600) { // Longer range for air targets
+                    if (dist < minDist) {
+                        minDist = dist;
+                        nearest = target;
+                    }
+                }
+                return; // Only target helicopters
+            }
+
+            // Standard targeting for other units
+            if (dist < minDist && dist < 400) { // Detection range
+                minDist = dist;
+                nearest = target;
+            }
+        });
+
+        return nearest;
+    }
+
+    attack(target, game) {
+        // Visual effect
+        game.createMuzzleFlash(this.friendly ? this.x + this.width / 2 : this.x - this.width / 2, this.y, this.friendly ? 'right' : 'left');
+
+        let vx, vy;
+
+        if (this.type === 'missile' && target) {
+            // Aim at target center
+            let targetX = target.x;
+            let targetY = target.y;
+
+            // Adjust for different anchor points
+            if (target instanceof Base) {
+                targetX += target.width / 2; // Base x is left
+                targetY -= target.height / 2; // Base y is bottom
+            } else if (target instanceof GroundUnit) {
+                targetY -= target.height / 2; // Unit y is bottom
+            }
+            // Helicopter x,y is center, so no adjustment needed
+
+            const dx = targetX - this.x;
+            const dy = targetY - (this.y - 10); // Fire from slightly above ground
+            const angle = Math.atan2(dy, dx);
+            const speed = 5;
+
+            vx = Math.cos(angle) * speed;
+            vy = Math.sin(angle) * speed;
+        } else {
+            // Standard horizontal fire
+            vx = this.friendly ? 5 : -5;
+            // Add some inaccuracy
+            vy = (Math.random() - 0.5) * 1;
+        }
+
+        // Use Projectile class!
+        game.projectiles.push(new Projectile(
+            this.x,
+            this.y - 5,
+            vx,
+            vy,
+            this.type === 'missile' ? 'missile' : 'bullet',
+            this.friendly ? 'player' : 'enemy',
+            this.damage
+        ));
+    }
+
+    takeDamage(amount) {
+        this.health -= amount;
+        if (this.health <= 0) {
+            this.active = false;
+            return true; // Destroyed
+        }
+        return false;
+    }
+
+    draw(ctx, game = null) {
+        if (!this.active) return;
+
+        // Draw parachute if parachuting
+        if (this.parachuting) {
+            // Parachute canopy
+            ctx.fillStyle = '#FFF';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y - 20, 12, 0, Math.PI, true); // Half circle
+            ctx.fill();
+
+            // Parachute lines
+            ctx.strokeStyle = '#888';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(this.x - 10, this.y - 8);
+            ctx.lineTo(this.x - 5, this.y - 5);
+            ctx.moveTo(this.x + 10, this.y - 8);
+            ctx.lineTo(this.x + 5, this.y - 5);
+            ctx.stroke();
+        }
+
+        ctx.fillStyle = this.friendly ? '#4CAF50' : '#F44336';
+
+        // Draw health bar if damaged
+        if (this.health < this.maxHealth) {
+            const hpPct = this.health / this.maxHealth;
+            ctx.fillStyle = '#333';
+            ctx.fillRect(this.x - 10, this.y - 25, 20, 4);
+            ctx.fillStyle = hpPct > 0.5 ? '#0f0' : '#f00';
+            ctx.fillRect(this.x - 10, this.y - 25, 20 * hpPct, 4);
+
+            // Reset color
+            ctx.fillStyle = this.friendly ? '#4CAF50' : '#F44336';
+        }
+
+        switch (this.type) {
+            case 'infantry':
+                ctx.fillRect(this.x - 5, this.y - 10, 10, 10);
+                // Head
+                ctx.fillStyle = '#eec';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y - 12, 3, 0, Math.PI * 2);
+                ctx.fill();
+                break;
+            case 'tank':
+                // Disable sprite for now - original graphics look better
+                const useSprite = false; // game && game.spritesLoaded && game.sprites.tank.complete;
+
+                if (useSprite) {
+                    ctx.save();
+                    ctx.translate(this.x, this.y - 12);
+
+                    // Flip if not friendly (enemy tanks face left)
+                    if (!this.friendly) {
+                        ctx.scale(-1, 1);
+                    }
+
+                    const spriteWidth = 40;
+                    const spriteHeight = 24;
+                    ctx.drawImage(game.sprites.tank, -spriteWidth / 2, -spriteHeight / 2, spriteWidth, spriteHeight);
+
+                    ctx.restore();
+                } else {
+                    // Fallback to original graphics
+                    ctx.save();
+                    ctx.translate(this.x, this.y - 12);
+
+                    // Flip if not friendly (enemy tanks face left)
+                    if (!this.friendly) {
+                        ctx.scale(-1, 1);
+                    }
+
+                    // Treads (Tracks)
+                    ctx.fillStyle = '#333';
+                    ctx.fillRect(-18, 6, 36, 6);
+
+                    // Wheels inside treads
+                    ctx.fillStyle = '#555';
+                    for (let i = -14; i <= 14; i += 7) {
+                        ctx.beginPath();
+                        ctx.arc(i, 9, 2.5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    // Main Hull
+                    ctx.fillStyle = this.friendly ? '#558B2F' : '#C62828'; // Olive Green or Dark Red
+                    ctx.beginPath();
+                    ctx.moveTo(-18, 6);
+                    ctx.lineTo(-14, 0);
+                    ctx.lineTo(14, 0);
+                    ctx.lineTo(18, 6);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Hull shading/detail
+                    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+                    ctx.fillRect(-14, 0, 28, 2);
+
+                    // Turret
+                    ctx.fillStyle = this.friendly ? '#689F38' : '#D32F2F'; // Slightly lighter
+                    ctx.beginPath();
+                    ctx.moveTo(-8, 0);
+                    ctx.lineTo(-6, -8);
+                    ctx.lineTo(6, -8);
+                    ctx.lineTo(10, 0);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Turret Hatch
+                    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                    ctx.beginPath();
+                    ctx.arc(0, -5, 3, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Barrel
+                    ctx.fillStyle = '#212121';
+                    ctx.fillRect(6, -6, 14, 3);
+
+                    // Muzzle brake
+                    ctx.fillRect(18, -7, 4, 5);
+
+                    // Star marking for friendly
+                    if (this.friendly) {
+                        ctx.fillStyle = '#FFF';
+                        ctx.beginPath();
+                        // Simple star approximation or just a white square/circle
+                        ctx.arc(-4, 3, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    ctx.restore();
+                }
+                break;
+            case 'missile':
+                ctx.fillRect(this.x - 12, this.y - 12, 24, 12);
+                // Launcher
+                ctx.fillStyle = '#333';
+                ctx.save();
+                ctx.translate(this.x, this.y - 15);
+                ctx.rotate(this.friendly ? -Math.PI / 4 : Math.PI / 4);
+                ctx.fillRect(-5, -8, 10, 16);
+                ctx.restore();
+                break;
+            case 'demo':
+                ctx.fillRect(this.x - 18, this.y - 15, 36, 15);
+                // Cargo
+                ctx.fillStyle = '#FFC107';
+                ctx.fillRect(this.x - 15, this.y - 22, 30, 7);
+                break;
+        }
+    }
+}
+
+class Helicopter {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.vx = 0;
+        this.vy = 0;
+        this.width = 40;
+        this.height = 20;
+        this.type = 'helicopter'; // For identification (missile targeting)
+
+        // Resources
+        this.health = 100;
+        this.maxHealth = 100;
+        this.fuel = 100;
+        this.maxFuel = 100;
+        this.ammo = 10; // Bombs
+        this.maxAmmo = 10;
+        this.lives = 3;
+        this.active = true; // Indicates if helicopter is alive and controllable
+
+        // Transport system
+        this.cargo = []; // Infantry being transported
+        this.maxCargo = 5; // Can carry up to 5 infantry
+
+        // Facing direction: 1 = right, -1 = left
+        this.facing = 1;
+        this.targetFacing = 1;
+
+        // Cooldowns
+        this.shootCooldown = 0;
+        this.bombCooldown = 0;
+
+        // Landing state
+        this.isLanded = false;
+    }
+
+    update(input, groundY) {
+        if (!this.active) return;
+
+        // Update facing direction immediately (no smooth transition)
+        // Only update facing when NOT shooting (allows strafing/backward movement)
+        if (!input.shooting) {
+            if (input.horizontal < 0) {
+                this.facing = -1;
+            } else if (input.horizontal > 0) {
+                this.facing = 1;
+            }
+        }
+        // Apply horizontal input (tilt or arrow keys)
+        const thrust = 0.3;
+        this.vx += input.horizontal * thrust;
+
+        // Apply gravity
+        this.vy += 0.15;
+
+        // Automatic hover lift (rotor keeps helicopter up)
+        // Adjust hover strength based on vertical input
+        let hoverLift = 0.2; // Base hover lift
+
+
+
+        if (!this.isLanded || input.vertical < 0) {
+            // W/ArrowUp increases lift (go up faster)
+            if (input.vertical < 0) {
+                hoverLift = 0.35;
+            }
+            // S/ArrowDown decreases lift (descend)
+            else if (input.vertical > 0) {
+                hoverLift = 0.05;
+            }
+
+            this.vy -= hoverLift;
+        }
+
+        // Air resistance
+        this.vx *= 0.95;
+        this.vy *= 0.98;
+
+        // Update position
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Fuel consumption (only when airborne)
+        if (!this.isLanded && this.fuel > 0) {
+            this.fuel -= 0.0165; // Depletes slowly (reduced to 33%)
+
+            // Crash if out of fuel
+            if (this.fuel <= 0) {
+                this.fuel = 0;
+                this.vy += 0.5; // Accelerate downward
+            }
+        }
+
+        // Update cooldowns
+        if (this.shootCooldown > 0) this.shootCooldown--;
+        if (this.bombCooldown > 0) this.bombCooldown--;
+    }
+
+    draw(ctx, game = null) {
+        if (!this.active) return;
+
+        // Disable sprite for now - original graphics look better
+        const useSprite = false; // game && game.spritesLoaded && game.sprites.helicopter.complete;
+
+        if (useSprite) {
+            // Draw using sprite
+            ctx.save();
+
+            // Detect backward movement
+            const isBackward = (this.facing === 1 && this.vx < -0.5) || (this.facing === -1 && this.vx > 0.5);
+            let tilt = this.vx * 0.15;
+            if (isBackward) {
+                tilt = 0.3;
+            }
+            tilt = Math.max(-0.5, Math.min(0.5, tilt));
+
+            ctx.translate(this.x, this.y);
+            ctx.scale(this.facing, 1);
+            ctx.rotate(tilt);
+
+            // Draw sprite (centered)
+            const spriteWidth = 60;
+            const spriteHeight = 30;
+            ctx.drawImage(game.sprites.helicopter, -spriteWidth / 2, -spriteHeight / 2, spriteWidth, spriteHeight);
+
+            ctx.restore();
+        } else {
+            // Fallback to original graphics
+            ctx.save();
+
+            // Tilt: Nose always points downward when moving (forward or backward)
+            // Positive rotation rotates the nose (local +X) downwards (towards local +Y)
+            // Since we scale by (facing, 1), a positive rotation always dips the nose in screen space too.
+            let tilt = Math.abs(this.vx) * 0.35;
+            tilt = Math.max(0, Math.min(0.6, tilt)); // Clamp between 0 and 0.6
+
+            ctx.translate(this.x, this.y);
+            ctx.scale(this.facing, 1);
+            ctx.rotate(tilt);
+
+            // Draw helicopter in outline style (like reference image)
+            ctx.strokeStyle = '#1565C0';
+            ctx.fillStyle = '#1976D2';
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Main body - angular shape with rounded front
+            ctx.beginPath();
+            // Start from back bottom
+            ctx.moveTo(-20, 8);
+            // Back side up
+            ctx.lineTo(-20, -8);
+            // Top line
+            ctx.lineTo(10, -8);
+            // Front top curve
+            ctx.quadraticCurveTo(24, -8, 24, 0);
+            // Front bottom curve
+            ctx.quadraticCurveTo(24, 8, 10, 8);
+            // Bottom line back
+            ctx.lineTo(-20, 8);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Cockpit windows (two rectangular panels)
+            ctx.fillStyle = '#64B5F6';
+            ctx.strokeStyle = '#1565C0';
+            ctx.lineWidth = 1.5;
+
+            // Left window panel
+            ctx.beginPath();
+            ctx.rect(2, -6, 8, 10);
+            ctx.fill();
+            ctx.stroke();
+
+            // Right window panel
+            ctx.beginPath();
+            ctx.rect(10, -6, 8, 10);
+            ctx.fill();
+            ctx.stroke();
+
+            // Window divider
+            ctx.beginPath();
+            ctx.moveTo(10, -6);
+            ctx.lineTo(10, 4);
+            ctx.stroke();
+
+            // Tail boom
+            ctx.strokeStyle = '#1565C0';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(-22, 0);
+            ctx.lineTo(-35, 0);
+            ctx.stroke();
+
+            // Tail fin (vertical stabilizer)
+            ctx.fillStyle = '#1976D2';
+            ctx.beginPath();
+            ctx.moveTo(-32, 0);
+            ctx.lineTo(-35, -10);
+            ctx.lineTo(-30, -10);
+            ctx.lineTo(-28, 0);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Tail rotor housing
+            ctx.fillStyle = '#1976D2';
+            ctx.beginPath();
+            ctx.arc(-35, -5, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Landing skids (two parallel bars)
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+
+            // Front skid strut
+            ctx.beginPath();
+            ctx.moveTo(10, 8);
+            ctx.lineTo(10, 14);
+            ctx.stroke();
+
+            // Rear skid strut
+            ctx.beginPath();
+            ctx.moveTo(-10, 8);
+            ctx.lineTo(-10, 14);
+            ctx.stroke();
+
+            // Skid bars
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(-15, 14);
+            ctx.lineTo(15, 14);
+            ctx.stroke();
+
+            // Main rotor mast
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, -10);
+            ctx.lineTo(0, -14);
+            ctx.stroke();
+
+            // Rotor hub
+            ctx.fillStyle = '#333';
+            ctx.beginPath();
+            ctx.arc(0, -14, 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Main rotor blades (static horizontal line)
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(-35, -14);
+            ctx.lineTo(35, -14);
+            ctx.stroke();
+
+            // Tail rotor (animated)
+            const rotorAngle = Date.now() * 0.05; // Keep rotorAngle for tail rotor
+            ctx.save();
+            ctx.translate(-35, -5);
+            ctx.rotate(rotorAngle * 2);
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, -8);
+            ctx.lineTo(0, 8);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(-8, 0);
+            ctx.lineTo(8, 0);
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.restore();
+        }
+
+        // Health bar (always visible above helicopter, not rotated)
+        ctx.fillStyle = '#333';
+        ctx.fillRect(this.x - 20, this.y - 30, 40, 4);
+        ctx.fillStyle = this.health > 30 ? '#4CAF50' : '#F44336';
+        ctx.fillRect(this.x - 20, this.y - 30, 40 * (Math.max(0, this.health) / this.maxHealth), 4);
+    }
+
+    shoot() {
+        if (this.shootCooldown <= 0 && this.fuel > 0) {
+            this.shootCooldown = 10; // Fast cooldown for machine gun
+
+            // Detect backward movement (moving opposite to facing)
+            const isBackward = (this.facing === 1 && this.vx < -0.5) || (this.facing === -1 && this.vx > 0.5);
+
+            let angle, spawnY;
+
+            if (isBackward) {
+                // Fire downward at 45-degree angle when moving backward
+                // Fire in the direction we're FACING (not the direction we're moving)
+                angle = this.facing === 1 ? Math.PI / 4 : (-Math.PI / 4);
+                spawnY = this.y + 10; // Spawn lower
+            } else {
+                // Normal horizontal fire
+                angle = this.facing === 1 ? 0 : Math.PI;
+                spawnY = this.y;
+            }
+
+            const bulletSpeed = 10;
+
+            // Calculate velocity vector
+            const vx = Math.cos(angle) * bulletSpeed;
+            const vy = Math.sin(angle) * bulletSpeed;
+
+            // Calculate spawn position (nose of helicopter)
+            const spawnDist = 25;
+            const spawnX = this.x + Math.cos(angle) * spawnDist;
+
+            return new Projectile(
+                spawnX,
+                spawnY,
+                vx,
+                vy,
+                'bullet',
+                'player'
+            );
+        }
+        return null;
+    }
+
+    dropBomb() {
+        if (this.bombCooldown <= 0 && this.ammo > 0 && this.fuel > 0) {
+            this.bombCooldown = 30;
+            this.ammo--;
+            return new Projectile(
+                this.x,
+                this.y + 10,
+                this.vx,
+                this.vy + 2,
+                'bomb',
+                'player'
+            );
+        }
+        return null;
+    }
+
+    hit(damage = 10) {
+        this.health = Math.max(0, this.health - damage);
+        return this.health <= 0;
+    }
+
+    die() {
+        this.lives--;
+        this.active = false; // Mark as inactive during respawn
+        return this.lives <= 0; // Return true if game over
+    }
+
+    respawn(x, y) {
+        // Respawn at specified location (friendly base)
+        this.x = x;
+        this.y = y;
+        this.vx = 0;
+        this.vy = 0;
+        this.health = this.maxHealth;
+        this.fuel = this.maxFuel;
+        this.ammo = this.maxAmmo;
+        this.active = true;
+    }
+
+    pickUpInfantry(unit, game) {
+        // Check if we have space
+        if (this.cargo.length >= this.maxCargo) {
+            return false; // Cargo full
+        }
+
+        // Add to cargo
+        this.cargo.push(unit);
+
+        // Remove from friendly units
+        unit.active = false;
+
+        // Visual feedback - dust puff instead of explosion
+        game.createDustPuff(unit.x, unit.y);
+
+        return true;
+    }
+
+    dropInfantry(game) {
+        // If cargo is empty, try to buy one instantly (QoL feature)
+        if (this.cargo.length === 0) {
+            if (game.economy && game.economy.funds >= 500) {
+                game.economy.purchase(500);
+                // Proceed to drop (auto-bought)
+            } else {
+                return null; // No cargo and can't afford
+            }
+        } else {
+            // Use existing cargo
+            this.cargo.pop();
+        }
+
+        // Create new infantry at helicopter position (in the air)
+
+        // Create new infantry at helicopter position (in the air)
+        const newInfantry = new GroundUnit(
+            this.x,
+            this.y, // Start at helicopter's Y position
+            'infantry',
+            true // Friendly
+        );
+
+        // Set parachuting state
+        newInfantry.parachuting = true;
+        newInfantry.fallSpeed = 1; // Slow fall speed
+
+        game.friendlyUnits.push(newInfantry);
+
+        // Visual feedback - dust puff instead of explosion
+        game.createDustPuff(this.x, this.y);
+
+        return newInfantry;
+    }
+
+    tryPickupNearbyInfantry(game) {
+        // Only pick up when landed or hovering very low
+        const groundY = game.canvas.height - 50;
+        if (this.y < groundY - 20 || this.cargo.length >= this.maxCargo) {
+            return; // Too high or cargo full
+        }
+
+        // Check for nearby friendly infantry
+        game.friendlyUnits.forEach(unit => {
+            if (unit.active && unit.type === 'infantry' && this.cargo.length < this.maxCargo) {
+                const dist = Math.abs(unit.x - this.x);
+                if (dist < 30) { // Within 30 pixels
+                    this.pickUpInfantry(unit, game);
+                }
+            }
+        });
+    }
+}
+
+class Helipad {
+    constructor(x, y, width = 80, height = 10) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.refuelRate = 1.0; // Faster refueling
+        this.repairRate = 1.0; // Faster repairs
+        this.rearmRate = 1;
+        this.rearmCounter = 0;
+    }
+
+    checkLanding(helicopter) {
+        // Check if helicopter is within helipad bounds and low enough
+        const inBounds =
+            helicopter.x > this.x - this.width / 2 &&
+            helicopter.x < this.x + this.width / 2 &&
+            helicopter.y > this.y - 30 &&
+            helicopter.y < this.y - 10;
+
+        // Only consider landing if not moving up significantly
+        const lowSpeed = Math.abs(helicopter.vx) < 2 && helicopter.vy > -0.5 && helicopter.vy < 2;
+
+        return inBounds && lowSpeed;
+    }
+
+    service(helicopter) {
+        // Refuel
+        if (helicopter.fuel < helicopter.maxFuel) {
+            helicopter.fuel = Math.min(helicopter.maxFuel, helicopter.fuel + this.refuelRate);
+        }
+
+        // Repair
+        if (helicopter.health < helicopter.maxHealth) {
+            helicopter.health = Math.min(helicopter.maxHealth, helicopter.health + this.repairRate);
+        }
+
+        // Rearm (slower but faster than before)
+        if (helicopter.ammo < helicopter.maxAmmo) {
+            this.rearmCounter++;
+            if (this.rearmCounter >= 10) { // Every ~0.16 seconds (was 30)
+                helicopter.ammo = Math.min(helicopter.maxAmmo, helicopter.ammo + 1);
+                this.rearmCounter = 0;
+            }
+        } else {
+            this.rearmCounter = 0;
+        }
+    }
+
+    draw(ctx) {
+        // Helipad platform
+        ctx.fillStyle = '#666';
+        ctx.fillRect(this.x - this.width / 2, this.y, this.width, this.height);
+
+        // Landing cross
+        ctx.strokeStyle = '#FFD700';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(this.x - 15, this.y + 5);
+        ctx.lineTo(this.x + 15, this.y + 5);
+        ctx.moveTo(this.x, this.y - 10);
+        ctx.lineTo(this.x, this.y + 20);
+        ctx.stroke();
+
+        // "H" marking
+        ctx.fillStyle = '#FFD700';
+        ctx.font = 'bold 20px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('H', this.x, this.y + 35);
+    }
+}
+
+class Economy {
+    constructor() {
+        this.funds = 1000; // Starting money
+        this.incomeTimer = 0;
+        this.incomeInterval = 120; // 2 seconds at 60fps
+        this.baseIncome = 100; // Doubled income rate
+    }
+
+    update() {
+        // Passive income tick
+        this.incomeTimer++;
+        if (this.incomeTimer >= this.incomeInterval) {
+            this.funds += this.baseIncome;
+            this.incomeTimer = 0;
+        }
+    }
+
+    awardBounty(amount) {
+        this.funds += amount;
+    }
+
+    canAfford(cost) {
+        return this.funds >= cost;
+    }
+
+    purchase(cost) {
+        if (this.canAfford(cost)) {
+            this.funds -= cost;
+            return true;
+        }
+        return false;
+    }
+}
+
+// Enemy AI Commander - Strategic decision making
+class EnemyAICommander {
+    constructor(economy, game) {
+        this.economy = economy;
+        this.game = game;
+
+        // Decision timing
+        this.decisionInterval = 120; // 2 seconds at 60fps (Faster decisions)
+        this.decisionTimer = 0;
+
+        // Strategy state
+        this.strategy = 'balanced'; // defensive, balanced, aggressive
+        this.threatLevel = 50; // 0-100
+
+        // Unit counts for tracking
+        this.unitCounts = {
+            infantry: 0,
+            tank: 0,
+            missile: 0,
+            demo: 0
+        };
+    }
+
+    update() {
+        this.decisionTimer++;
+        // if (this.decisionTimer % 60 === 0) console.log('[AI Update] Frame:', this.decisionTimer, 'Funds:', this.economy.funds);
+
+        if (this.decisionTimer >= this.decisionInterval) {
+            this.makeDecision();
+            this.decisionTimer = 0;
+        }
+    }
+
+    makeDecision() {
+        // console.log('[AI] Making decision at frame', this.decisionTimer, 'funds:', this.economy.funds, 'strategy:', this.strategy);
+        // Assess the current situation
+        this.assessSituation();
+
+        // Choose strategy based on situation
+        this.chooseStrategy();
+
+        // Decide what unit to purchase
+        const unitToPurchase = this.decideUnitPurchase();
+
+        if (unitToPurchase) {
+            this.purchaseUnit(unitToPurchase);
+        }
+    }
+
+    assessSituation() {
+        // Count enemy units (friendly to player = enemy to AI)
+        const playerUnits = this.game.friendlyUnits.length;
+        const aiUnits = this.game.enemies.length;
+
+        // Count bunkers controlled
+        const playerBunkers = this.game.bunkers.filter(b => b.owner === 'friendly').length;
+        const aiBunkers = this.game.bunkers.filter(b => b.owner === 'enemy').length;
+
+        // Calculate threat level
+        let threat = 50; // Baseline
+
+        // Unit superiority
+        if (playerUnits > aiUnits) {
+            threat += (playerUnits - aiUnits) * 5;
+        } else {
+            threat -= (aiUnits - playerUnits) * 5;
+        }
+
+        // Territory control
+        if (playerBunkers > aiBunkers) {
+            threat += (playerBunkers - aiBunkers) * 10;
+        } else {
+            threat -= (aiBunkers - playerBunkers) * 10;
+        }
+
+        // Player helicopter proximity to enemy base
+        if (this.game.enemyBase) {
+            const distToEnemyBase = Math.abs(this.game.player.x - this.game.enemyBase.x);
+            if (distToEnemyBase < 1000) { // Increased threat range
+                threat += 30;
+            }
+        }
+
+        // Clamp threat level
+        this.threatLevel = Math.max(0, Math.min(100, threat));
+    }
+
+    chooseStrategy() {
+        if (this.threatLevel > 70) {
+            this.strategy = 'defensive';
+        } else if (this.threatLevel < 30) {
+            this.strategy = 'aggressive';
+        } else {
+            this.strategy = 'balanced';
+        }
+    }
+
+    decideUnitPurchase() {
+        // Update unit counts
+        this.updateUnitCounts();
+
+        const funds = this.economy.funds;
+
+        // Unit costs (match player costs)
+        const costs = {
+            infantry: 500,
+            tank: 2000,
+            missile: 3000,
+            demo: 5000
+        };
+
+        // Check if player helicopter is a threat (nearby and alive)
+        const playerHelicopterThreat = this.game.player.health > 0 &&
+            this.game.player.x > this.game.levelWidth / 2;
+
+        // Count neutral bunkers that can be captured
+        const neutralBunkers = this.game.bunkers.filter(b => b.owner === 'neutral').length;
+
+        // Decision tree based on strategy
+        if (this.strategy === 'defensive') {
+            // Prioritize anti-air and tanks
+            if (playerHelicopterThreat && this.unitCounts.missile < 3 && funds >= costs.missile) {
+                return 'missile';
+            }
+            if (this.unitCounts.tank < 5 && funds >= costs.tank) {
+                return 'tank';
+            }
+            if (funds >= costs.infantry) {
+                return 'infantry'; // Cheap meat shield
+            }
+        } else if (this.strategy === 'aggressive') {
+            // Try for demo truck if we can afford it
+            if (funds >= costs.demo && this.unitCounts.tank >= 2) {
+                return 'demo';
+            }
+            // Build up tank force
+            if (this.unitCounts.tank < 8 && funds >= costs.tank) {
+                return 'tank';
+            }
+            // Capture bunkers for income
+            if (neutralBunkers > 0 && this.unitCounts.infantry < 5 && funds >= costs.infantry) {
+                return 'infantry';
+            }
+            // Default to tanks
+            if (funds >= costs.tank) {
+                return 'tank';
+            }
+        } else { // balanced
+            // Balanced mix of units
+            if (neutralBunkers > 0 && this.unitCounts.infantry < 3 && funds >= costs.infantry) {
+                return 'infantry';
+            }
+            if (playerHelicopterThreat && this.unitCounts.missile < 2 && funds >= costs.missile) {
+                return 'missile';
+            }
+            if (this.unitCounts.tank < 4 && funds >= costs.tank) {
+                return 'tank';
+            }
+            if (funds >= costs.infantry) {
+                return 'infantry';
+            }
+        }
+
+        return null; // Can't afford anything or satisfied
+    }
+
+    updateUnitCounts() {
+        this.unitCounts = {
+            infantry: 0,
+            tank: 0,
+            missile: 0,
+            demo: 0
+        };
+
+        for (const unit of this.game.enemies) {
+            if (this.unitCounts.hasOwnProperty(unit.type)) {
+                this.unitCounts[unit.type]++;
+            }
+        }
+    }
+
+    purchaseUnit(unitType) {
+        const costs = {
+            infantry: 500,
+            tank: 2000,
+            missile: 3000,
+            demo: 5000
+        };
+
+        const cost = costs[unitType];
+
+        if (this.economy.purchase(cost)) {
+            // Spawn unit at enemy base
+            if (this.game.enemyBase) {
+                const spawnX = this.game.enemyBase.x - 50;
+                const spawnY = this.game.canvas.height - 50;
+                const newUnit = new GroundUnit(spawnX, spawnY, unitType, false);
+                this.game.enemies.push(newUnit);
+
+                // console.log(`AI purchased ${unitType} for $${cost}. Remaining funds: $${this.economy.funds}`);
+            }
+        }
+    }
+}
+
+class RescueRaidersGame {
+    constructor() {
+        this.canvas = document.getElementById('chopper-canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.scoreEl = document.getElementById('chopper-score');
+        this.levelEl = document.getElementById('chopper-level');
+        this.healthEl = document.getElementById('chopper-health');
+        this.highScoreEl = document.getElementById('chopper-high-score');
+        this.fuelEl = document.getElementById('chopper-fuel');
+        this.ammoEl = document.getElementById('chopper-ammo');
+        this.livesEl = document.getElementById('chopper-lives');
+        this.fundsEl = document.getElementById('chopper-funds');
+
+        this.gameLoop = null;
+        this.player = null;
+        this.helipad = null;
+        this.economy = new Economy();
+        this.enemies = [];
+        this.projectiles = [];
+        this.particles = [];
+        this.terrain = [];
+        this.score = 0;
+        this.level = 1;
+        this.difficulty = 'easy';
+        this.gameState = 'menu';
+
+        // Input state
+        this.input = {
+            horizontal: 0,
+            vertical: 0,
+            shooting: false,
+            bombing: false
+        };
+
+        // Mobile orientation
+        this.tiltEnabled = false;
+        this.baseGamma = 0;
+
+        // Camera offset
+        this.cameraX = 0;
+        this.levelWidth = 3000; // Wider map for RTS gameplay
+        this.levelComplete = false;
+        this.level = 1;
+        this.score = 0;
+        this.highScore = parseInt(localStorage.getItem('rescueRaidersHighScore') || '0');
+        this.difficulty = 'easy';
+        this.gameState = 'menu';
+        this.respawnDelay = 120; // 2 seconds at 60fps (player only)
+        this.respawnTimer = this.respawnDelay;
+
+        // Load sprite images
+        this.sprites = {
+            helicopter: new Image(),
+            tank: new Image()
+        };
+        this.sprites.helicopter.src = 'images/sprites/helicopter.png';
+        this.sprites.tank.src = 'images/sprites/tank.png';
+        this.spritesLoaded = false;
+
+        // Check when all sprites are loaded
+        let loadedCount = 0;
+        const totalSprites = Object.keys(this.sprites).length;
+        Object.values(this.sprites).forEach(img => {
+            img.onload = () => {
+                loadedCount++;
+                if (loadedCount === totalSprites) {
+                    this.spritesLoaded = true;
+                    // console.log('All sprites loaded successfully');
+                }
+            };
+            img.onerror = () => {
+                console.warn('Failed to load sprite:', img.src);
+            };
+        });
+
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        // Reset button
+        const resetBtn = document.getElementById('chopper-reset');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => this.init());
+        }
+
+        // Keyboard controls
+        this.keydownHandler = (e) => this.handleKeyDown(e);
+        this.keyupHandler = (e) => this.handleKeyUp(e);
+
+        // Touch/Mouse controls for shooting
+        this.canvas.addEventListener('touchstart', (e) => this.handleTouch(e), { passive: false });
+        this.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
+        this.canvas.addEventListener('touchcancel', (e) => this.handleTouchEnd(e), { passive: false });
+        this.canvas.addEventListener('mousedown', (e) => { this.canvas.focus(); this.handleClick(e); });
+
+        // Virtual D-Pad for mobile
+        this.setupVirtualDpad();
+
+        // Device orientation for tilt controls
+        if (window.DeviceOrientationEvent) {
+            // Request permission for iOS 13+
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                // iOS 13+ requires permission
+                // We'll request it when the user starts playing
+                this.needsOrientationPermission = true;
+            } else {
+                // Non-iOS or older iOS, just add the listener
+                window.addEventListener('deviceorientation', (e) => this.handleOrientation(e));
+            }
+        }
+
+        // Unit purchase buttons
+        document.getElementById('buy-infantry').addEventListener('click', () => this.purchaseUnit('infantry', 500));
+        document.getElementById('buy-tank').addEventListener('click', () => this.purchaseUnit('tank', 2000));
+        document.getElementById('buy-missile').addEventListener('click', () => this.purchaseUnit('missile', 3000));
+        document.getElementById('buy-demo').addEventListener('click', () => this.purchaseUnit('demo', 5000));
+
+        // Difficulty buttons
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.difficulty = btn.dataset.difficulty;
+                document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // Action buttons (Drop Bomb, Deploy Infantry)
+        const btnDropBomb = document.getElementById('btn-drop-bomb');
+        const btnDeployInfantry = document.getElementById('btn-deploy-infantry');
+
+        if (btnDropBomb) {
+            btnDropBomb.addEventListener('click', () => {
+                if (this.gameState === 'playing') {
+                    this.input.bombing = true;
+                    setTimeout(() => this.input.bombing = false, 100); // Brief pulse
+                }
+            });
+        }
+
+        if (btnDeployInfantry) {
+            btnDeployInfantry.addEventListener('click', () => {
+                if (this.gameState === 'playing' && this.player) {
+                    this.player.dropInfantry(this);
+                }
+            });
+        }
+
+        // Mobile controls setup removed (buttons removed)
+    }
+
+    // Helper to clean up event listeners
+    cleanup() {
+        document.removeEventListener('keydown', this.keydownHandler);
+        document.removeEventListener('keyup', this.keyupHandler);
+        window.removeEventListener('keydown', this.keydownHandler);
+        window.removeEventListener('keyup', this.keyupHandler);
+        if (this.gameLoop) {
+            cancelAnimationFrame(this.gameLoop);
+            this.gameLoop = null;
+        }
+    }
+
+    init() {
+        this.cleanup(); // Ensure clean slate
+        this.level = 1;
+        this.score = 0;
+        // Don't set difficulty here - let user choose
+        // Don't call startLevel() - wait for user to click "Got it! Let's Play"
+
+        // Add event listeners
+        document.addEventListener('keydown', this.keydownHandler);
+        document.addEventListener('keyup', this.keyupHandler);
+        // Also listen on window as fallback for embedded/iframed contexts
+        window.addEventListener('keydown', this.keydownHandler);
+        window.addEventListener('keyup', this.keyupHandler);
+
+        // Prevent double-tap zoom on buttons
+        document.addEventListener('dblclick', (e) => {
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Robust double-tap prevention for touch devices
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, { passive: false });
+    }
+
+    startLevel() {
+        this.gameState = 'playing';
+        this.canvas.focus(); // Ensure keyboard events work
+
+        // Show control hint briefly
+        const hint = document.createElement('div');
+        hint.id = 'control-hint';
+        hint.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);padding:20px 30px;border-radius:12px;z-index:100;text-align:center;font-size:16px;color:#fff;pointer-events:none;';
+        hint.innerHTML = '⌨️ WASD/Arrows to fly<br>Space to shoot<br><small>(fades in 2s)</small>';
+        document.body.appendChild(hint);
+        setTimeout(() => { hint.style.transition = 'opacity 1s'; hint.style.opacity = '0'; setTimeout(() => hint.remove(), 1000); }, 2000);
+
+        // Resize canvas to fill the container (maximize play area)
+        const container = this.canvas.parentElement;
+        if (container) {
+            this.canvas.width = container.clientWidth;
+            this.canvas.height = container.clientHeight;
+        }
+
+        // Request gyroscope permission for iOS devices
+        this.requestOrientationPermission();
+
+        this.player = new Helicopter(150, this.canvas.height / 2);
+        this.helipad = new Helipad(150, this.canvas.height - 50); // In front of base
+        this.economy = new Economy();
+        this.enemyEconomy = new Economy();
+        this.aiCommander = new EnemyAICommander(this.enemyEconomy, this);
+
+        // Initialize Audio
+        if (!this.audio) {
+            this.audio = new AudioController();
+        }
+
+        this.enemies = [];
+        this.enemyChoppers = [];
+        this.friendlyUnits = [];
+        this.bases = [];
+        this.bunkers = [];
+        this.projectiles = [];
+        this.particles = [];
+        this.levelComplete = false;
+        this.cameraX = 0; // Will be updated in first frame to follow player
+
+        this.generateLevel();
+        this.updateStats();
+        this.respawnTimer = 0;
+
+        // Start game loop
+        if (this.gameLoop) cancelAnimationFrame(this.gameLoop);
+        this.gameLoop = requestAnimationFrame(() => this.update());
+    }
+
+    generateLevel() {
+        this.enemies = [];
+        this.terrain = [];
+
+        // Calculate difficulty multipliers
+        // Start with just 2 enemies, let the AI build more with funds
+        let enemyCount = 2 + this.level;
+
+        // Create Bases
+        const groundY = this.canvas.height - 50;
+        this.friendlyBase = new Base(50, groundY, true, this);
+        this.enemyBase = new Base(this.levelWidth - 100, groundY, false, this);
+        this.bases = [this.friendlyBase, this.enemyBase];
+
+        // Create enemy helipad in front of enemy base
+        this.enemyHelipad = new Helipad(this.levelWidth - 200, this.canvas.height - 50);
+
+        // Generate terrain
+        for (let x = 0; x < this.levelWidth; x += 50) {
+            // Flat terrain everywhere
+            this.terrain.push({ x, y: groundY });
+
+            // Chance to spawn bunker (every ~600px)
+            if (x > 500 && x < this.levelWidth - 500 && x % 600 === 0) {
+                this.bunkers.push(new Bunker(x, groundY, this));
+            }
+        }
+
+        // Spawn enemies (reduced starting units)
+        for (let i = 0; i < enemyCount; i++) {
+            const x = 800 + Math.random() * (this.levelWidth - 1000);
+            const type = Math.random() > 0.7 ? 'tank' : 'infantry';
+            this.enemies.push(new GroundUnit(x, this.canvas.height - 50, type, false));
+        }
+    }
+
+    purchaseUnit(type, cost) {
+        if (this.economy && this.economy.purchase(cost)) {
+            // Spawn unit at friendly base
+            // Base is at x=50, width=80. Spawn to the right of it.
+            const spawnX = this.friendlyBase ? this.friendlyBase.x + this.friendlyBase.width + 10 : 150;
+            const groundY = this.canvas.height - 50;
+
+            // Create unit
+            const unit = new GroundUnit(spawnX, groundY, type, true);
+            this.friendlyUnits.push(unit);
+
+            // Visual feedback
+            this.createExplosion(spawnX, groundY, 5); // Small puff
+        }
+    }
+
+    handleKeyDown(e) {
+        if (this.gameState !== 'playing') return;
+
+        switch (e.key) {
+            case 'ArrowLeft':
+            case 'a':
+            case 'A':
+                this.input.horizontal = -1;
+                e.preventDefault();
+                break;
+            case 'ArrowRight':
+            case 'd':
+            case 'D':
+                this.input.horizontal = 1;
+                e.preventDefault();
+                break;
+            case 'ArrowUp':
+            case 'w':
+            case 'W':
+                this.input.vertical = -1;
+                e.preventDefault();
+                break;
+            case 'ArrowDown':
+            case 's':
+            case 'S':
+                this.input.vertical = 1;
+                e.preventDefault();
+                break;
+            case ' ':
+                this.input.shooting = true;
+                e.preventDefault();
+                break;
+            case 'Shift':
+                this.input.bombing = true;
+                e.preventDefault();
+                break;
+            // Unit purchasing shortcuts
+            case '1':
+                this.purchaseUnit('infantry', 500);
+                break;
+            case '2':
+                this.purchaseUnit('tank', 2000);
+                break;
+            case '3':
+                this.purchaseUnit('missile', 3000);
+                break;
+            case '4':
+                this.purchaseUnit('demo', 5000);
+                break;
+            // Drop infantry
+            case 'e':
+            case 'E':
+                if (this.player && this.player.cargo.length > 0) {
+                    this.player.dropInfantry(this);
+                }
+                e.preventDefault();
+                break;
+        }
+    }
+
+    handleKeyUp(e) {
+        // This method is no longer directly called by event listeners
+        // as the logic has been moved into the anonymous function in setupEventListeners.
+        // Keeping it here for reference or if it's called elsewhere.
+        switch (e.key) {
+            case 'ArrowLeft':
+            case 'a':
+            case 'A':
+            case 'ArrowRight':
+            case 'd':
+            case 'D':
+                this.input.horizontal = 0;
+                break;
+            case 'ArrowUp':
+            case 'w':
+            case 'W':
+            case 'ArrowDown':
+            case 's':
+            case 'S':
+                this.input.vertical = 0;
+                break;
+            case ' ':
+                this.input.shooting = false;
+                break;
+            case 'Shift':
+                this.input.bombing = false;
+                break;
+        }
+    }
+
+    setupVirtualDpad() {
+        const dpad = document.getElementById('virtual-dpad');
+        const fireBtn = document.getElementById('virtual-fire');
+        if (!dpad) return;
+
+        const dirMap = { up: 'vertical', down: 'vertical', left: 'horizontal', right: 'horizontal' };
+        const valMap = { up: -1, down: 1, left: -1, right: 1 };
+
+        dpad.querySelectorAll('[data-dir]').forEach(btn => {
+            const dir = btn.dataset.dir;
+            const axis = dirMap[dir];
+            const val = valMap[dir];
+
+            const start = (e) => {
+                e.preventDefault();
+                this.input[axis] = val;
+                btn.style.background = 'rgba(255,255,255,0.5)';
+            };
+            const end = (e) => {
+                e.preventDefault();
+                this.input[axis] = 0;
+                btn.style.background = 'rgba(255,255,255,0.25)';
+            };
+
+            btn.addEventListener('touchstart', start, { passive: false });
+            btn.addEventListener('touchend', end, { passive: false });
+            btn.addEventListener('touchcancel', end, { passive: false });
+            btn.addEventListener('mousedown', start);
+            btn.addEventListener('mouseup', end);
+            btn.addEventListener('mouseleave', end);
+        });
+
+        if (fireBtn) {
+            const fireStart = (e) => { e.preventDefault(); this.input.shooting = true; fireBtn.style.background = 'rgba(231,76,60,0.7)'; };
+            const fireEnd = (e) => { e.preventDefault(); this.input.shooting = false; fireBtn.style.background = 'rgba(231,76,60,0.4)'; };
+            fireBtn.addEventListener('touchstart', fireStart, { passive: false });
+            fireBtn.addEventListener('touchend', fireEnd, { passive: false });
+            fireBtn.addEventListener('touchcancel', fireEnd, { passive: false });
+            fireBtn.addEventListener('mousedown', fireStart);
+            fireBtn.addEventListener('mouseup', fireEnd);
+            fireBtn.addEventListener('mouseleave', fireEnd);
+        }
+    }
+
+    handleTouch(e) {
+        if (this.gameState !== 'playing') return;
+        if (e.cancelable) e.preventDefault(); // Prevent scrolling/zooming if possible
+
+        // Touch to Fly removed in favor of vertical tilt control
+        // Auto-fire handles shooting
+    }
+
+    handleTouchEnd(e) {
+        if (this.gameState !== 'playing') return;
+        if (e.cancelable) e.preventDefault();
+
+        // Flight logic removed
+    }
+
+    handleClick(e) {
+        if (this.gameState !== 'playing') return;
+
+        const projectile = this.player.shoot();
+        if (projectile) this.projectiles.push(projectile);
+    }
+
+    handleOrientation(e) {
+        if (this.gameState !== 'playing') return;
+
+        // Initialize base orientation on first tilt
+        if (e.gamma !== null && e.beta !== null) {
+            if (!this.tiltEnabled) {
+                this.tiltEnabled = true;
+                this.baseGamma = e.gamma;
+                this.baseBeta = e.beta;
+            }
+
+            // Horizontal control (gamma: left-right tilt)
+            const tiltX = e.gamma - this.baseGamma;
+            if (Math.abs(tiltX) > 3) {
+                this.input.horizontal = Math.max(-1, Math.min(1, tiltX / 30)); // Less sensitive (was 15)
+            } else {
+                this.input.horizontal = 0;
+            }
+
+            // Vertical control (beta: forward-backward tilt)
+            // User requested: "up and down using gyroscope should be reverse"
+            const tiltY = e.beta - this.baseBeta;
+            if (Math.abs(tiltY) > 3) {
+                // Reversed: Positive tiltY (tilting back) now goes DOWN (1), Negative (tilting forward) goes UP (-1)
+                // Wait, standard: Tilt Forward (negative beta) -> Up (-1). Tilt Back (positive beta) -> Down (1).
+                // Previous code was: -tiltY / 15. So Forward (-beta) -> -(-beta) = +beta -> Down?
+                // Let's try: Tilt Forward (top of phone goes down) -> Move Down. Tilt Back -> Move Up.
+                // Or: Tilt Forward -> Move Up (like diving?).
+                // User said "reverse".
+                // Let's implement: Tilt Forward (negative beta) -> Move Down (1). Tilt Back (positive beta) -> Move Up (-1).
+                // So: -tiltY / 30 would be: Forward (-beta) -> +val -> Down. Back (+beta) -> -val -> Up.
+                // Let's try that.
+                this.input.vertical = Math.max(-1, Math.min(1, tiltY / 30)); // Less sensitive
+            } else {
+                this.input.vertical = 0;
+            }
+        }
+    }
+
+    async requestOrientationPermission() {
+        if (this.needsOrientationPermission && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            try {
+                const permission = await DeviceOrientationEvent.requestPermission();
+                if (permission === 'granted') {
+                    window.addEventListener('deviceorientation', (e) => this.handleOrientation(e));
+                    this.needsOrientationPermission = false;
+                    console.log('Gyroscope controls enabled!');
+                } else {
+                    console.log('Gyroscope permission denied');
+                }
+            } catch (error) {
+                console.error('Error requesting orientation permission:', error);
+            }
+        }
+    }
+
+    calibrateGyroscope() {
+        // Reset the base orientation
+        this.tiltEnabled = false;
+        this.baseGamma = null;
+        this.baseBeta = null;
+        console.log('Gyroscope calibrated! Tilt your device to set new base position.');
+    }
+
+
+    update() {
+        if (this.gameState !== 'playing') {
+            this.gameLoop = requestAnimationFrame(() => this.update());
+            return;
+        }
+
+        // Get ground Y for current position
+        const groundY = this.canvas.height - 50;
+
+        // Update economy
+        if (this.economy) this.economy.update();
+
+        // Update enemy economy and AI commander
+        if (this.enemyEconomy) this.enemyEconomy.update();
+        if (this.aiCommander) this.aiCommander.update();
+
+        // Check helipad landing
+        this.player.isLanded = this.helipad.checkLanding(this.player);
+        if (this.player.isLanded) {
+            this.helipad.service(this.player);
+            // Only stabilize if not actively taking off
+            if (this.input.vertical >= 0) {
+                this.player.vx *= 0.8;
+                this.player.vy *= 0.8;
+                this.player.y = groundY - 18; // Slightly above helipad
+            }
+        }
+
+        // Update player
+        this.player.update(this.input, groundY);
+
+        // Keep player in bounds (altitude limits)
+        if (this.player.y < 10) {
+            this.player.y = 10;
+            this.player.vy = 0;
+        }
+
+        // Ground collision
+        if (this.player.active && this.player.y > groundY - 15 && !this.player.isLanded) {
+            this.player.y = groundY - 15;
+            this.player.vy = 0;
+            // Damage from hard landing
+            if (Math.abs(this.player.vy) > 2) {
+                if (this.player.hit(10)) {
+                    const gameOver = this.player.die();
+                    this.createExplosion(this.player.x, this.player.y, 50);
+                    if (gameOver) {
+                        this.gameOver();
+                        return;
+                    } else {
+                        this.respawnTimer = this.respawnDelay;
+                    }
+                }
+            }
+        }
+
+        // Check fuel - crash if empty
+        if (this.player.active && this.player.fuel <= 0 && !this.player.isLanded) {
+            if (this.player.hit(1)) { // Continuous damage
+                const gameOver = this.player.die();
+                this.createExplosion(this.player.x, this.player.y, 50);
+                if (gameOver) {
+                    this.gameOver();
+                    return;
+                } else {
+                    this.respawnTimer = this.respawnDelay;
+                }
+            }
+        }
+
+        // Handle respawn timer
+        if (this.respawnTimer > 0) {
+            this.respawnTimer--;
+            if (this.respawnTimer === 0 && this.player.lives > 0) {
+                // Respawn at friendly base
+                const spawnX = this.friendlyBase.x + 50;
+                const spawnY = this.canvas.height / 2;
+                this.player.respawn(spawnX, spawnY);
+            }
+        }
+
+        // Only update player controls if active
+        if (this.player.active) {
+            // Keep player in horizontal bounds
+            if (this.player.x < 50) this.player.x = 50;
+            if (this.player.x > this.levelWidth - 50) this.player.x = this.levelWidth - 50;
+
+            // Camera follows player
+            this.cameraX = this.player.x - 250;
+            if (this.cameraX < 0) this.cameraX = 0;
+            if (this.cameraX > this.levelWidth - this.canvas.width) {
+                this.cameraX = this.levelWidth - this.canvas.width;
+            }
+
+            // Shoot if holding space OR auto-fire triggers
+            if (this.input.shooting || this.checkAutoFire()) {
+                const projectile = this.player.shoot();
+                if (projectile) {
+                    this.projectiles.push(projectile);
+                    this.createMuzzleFlash(projectile.x, projectile.y, this.player.facing);
+                }
+            }
+
+            // Drop bomb if holding Shift
+            if (this.input.bombing) {
+                const projectile = this.player.dropBomb();
+                if (projectile) this.projectiles.push(projectile);
+            }
+
+            // Auto-pickup nearby infantry when low/landed
+            this.player.tryPickupNearbyInfantry(this);
+        }
+
+
+        // Update friendly units
+        if (this.friendlyUnits) {
+            const enemyTargets = [...this.enemies, ...this.enemyChoppers, this.enemyBase]; // Include enemy helicopters
+            this.friendlyUnits = this.friendlyUnits.filter(unit => {
+                unit.update(enemyTargets, this);
+                return unit.active;
+            });
+        }
+
+        // Update enemies
+        const friendlyTargets = [this.player, ...(this.friendlyUnits || []), this.friendlyBase]; // Target player helicopter, units, friendly base
+        this.enemies = this.enemies.filter(enemy => {
+            enemy.update(friendlyTargets, this);
+            return enemy.active;
+        });
+
+        // Update Enemy Choppers
+        if (this.enemyChoppers.length === 0 && this.level >= 1 && this.enemyBase && this.enemyBase.active) {
+            // Spawn one at enemy base
+            this.enemyChoppers.push(new EnemyHelicopter(this.enemyBase.x, this.enemyBase.y - 100, this));
+        }
+
+        this.enemyChoppers = this.enemyChoppers.filter(chopper => {
+            chopper.update(friendlyTargets, this);
+
+            // Check for landing on enemy helipad
+            if (this.enemyHelipad && this.enemyHelipad.checkLanding(chopper)) {
+                this.enemyHelipad.service(chopper);
+                // If fully serviced, resume patrol/attack
+                if (chopper.fuel >= chopper.maxFuel && chopper.health >= chopper.maxHealth && chopper.ammo >= chopper.maxAmmo) {
+                    chopper.state = 'patrol';
+                }
+            }
+
+            return chopper.active || (chopper.respawnTimer && chopper.respawnTimer > 0);
+        });
+
+        // Update bases
+        this.bases.forEach(base => base.update());
+
+        // Update bunkers
+        this.bunkers.forEach(bunker => bunker.update());
+
+        // Update economy with bunker income
+        if (this.economy && this.gameLoop % 120 === 0) { // Every 2 seconds
+            const friendlyBunkers = this.bunkers.filter(b => b.owner === 'friendly').length;
+            this.economy.funds += friendlyBunkers * 4; // Doubled bunker income
+        }
+
+        // Update enemy economy with bunker income
+        if (this.enemyEconomy && this.gameLoop % 120 === 0) { // Every 2 seconds
+            const enemyBunkers = this.bunkers.filter(b => b.owner === 'enemy').length;
+            this.enemyEconomy.funds += enemyBunkers * 4; // Doubled bunker income
+        }
+
+        // Update projectiles
+        this.projectiles = this.projectiles.filter(p => {
+            p.update();
+
+            // Check for bomb ground collision
+            if (p.type === 'bomb' && p.y > groundY) {
+                this.createExplosion(p.x, groundY, 20); // Big explosion for bomb
+                return false; // Remove projectile
+            }
+
+            // Remove out of bounds (limit to visible screen area)
+            const screenLeft = this.cameraX - 50;
+            const screenRight = this.cameraX + this.canvas.width + 50;
+            if (p.x < screenLeft || p.x > screenRight || p.y < -50 || p.y > this.canvas.height + 50) {
+                return false;
+            }
+
+            return p.active;
+        });
+
+        // Check collisions
+        this.checkCollisions();
+
+        // Update particles
+        this.particles = this.particles.filter(p => {
+            p.update();
+            return p.active;
+        });
+
+        // Check level complete - win by destroying enemy base
+        if (this.enemyBase && !this.enemyBase.active && !this.levelComplete) {
+            this.levelComplete = true;
+            setTimeout(() => this.levelVictory(), 2000);
+        }
+
+
+        // Update HUD
+        this.updateStats();
+
+        // Draw Enemy Choppers
+        this.enemyChoppers.forEach(chopper => chopper.draw(this.ctx));
+
+        // Draw everything
+        this.draw();
+
+        // Continue game loop
+        this.gameLoop = requestAnimationFrame(() => this.update());
+    }
+
+    checkAutoFire() {
+        if (!this.player || !this.player.active) return false;
+
+        // Range for auto-fire (increased for better coverage)
+        const range = 600;
+        const verticalTolerance = 100; // Bullets fly straight, so target must be roughly level
+
+        // Collect all potential targets
+        const targets = [
+            ...this.enemies,
+            ...this.enemyChoppers,
+            ...(this.enemyBase && this.enemyBase.active ? [this.enemyBase] : []),
+            ...this.bunkers.filter(b => b.owner === 'enemy' || b.owner === 'neutral')
+        ];
+
+        for (const target of targets) {
+            if (!target.active) continue;
+
+            // Check if target is in front
+            const dx = target.x - this.player.x;
+            const dy = Math.abs(target.y - this.player.y);
+
+            // Facing right (1) and target is to the right (dx > 0)
+            // OR Facing left (-1) and target is to the left (dx < 0)
+            const isInFront = (this.player.facing === 1 && dx > 0) || (this.player.facing === -1 && dx < 0);
+
+            if (isInFront && Math.abs(dx) < range && dy < verticalTolerance) {
+                // Debug: Log when auto-fire triggers
+                // if (Math.random() < 0.01) { 
+                //    console.log('Auto-fire triggered!', { dx: Math.abs(dx), dy, facing: this.player.facing });
+                // }
+                return true; // Found a valid target
+            }
+        }
+
+        return false;
+    }
+
+    checkCollisions() {
+        // Projectile collisions
+        this.projectiles.forEach(projectile => {
+            if (!projectile.active) return;
+
+            // Projectile AABB (Top-Left)
+            const pLeft = projectile.x;
+            const pRight = projectile.x + projectile.width;
+            const pTop = projectile.y;
+            const pBottom = projectile.y + projectile.height;
+
+            if (projectile.owner === 'player') {
+                // Player projectiles hit enemies (GroundUnit: Center-Bottom)
+                this.enemies.forEach(enemy => {
+                    if (!enemy.active) return;
+
+                    const eLeft = enemy.x - enemy.width / 2;
+                    const eRight = enemy.x + enemy.width / 2;
+                    const eTop = enemy.y - enemy.height;
+                    const eBottom = enemy.y;
+
+                    // AABB Collision
+                    if (pRight > eLeft && pLeft < eRight && pBottom > eTop && pTop < eBottom) {
+                        projectile.active = false;
+                        this.createHitEffect(projectile.x, projectile.y);
+
+                        if (enemy.takeDamage(projectile.damage)) {
+                            // Enemy destroyed
+                            this.createExplosion(enemy.x, enemy.y, enemy.type === 'tank' ? 15 : 10);
+                            this.score += enemy.type === 'tank' ? 100 : 50;
+
+                            // Award bounty
+                            if (this.economy) {
+                                this.economy.awardBounty(enemy.type === 'tank' ? 20 : 5);
+                            }
+                        }
+                    }
+                });
+
+                // Player projectiles hit enemy base (Base: Left-Bottom)
+                if (this.enemyBase && this.enemyBase.active) {
+                    const bLeft = this.enemyBase.x;
+                    const bRight = this.enemyBase.x + this.enemyBase.width;
+                    const bTop = this.enemyBase.y - this.enemyBase.height;
+                    const bBottom = this.enemyBase.y;
+
+                    if (pRight > bLeft && pLeft < bRight && pBottom > bTop && pTop < bBottom) {
+                        projectile.active = false;
+                        this.createHitEffect(projectile.x, projectile.y);
+                        this.enemyBase.takeDamage(projectile.damage);
+                    }
+                }
+
+                // Player projectiles hit enemy choppers
+                this.enemyChoppers.forEach(chopper => {
+                    if (!chopper.active) return;
+
+                    // Chopper AABB (Center-Center approx like player)
+                    const cLeft = chopper.x - 20;
+                    const cRight = chopper.x + 20;
+                    const cTop = chopper.y - 10;
+                    const cBottom = chopper.y + 10;
+
+                    if (pRight > cLeft && pLeft < cRight && pBottom > cTop && pTop < cBottom) {
+                        projectile.active = false;
+                        this.createHitEffect(projectile.x, projectile.y);
+                        chopper.takeDamage(projectile.damage);
+                    }
+                });
+            } else if (projectile.owner === 'enemy') {
+                // Enemy projectiles hit player (Helicopter: Center-Center approx)
+                // Player width ~40, height ~20 based on draw
+                const plLeft = this.player.x - 20;
+                const plRight = this.player.x + 20;
+                const plTop = this.player.y - 10;
+                const plBottom = this.player.y + 10;
+
+                if (pRight > plLeft && pLeft < plRight && pBottom > plTop && pTop < plBottom) {
+                    projectile.active = false;
+                    this.createHitEffect(projectile.x, projectile.y);
+                    if (this.player.hit(projectile.damage)) {
+                        const gameOver = this.player.die();
+                        this.createExplosion(this.player.x, this.player.y, 50);
+                        if (gameOver) {
+                            this.gameOver();
+                        } else {
+                            this.respawnTimer = this.respawnDelay;
+                        }
+                    }
+                }
+
+                // Enemy projectiles hit friendly units (GroundUnit: Center-Bottom)
+                if (this.friendlyUnits) {
+                    this.friendlyUnits.forEach(unit => {
+                        if (!unit.active) return;
+
+                        const uLeft = unit.x - unit.width / 2;
+                        const uRight = unit.x + unit.width / 2;
+                        const uTop = unit.y - unit.height;
+                        const uBottom = unit.y;
+
+                        if (pRight > uLeft && pLeft < uRight && pBottom > uTop && pTop < uBottom) {
+                            projectile.active = false;
+                            this.createHitEffect(projectile.x, projectile.y);
+
+                            if (unit.takeDamage(projectile.damage)) {
+                                this.createExplosion(unit.x, unit.y, 10);
+                            }
+                        }
+                    });
+                }
+
+                // Enemy projectiles hit friendly base (Base: Left-Bottom)
+                if (this.friendlyBase && this.friendlyBase.active) {
+                    const bLeft = this.friendlyBase.x;
+                    const bRight = this.friendlyBase.x + this.friendlyBase.width;
+                    const bTop = this.friendlyBase.y - this.friendlyBase.height;
+                    const bBottom = this.friendlyBase.y;
+
+                    if (pRight > bLeft && pLeft < bRight && pBottom > bTop && pTop < bBottom) {
+                        projectile.active = false;
+                        this.createHitEffect(projectile.x, projectile.y);
+                        this.friendlyBase.takeDamage(projectile.damage);
+                    }
+                }
+            }
+        });
+
+        // Chopper vs Chopper Collision
+        this.enemyChoppers.forEach(enemy => {
+            if (!enemy.active) return;
+
+            // Simple distance check for mid-air collision
+            const dist = Math.sqrt(Math.pow(this.player.x - enemy.x, 2) + Math.pow(this.player.y - enemy.y, 2));
+            if (dist < 40) { // Approx combined radius
+                // Massive damage to both
+                this.player.hit(50);
+                enemy.takeDamage(50);
+                this.createExplosion((this.player.x + enemy.x) / 2, (this.player.y + enemy.y) / 2, 30);
+
+                if (this.player.health <= 0) {
+                    const gameOver = this.player.die();
+                    this.createExplosion((this.player.x + enemy.x) / 2, (this.player.y + enemy.y) / 2, 30);
+                    if (gameOver) {
+                        this.gameOver();
+                    } else {
+                        this.respawnTimer = this.respawnDelay;
+                    }
+                }
+            }
+        });
+    }
+
+
+    handleBaseDestroyed(base) {
+        this.createExplosion(base.x + base.width / 2, base.y - base.height / 2, 50);
+
+        if (base === this.enemyBase) {
+            // Level Victory
+            setTimeout(() => {
+                this.levelVictory();
+            }, 1000);
+        } else {
+            // Defeat
+            this.gameOver();
+        }
+    }
+
+    levelVictory() {
+        this.gameState = 'gameover';
+        if (this.gameLoop) cancelAnimationFrame(this.gameLoop);
+
+        window.showGameModal(
+            '🎉',
+            'Victory!',
+            `Enemy base destroyed!`,
+            () => this.init(), // Restart game
+            () => window.gameApp.showMenu(), // Exit action
+            'Play Again' // Button text
+        );
+    }
+
+    createExplosion(x, y, particleCount = 10) {
+        if (this.audio) this.audio.playExplosion(particleCount > 20 ? 'large' : 'small');
+
+        const colors = ['rgba(255, 100, 0, 1)', 'rgba(255, 200, 0, 1)', 'rgba(255, 50, 0, 1)', 'rgba(100, 100, 100, 1)'];
+
+        for (let i = 0; i < particleCount; i++) {
+            this.particles.push(new Particle(x, y, colors[Math.floor(Math.random() * colors.length)], 'explosion'));
+        }
+
+        // Add some smoke
+        for (let i = 0; i < particleCount / 2; i++) {
+            this.particles.push(new Particle(x, y, 'rgba(100, 100, 100, 0.8)', 'smoke'));
+        }
+
+        // Add debris
+        if (particleCount > 20) {
+            for (let i = 0; i < 5; i++) {
+                this.particles.push(new Particle(x, y, '#555', 'debris'));
+            }
+        }
+    }
+
+    createDustPuff(x, y) {
+        // Create gentle dust/smoke particles for non-destructive actions
+        const dustColors = ['rgba(200, 200, 180, 0.6)', 'rgba(180, 180, 160, 0.5)', 'rgba(160, 160, 140, 0.4)'];
+
+        for (let i = 0; i < 8; i++) {
+            this.particles.push(new Particle(x, y, dustColors[Math.floor(Math.random() * dustColors.length)], 'smoke'));
+        }
+    }
+
+    createMuzzleFlash(x, y, facing) {
+        if (this.audio) this.audio.playShoot();
+        const offset = facing === 'right' ? 10 : -10;
+        this.particles.push(new Particle(x + offset, y, 'rgba(255, 255, 0, 0.8)', 'spark'));
+    }
+
+    createHitEffect(x, y) {
+        if (this.audio) this.audio.playHit();
+        for (let i = 0; i < 3; i++) {
+            this.particles.push(new Particle(x, y, 'rgba(255, 255, 200, 1)', 'spark'));
+        }
+    }
+
+    draw() {
+        // Clear screen
+        this.ctx.fillStyle = '#87CEEB'; // Sky blue
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Save context for camera transform
+        this.ctx.save();
+        this.ctx.translate(-this.cameraX, 0);
+
+        // Draw terrain
+        this.ctx.fillStyle = '#4CAF50'; // Green ground
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, this.canvas.height);
+        this.terrain.forEach(point => {
+            this.ctx.lineTo(point.x, point.y);
+        });
+        this.ctx.lineTo(this.levelWidth, this.canvas.height);
+        this.ctx.fill();
+
+        // Draw helipad
+        this.helipad.draw(this.ctx);
+
+        // Draw enemy helipad
+        if (this.enemyHelipad) {
+            this.enemyHelipad.draw(this.ctx);
+        }
+
+        // Draw bases
+        this.bases.forEach(base => base.draw(this.ctx));
+
+        // Draw bunkers
+        this.bunkers.forEach(bunker => bunker.draw(this.ctx));
+
+        // Draw enemies
+        this.enemies.forEach(enemy => enemy.draw(this.ctx, this));
+
+        // Draw enemy choppers
+        this.enemyChoppers.forEach(chopper => chopper.draw(this.ctx));
+
+        // Draw friendly units
+        if (this.friendlyUnits) {
+            this.friendlyUnits.forEach(unit => unit.draw(this.ctx, this));
+        }
+
+        // Draw player
+        this.player.draw(this.ctx, this);
+
+        // Draw projectiles
+        this.projectiles.forEach(p => p.draw(this.ctx));
+
+        // Draw particles
+        this.particles.forEach(p => p.draw(this.ctx));
+
+        // Restore context (remove camera transform) for HUD
+        this.ctx.restore();
+
+        // Draw HUD
+        this.drawHUD();
+        this.drawMinimap();
+    }
+
+    drawHUD() {
+        // HUD constants
+        const margin = 10;
+        const barWidth = 150;
+        const barHeight = 20;
+
+        // Fuel bar background
+        this.ctx.fillStyle = '#333';
+        this.ctx.fillRect(margin, margin, barWidth, barHeight);
+
+        // Fuel bar fill
+        const fuelPercent = this.player.fuel / this.player.maxFuel;
+
+        // Flash red if low fuel
+        if (fuelPercent < 0.2 && Math.floor(Date.now() / 500) % 2 === 0) {
+            this.ctx.fillStyle = '#ff0000';
+        } else {
+            this.ctx.fillStyle = fuelPercent > 0.3 ? '#4CAF50' : '#F44336';
+        }
+
+        this.ctx.fillRect(margin, margin, barWidth * fuelPercent, barHeight);
+        this.ctx.fillStyle = '#FFF';
+        this.ctx.font = '12px Arial';
+        this.ctx.textAlign = 'left';
+        this.ctx.fillText(`⛽ Fuel: ${Math.floor(this.player.fuel)}/${this.player.maxFuel}`, margin + 5, margin + 15);
+
+        // Health bar
+        this.ctx.fillStyle = '#333';
+        this.ctx.fillRect(margin, margin + 30, barWidth, barHeight);
+        const healthPercent = this.player.health / this.player.maxHealth;
+
+        // Flash red if low health
+        if (healthPercent < 0.3 && Math.floor(Date.now() / 200) % 2 === 0) {
+            this.ctx.fillStyle = '#ff0000';
+        } else {
+            this.ctx.fillStyle = healthPercent > 0.3 ? '#4CAF50' : '#F44336';
+        }
+
+        this.ctx.fillRect(margin, margin + 30, barWidth * healthPercent, barHeight);
+        this.ctx.fillStyle = '#FFF';
+        this.ctx.fillText(`❤️ Health: ${Math.floor(this.player.health)}/${this.player.maxHealth}`, margin + 5, margin + 45);
+
+        // Ammo counter
+        this.ctx.fillStyle = '#FFF';
+        this.ctx.font = '16px Arial';
+        this.ctx.textAlign = 'right';
+        this.ctx.fillText(`💣 Bombs: ${this.player.ammo}/${this.player.maxAmmo}`, this.canvas.width - margin, margin + 20);
+
+        // Lives
+        this.ctx.fillText(`Lives: ${'❤️'.repeat(Math.max(0, this.player.lives))}`, this.canvas.width - margin, margin + 45);
+
+        // Cargo count
+        this.ctx.fillText(`🎖️ Cargo: ${this.player.cargo.length}/${this.player.maxCargo}`, this.canvas.width - margin, margin + 70);
+
+        // Funds
+        this.ctx.fillStyle = '#4CAF50';
+        this.ctx.fillText(`💰 Funds: $${this.economy.funds}`, this.canvas.width - margin, margin + 95);
+
+        // Landed indicator
+        if (this.player.isLanded) {
+            this.ctx.fillStyle = '#FFD700';
+            this.ctx.font = 'bold 18px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('🔧 SERVICING...', this.canvas.width / 2, 20);
+        }
+
+        // Respawn countdown
+        if (this.respawnTimer > 0) {
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+            this.ctx.fillStyle = '#FFD700';
+            this.ctx.font = 'bold 48px Arial';
+            this.ctx.textAlign = 'center';
+            const secondsLeft = Math.ceil(this.respawnTimer / 60);
+            this.ctx.fillText(`RESPAWNING IN ${secondsLeft}...`, this.canvas.width / 2, this.canvas.height / 2);
+
+            this.ctx.font = '24px Arial';
+            this.ctx.fillStyle = '#FFF';
+            this.ctx.fillText(`Lives Remaining: ${this.player.lives}`, this.canvas.width / 2, this.canvas.height / 2 + 50);
+        }
+    }
+
+    drawMinimap() {
+        const mapWidth = 200;
+        const mapHeight = 30;
+        const mapX = (this.canvas.width - mapWidth) / 2;
+        const mapY = 10;
+
+        // Background
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        this.ctx.fillRect(mapX, mapY, mapWidth, mapHeight);
+        this.ctx.strokeStyle = '#FFF';
+        this.ctx.strokeRect(mapX, mapY, mapWidth, mapHeight);
+
+        // Helper to scale X
+        const scaleX = (x) => mapX + (x / this.levelWidth) * mapWidth;
+        const scaleY = (y) => mapY + (y / this.canvas.height) * mapHeight;
+
+        // Draw Bases
+        this.bases.forEach(base => {
+            this.ctx.fillStyle = base.friendly ? '#4CAF50' : '#F44336';
+            this.ctx.fillRect(scaleX(base.x), mapY + 5, 6, 20);
+        });
+
+        // Draw Bunkers
+        this.bunkers.forEach(bunker => {
+            let color = '#9E9E9E';
+            if (bunker.owner === 'friendly') color = '#4CAF50';
+            if (bunker.owner === 'enemy') color = '#F44336';
+            this.ctx.fillStyle = color;
+            this.ctx.fillRect(scaleX(bunker.x), mapY + 10, 4, 10);
+        });
+
+        // Draw Units
+        // Friendly
+        this.ctx.fillStyle = '#81C784';
+        this.friendlyUnits.forEach(unit => {
+            if (!unit.active) return;
+            this.ctx.fillRect(scaleX(unit.x), scaleY(unit.y), 2, 2);
+        });
+
+        // Enemy
+        this.ctx.fillStyle = '#E57373';
+        this.enemies.forEach(unit => {
+            if (!unit.active) return;
+            this.ctx.fillRect(scaleX(unit.x), scaleY(unit.y), 2, 2);
+        });
+
+        // Enemy Choppers (Larger/Brighter Red)
+        this.ctx.fillStyle = '#D32F2F';
+        this.enemyChoppers.forEach(chopper => {
+            if (!chopper.active) return;
+            this.ctx.fillRect(scaleX(chopper.x), scaleY(chopper.y), 4, 3);
+        });
+
+        // Player
+        if (this.player.active) {
+            this.ctx.fillStyle = '#FFF';
+            this.ctx.fillRect(scaleX(this.player.x), scaleY(this.player.y), 3, 3);
+        }
+
+        // Camera Viewport Box
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        this.ctx.strokeRect(scaleX(this.cameraX), mapY, (this.canvas.width / this.levelWidth) * mapWidth, mapHeight);
+    }
+
+    nextLevel() {
+        this.level++;
+
+        // Max 60 levels
+        if (this.level > 60) {
+            this.winGame();
+            return;
+        }
+
+        // Every 20 levels, increase difficulty
+        if (this.level === 21 && this.difficulty === 'easy') {
+            this.difficulty = 'medium';
+        } else if (this.level === 41 && this.difficulty === 'medium') {
+            this.difficulty = 'hard';
+        }
+
+        this.player = new Helicopter(150, this.canvas.height / 2);
+        this.helipad = new Helipad(150, this.canvas.height - 50); // In front of base
+        this.enemies = [];
+        this.projectiles = [];
+        this.cameraX = 0;
+        this.levelComplete = false;
+
+        this.generateLevel();
+        this.updateStats();
+    }
+
+    winGame() {
+        this.gameState = 'gameover';
+        if (this.gameLoop) cancelAnimationFrame(this.gameLoop);
+
+        window.showGameModal(
+            '🎉',
+            'Victory!',
+            `You've completed all 60 levels! Final Score: ${this.score}`,
+            () => this.init(),
+            () => window.gameApp.showMenu()
+        );
+    }
+
+    gameOver() {
+        this.gameState = 'gameover';
+        if (this.gameLoop) cancelAnimationFrame(this.gameLoop);
+
+        // Update high score
+        if (this.score > this.highScore) {
+            this.highScore = this.score;
+            localStorage.setItem('rescueRaidersHighScore', this.highScore.toString());
+        }
+
+        window.showGameModal(
+            '💥',
+            'Game Over',
+            `Level ${this.level} - Score: ${this.score}`,
+            () => this.init(),
+            () => window.gameApp.showMenu()
+        );
+    }
+
+    updateStats() {
+        if (this.scoreEl) this.scoreEl.textContent = this.score;
+        if (this.levelEl) this.levelEl.textContent = this.level;
+        if (this.healthEl) this.healthEl.textContent = Math.max(0, Math.floor(this.player.health));
+        if (this.highScoreEl) this.highScoreEl.textContent = this.highScore;
+        if (this.fuelEl) this.fuelEl.textContent = Math.max(0, Math.floor(this.player.fuel));
+        if (this.ammoEl) this.ammoEl.textContent = this.player.ammo;
+        if (this.livesEl) this.livesEl.textContent = this.player.lives;
+        if (this.fundsEl && this.economy) {
+            this.fundsEl.textContent = '$' + this.economy.funds;
+
+            // Update button states
+            const buttons = [
+                { id: 'buy-infantry', cost: 5 },
+                { id: 'buy-tank', cost: 20 },
+                { id: 'buy-missile', cost: 30 },
+                { id: 'buy-demo', cost: 100 }
+            ];
+
+            buttons.forEach(btn => {
+                const el = document.getElementById(btn.id);
+                if (el) {
+                    if (this.economy.canAfford(btn.cost)) {
+                        el.classList.remove('disabled');
+                    } else {
+                        el.classList.add('disabled');
+                    }
+                }
+            });
+        }
+    }
+
+    purchaseUnit(type, cost) {
+        if (!this.economy) return;
+
+        if (this.economy.purchase(cost)) {
+            // Spawn unit at base
+            const unit = new GroundUnit(100, this.canvas.height - 50, type, true);
+            this.friendlyUnits.push(unit);
+
+            // Visual feedback
+            this.createHitEffect(100, this.canvas.height - 50);
+        }
+    }
+
+    cleanup() {
+        if (this.gameLoop) {
+            cancelAnimationFrame(this.gameLoop);
+            this.gameLoop = null;
+        }
+        document.removeEventListener('keydown', this.keydownHandler);
+        document.removeEventListener('keyup', this.keyupHandler);
+        this.gameState = 'menu';
+    }
+}
+
+class AudioController {
+    constructor() {
+        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        this.enabled = false;
+
+        // Unlock audio context on first user interaction
+        const unlock = () => {
+            if (this.ctx.state === 'suspended') {
+                this.ctx.resume();
+            }
+            this.enabled = true;
+            window.removeEventListener('click', unlock);
+            window.removeEventListener('keydown', unlock);
+        };
+        window.addEventListener('click', unlock);
+        window.addEventListener('keydown', unlock);
+    }
+
+    playShoot() {
+        if (!this.enabled) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.1);
+
+        gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.1);
+    }
+
+    playExplosion(size = 'small') {
+        if (!this.enabled) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(100, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(10, this.ctx.currentTime + (size === 'large' ? 0.5 : 0.2));
+
+        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + (size === 'large' ? 0.5 : 0.2));
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start();
+        osc.stop(this.ctx.currentTime + (size === 'large' ? 0.5 : 0.2));
+    }
+
+    playHit() {
+        if (!this.enabled) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(200, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(50, this.ctx.currentTime + 0.05);
+
+        gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.05);
+    }
+}
+
+// Initialize game
+
+
+window.chopperGame = new RescueRaidersGame();
+// Show instructions in standalone mode (SPA router normally handles this)
+setTimeout(() => {
+    const instr = document.getElementById('chopper-instructions');
+    if (instr && instr.classList.contains('hidden')) instr.classList.remove('hidden');
+}, 100);
+
+// Global keyboard handlers — bypass all event listener issues
+function chopperKeyDown(e) {
+    if (!window.chopperGame || window.chopperGame.gameState !== 'playing') return;
+    const input = window.chopperGame.input;
+    switch (e.key) {
+        case 'ArrowLeft': case 'a': case 'A': input.horizontal = -1; e.preventDefault(); break;
+        case 'ArrowRight': case 'd': case 'D': input.horizontal = 1; e.preventDefault(); break;
+        case 'ArrowUp': case 'w': case 'W': input.vertical = -1; e.preventDefault(); break;
+        case 'ArrowDown': case 's': case 'S': input.vertical = 1; e.preventDefault(); break;
+        case ' ': input.shooting = true; e.preventDefault(); break;
+        case 'Shift': input.bombing = true; e.preventDefault(); break;
+    }
+}
+function chopperKeyUp(e) {
+    if (!window.chopperGame) return;
+    const input = window.chopperGame.input;
+    switch (e.key) {
+        case 'ArrowLeft': case 'a': case 'A':
+        case 'ArrowRight': case 'd': case 'D': input.horizontal = 0; break;
+        case 'ArrowUp': case 'w': case 'W':
+        case 'ArrowDown': case 's': case 'S': input.vertical = 0; break;
+        case ' ': input.shooting = false; break;
+        case 'Shift': input.bombing = false; break;
+    }
+}
+ class EnemyHelicopter {
+    constructor(x, y, game) {
+        this.x = x;
+        this.y = y;
+        this.game = game; // Reference to game for accessing player/economy
+        this.vx = 0;
+        this.vy = 0;
+        this.width = 40;
+        this.height = 20;
+        this.type = 'helicopter'; // For identification
+
+        // Resources
+        this.health = 100;
+        this.maxHealth = 100;
+        this.fuel = 100;
+        this.maxFuel = 100;
+        this.ammo = 20; // More ammo for bot
+        this.maxAmmo = 20;
+        this.friendly = false;
+
+        // AI State
+        this.state = 'patrol'; // patrol, chase, attack, evade
+        this.facing = -1;
+        this.targetFacing = -1;
+        this.shootCooldown = 0;
+        this.evadeTimer = 0;
+
+        this.active = true;
+        // Respawn handling for bot only
+        this.respawnDelay = 900; // 15 seconds at 60fps
+        this.respawnTimer = 0;
+        this.spawnX = x;
+        this.spawnY = y;
+    }
+
+    update(targets, game) {
+        if (!this.active) {
+            // Handle respawn timer
+            if (this.respawnTimer > 0) {
+                this.respawnTimer--;
+                if (this.respawnTimer === 0) {
+                    this.respawn();
+                }
+            } else {
+                // Safety check: if inactive but timer is 0, respawn immediately
+                this.respawn();
+            }
+            return;
+        }
+
+        const player = game.player;
+        const distToPlayer = Math.abs(player.x - this.x);
+        const heightDiff = player.y - this.y;
+
+        // AI Logic
+        if (player.health > 0 && player.lives > 0) {
+            // Face player by default
+            this.targetFacing = player.x > this.x ? 1 : -1;
+
+            // Check needs
+            const needsRefuel = this.fuel < 30;
+            const needsRepair = this.health < 40;
+            const needsAmmo = this.ammo <= 0;
+
+            // If already returning to base, stay there until FULLY serviced
+            const isFullyServiced = this.fuel >= this.maxFuel &&
+                this.health >= this.maxHealth &&
+                this.ammo >= this.maxAmmo;
+
+            if (this.state === 'return_to_base' && !isFullyServiced) {
+                // Stay in return_to_base until completely serviced
+                // Don't change state
+            } else if (needsRefuel || needsRepair || needsAmmo) {
+                this.state = 'return_to_base';
+            } else if (this.health < 30) {
+                this.state = 'evade';
+            } else if (distToPlayer < 400) {
+                this.state = 'attack';
+            } else {
+                this.state = 'chase';
+            }
+        } else {
+            this.state = 'patrol';
+        }
+
+        // Consume fuel
+        if (this.active) {
+            this.fuel -= 0.05; // Slower consumption for bot
+            if (this.fuel <= 0) {
+                this.fuel = 0;
+                this.vy += 0.2; // Fall if out of fuel
+            }
+        }
+
+        // Apply Physics & Movement based on state
+        const speed = 4; // Slightly faster than ground units
+        const accel = 0.15;
+
+        if (this.state === 'chase') {
+            // Move towards player
+            if (player.x > this.x) this.vx += accel;
+            else this.vx -= accel;
+
+            // Match altitude roughly, but stay above ground
+            const targetY = Math.max(50, player.y - 50); // Try to stay above player
+            if (this.y < targetY) this.vy += 0.1;
+            else this.vy -= 0.1;
+
+        } else if (this.state === 'attack') {
+            // Slow down to aim
+            this.vx *= 0.95;
+
+            // Try to align Y for shooting
+            if (Math.abs(heightDiff) > 20) {
+                if (heightDiff < 0) this.vy -= 0.1; // Player is above
+                else this.vy += 0.1; // Player is below
+            }
+
+            // Shoot if aligned and facing
+            if (Math.abs(heightDiff) < 60 && this.facing === this.targetFacing) {
+                this.shoot();
+            }
+        } else if (this.state === 'evade') {
+            // Fly away from player
+            if (player.x > this.x) this.vx -= accel;
+            else this.vx += accel;
+
+            // Change altitude erratically
+            this.evadeTimer++;
+            if (this.evadeTimer % 60 < 30) this.vy -= 0.2;
+            else this.vy += 0.2;
+        } else if (this.state === 'patrol') {
+            // Just fly back and forth
+            this.vx += this.facing * 0.05;
+            if (this.x < 100) this.targetFacing = 1;
+            if (this.x > game.levelWidth - 100) this.targetFacing = -1;
+
+        } else if (this.state === 'return_to_base') {
+            // Fly to enemy helipad
+            if (game.enemyHelipad) {
+                const padX = game.enemyHelipad.x;
+                const padY = game.enemyHelipad.y;
+                const distToPad = Math.abs(padX - this.x);
+
+                // Face base
+                this.targetFacing = padX > this.x ? 1 : -1;
+
+                // Move towards pad
+                if (distToPad > 10) {
+                    if (padX > this.x) this.vx += accel;
+                    else this.vx -= accel;
+                } else {
+                    // Slow down when close
+                    this.vx *= 0.9;
+                }
+
+                // Descent logic
+                if (distToPad < 50) {
+                    // Close enough to descend
+                    const targetLandY = padY - 20;
+                    if (this.y < targetLandY - 2) {
+                        this.vy += 0.1; // Go down
+                    } else if (this.y > targetLandY + 2) {
+                        this.vy -= 0.1; // Go up (too low!)
+                    } else {
+                        // Hover at target height
+                        this.vy *= 0.8;
+                        this.y = targetLandY; // Snap to exact height for stability
+                    }
+                } else {
+                    // Cruising altitude
+                    const cruiseY = 100;
+                    if (this.y > cruiseY) this.vy -= 0.1;
+                    else this.vy += 0.1;
+                }
+            }
+        }
+
+        // Physics limits
+        this.vx = Math.max(-speed, Math.min(speed, this.vx));
+        this.vy = Math.max(-3, Math.min(3, this.vy));
+
+        // Drag
+        this.vx *= 0.98;
+        this.vy *= 0.98;
+
+        // Apply position
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Bounds
+        if (this.y < 20) { this.y = 20; this.vy = 0; }
+        if (this.y > game.canvas.height - 50) { this.y = game.canvas.height - 50; this.vy = 0; }
+        if (this.x < 0) { this.x = 0; this.vx = -this.vx; }
+        if (this.x > game.levelWidth) { this.x = game.levelWidth; this.vx = -this.vx; }
+
+        // Smooth facing
+        if (this.facing !== this.targetFacing) {
+            this.facing += (this.targetFacing - this.facing) * 0.1;
+            if (Math.abs(this.facing - this.targetFacing) < 0.1) this.facing = this.targetFacing;
+        }
+
+        // Cooldowns
+        if (this.shootCooldown > 0) this.shootCooldown--;
+    }
+
+    shoot() {
+        if (this.shootCooldown <= 0) {
+            this.shootCooldown = 30; // Fire rate
+
+            // Calculate angle with slight randomness for "AI aim error"
+            const angle = (this.facing === 1 ? 0 : Math.PI) + (Math.random() * 0.1 - 0.05);
+            const bulletSpeed = 10;
+            const vx = Math.cos(angle) * bulletSpeed;
+            const vy = Math.sin(angle) * bulletSpeed;
+
+            // Create projectile
+            const projectile = new Projectile(
+                this.x + (this.facing * 20),
+                this.y + 5,
+                vx,
+                vy,
+                'bullet',
+                'enemy',
+                10 // Damage
+            );
+            this.game.projectiles.push(projectile);
+
+            // Muzzle flash
+            this.game.createMuzzleFlash(this.x + (this.facing * 20), this.y + 5, this.facing === 1 ? 'right' : 'left');
+        }
+    }
+
+    draw(ctx) {
+        if (!this.active) return;
+
+        // Disable sprite for now - original graphics look better
+        const useSprite = false; // this.game && this.game.spritesLoaded && this.game.sprites.helicopter.complete;
+
+        if (useSprite) {
+            // Draw using sprite
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.scale(this.facing, 1);
+            ctx.rotate(this.vx * 0.05);
+
+            // Draw sprite (centered) - enemy uses same helicopter sprite
+            const spriteWidth = 60;
+            const spriteHeight = 30;
+
+            // Tint red for enemy (using composite operation)
+            ctx.globalAlpha = 0.7;
+            ctx.globalCompositeOperation = 'multiply';
+            ctx.fillStyle = '#FF0000';
+            ctx.fillRect(-spriteWidth / 2, -spriteHeight / 2, spriteWidth, spriteHeight);
+            ctx.globalCompositeOperation = 'destination-over';
+            ctx.globalAlpha = 1.0;
+
+            ctx.drawImage(this.game.sprites.helicopter, -spriteWidth / 2, -spriteHeight / 2, spriteWidth, spriteHeight);
+            ctx.globalCompositeOperation = 'source-over';
+
+            ctx.restore();
+        } else {
+            // Fallback to original graphics (matching player design but in red)
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.scale(this.facing, 1);
+
+            // Tilt: Nose always points downward when moving (forward or backward)
+            let tilt = Math.abs(this.vx) * 0.35;
+            tilt = Math.max(0, Math.min(0.6, tilt)); // Clamp tilt
+            ctx.rotate(tilt);
+
+            // Draw helicopter in outline style (matching player but red)
+            ctx.strokeStyle = '#B71C1C'; // Dark red stroke
+            ctx.fillStyle = '#C62828'; // Red fill
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Main body - angular shape with rounded front
+            ctx.beginPath();
+            // Start from back bottom
+            ctx.moveTo(-20, 8);
+            // Back side up
+            ctx.lineTo(-20, -8);
+            // Top line
+            ctx.lineTo(10, -8);
+            // Front top curve
+            ctx.quadraticCurveTo(24, -8, 24, 0);
+            // Front bottom curve
+            ctx.quadraticCurveTo(24, 8, 10, 8);
+            // Bottom line back
+            ctx.lineTo(-20, 8);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Cockpit windows (two rectangular panels)
+            ctx.fillStyle = '#FF5252'; // Light red for windows
+            ctx.strokeStyle = '#B71C1C';
+            ctx.lineWidth = 1.5;
+
+            // Left window panel
+            ctx.beginPath();
+            ctx.rect(2, -6, 8, 10);
+            ctx.fill();
+            ctx.stroke();
+
+            // Right window panel
+            ctx.beginPath();
+            ctx.rect(10, -6, 8, 10);
+            ctx.fill();
+            ctx.stroke();
+
+            // Window divider
+            ctx.beginPath();
+            ctx.moveTo(10, -6);
+            ctx.lineTo(10, 4);
+            ctx.stroke();
+
+            // Tail boom
+            ctx.strokeStyle = '#B71C1C';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(-22, 0);
+            ctx.lineTo(-35, 0);
+            ctx.stroke();
+
+            // Tail fin (vertical stabilizer)
+            ctx.fillStyle = '#C62828';
+            ctx.beginPath();
+            ctx.moveTo(-32, 0);
+            ctx.lineTo(-35, -10);
+            ctx.lineTo(-30, -10);
+            ctx.lineTo(-28, 0);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Tail rotor housing
+            ctx.fillStyle = '#C62828';
+            ctx.beginPath();
+            ctx.arc(-35, -5, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Landing skids (two parallel bars)
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+
+            // Front skid strut
+            ctx.beginPath();
+            ctx.moveTo(10, 8);
+            ctx.lineTo(10, 14);
+            ctx.stroke();
+
+            // Rear skid strut
+            ctx.beginPath();
+            ctx.moveTo(-10, 8);
+            ctx.lineTo(-10, 14);
+            ctx.stroke();
+
+            // Skid bars
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(-15, 14);
+            ctx.lineTo(15, 14);
+            ctx.stroke();
+
+            // Main rotor mast
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, -10);
+            ctx.lineTo(0, -14);
+            ctx.stroke();
+
+            // Rotor hub
+            ctx.fillStyle = '#333';
+            ctx.beginPath();
+            ctx.arc(0, -14, 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Main rotor blades (static horizontal line)
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(-35, -14);
+            ctx.lineTo(35, -14);
+            ctx.stroke();
+
+            // Tail rotor (animated)
+            const rotorAngle = Date.now() * 0.05;
+            ctx.save();
+            ctx.translate(-35, -5);
+            ctx.rotate(rotorAngle * 2);
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, -8);
+            ctx.lineTo(0, 8);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(-8, 0);
+            ctx.lineTo(8, 0);
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.restore();
+        }
+
+        // Health bar
+        // Health bar
+        if (this.health < this.maxHealth) {
+            ctx.fillStyle = '#333';
+            ctx.fillRect(this.x - 20, this.y - 30, 40, 4);
+            ctx.fillStyle = '#F44336';
+            ctx.fillRect(this.x - 20, this.y - 30, 40 * (this.health / this.maxHealth), 4);
+        }
+
+        // Fuel bar (if not full)
+        if (this.fuel < this.maxFuel) {
+            ctx.fillStyle = '#333';
+            ctx.fillRect(this.x - 20, this.y - 25, 40, 3);
+            ctx.fillStyle = '#FFC107'; // Amber for fuel
+            ctx.fillRect(this.x - 20, this.y - 25, 40 * (this.fuel / this.maxFuel), 3);
+        }
+    }
+
+    takeDamage(amount) {
+        this.health -= amount;
+        if (this.health <= 0) {
+            this.active = false;
+            this.respawnTimer = this.respawnDelay; // Start respawn timer
+            this.game.createExplosion(this.x, this.y, 30);
+            this.game.economy.awardBounty(1000); // Big bounty for chopper
+        }
+    }
+
+    respawn() {
+        this.x = this.spawnX;
+        this.y = this.spawnY;
+        this.vx = 0;
+        this.vy = 0;
+        this.health = this.maxHealth;
+        this.fuel = this.maxFuel;
+        this.ammo = this.maxAmmo;
+        this.active = true;
+        this.state = 'patrol';
+    }
+}
+
+    </script>
+</body>
+</html>

@@ -120,7 +120,7 @@
             'ANGEL', 'BLEND', 'CROWN', 'DRIFT', 'EMBER', 'FLORA', 'GRILL', 'HYDRO', 'INPUT', 'JOINT',
             'KAYAK', 'LUNAR', 'METRO', 'NEXUS', 'ORBIT', 'PIXEL', 'QUIRK', 'RADAR', 'SOLAR', 'TOPIC'
         ];
-        let targetWord, guesses, currentRow, currentCol, gameOver, keyStates;
+        let targetWord, guesses, currentRow, currentCol, gameOver, keyStates, gameStarted = false;
 
         function init() {
             targetWord = words[Math.floor(Math.random() * words.length)];
@@ -128,6 +128,7 @@
             currentRow = 0;
             currentCol = 0;
             gameOver = false;
+            gameStarted = false;
             keyStates = {};
             document.getElementById('message').textContent = '';
             renderBoard();
@@ -196,6 +197,7 @@
                     shakeRow();
                 }
             } else if (currentCol < 5) {
+                gameStarted = true;
                 guesses[currentRow][currentCol] = key;
                 const cell = document.getElementById(`cell-${currentRow}-${currentCol}`);
                 cell.textContent = key;
@@ -268,6 +270,7 @@
         }
 
         function newGame() {
+            if (gameStarted && !confirm('Game is in progress. Start a new game? Current progress will be lost.')) return;
             init();
         }
 

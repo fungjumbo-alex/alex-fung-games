@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gin Rummy</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #0f0f23 100%); min-height: 100vh; color: #fff; padding: 50px 5px 10px; }
+        .container { max-width: 450px; margin: 0 auto; text-align: center; }
+        h1 { font-size: 1.3em; margin-bottom: 10px; }
+        .status { margin-bottom: 10px; color: #4a90d9; }
+        .scores { display: flex; gap: 20px; justify-content: center; margin-bottom: 10px; font-size: 0.9em; }
+        .scores span { color: #ffd700; }
+        .ai-hand { color: #888; margin-bottom: 10px; }
+        .pile { display: flex; gap: 15px; justify-content: center; margin: 10px 0; }
+        .card { width: 45px; height: 65px; border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.85em; cursor: pointer; transition: all 0.2s; }
+        .card.red { color: #e74c3c; background: #fff; }
+        .card.black { color: #2c3e50; background: #fff; }
+        .card.deck { background: #4a90d9; }
+        .card.selected { box-shadow: 0 0 0 3px #4a90d9; transform: translateY(-5px); }
+        .card .suit { font-size: 1.1em; }
+        .hand { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin: 10px 0; min-height: 70px; }
+        .melds { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 10px 0; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; min-height: 70px; }
+        .meld { display: flex; gap: 2px; }
+        .meld .card { width: 35px; height: 50px; font-size: 0.7em; }
+        .buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        button { padding: 10px 18px; font-size: 13px; border: none; border-radius: 8px; cursor: pointer; background: #4a90d9; color: white; }
+        button:disabled { background: #555; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <div class="container">
+        <h1>🃏 Gin Rummy</h1>
+        <div class="scores">You: <span id="score0">0</span> | AI: <span id="score1">0</span></div>
+        <div class="status" id="status">Your turn - Draw a card</div>
+        <div class="ai-hand">AI has <span id="aiCount">10</span> cards</div>
+        <div class="melds" id="melds"></div>
+        <div class="pile">
+            <div class="card deck" onclick="drawFromDeck()" id="deck">?</div>
+            <div class="card" id="discard"></div>
+        </div>
+        <div class="hand" id="hand"></div>
+        <div class="buttons">
+            <button onclick="knock()" id="knockBtn" disabled>Knock</button>
+            <button onclick="gin()" id="ginBtn" disabled>Gin</button>
+            <button onclick="newGame()">New Game</button>
+        </div>
+    </div>
+    <script>
+        const suits = ['♠', '♥', '♦', '♣'];
+        const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+        let deck = [], playerHand = [], aiHand = [], discard = [];
+        let scores = [0, 0];
+        let selectedCard = null;
+        let phase = 'draw'; // 'draw' or 'discard'
+        let gameOver = false, gameStarted = false;
+
+        function getCardValue(rank) {
+            if (rank === 'A') return 1;
+            if (['J', 'Q', 'K'].includes(rank)) return 10;
+            return parseInt(rank);
+        }
+
+        function createDeck() {
+            deck = [];
+            for (let s of suits) for (let r of ranks) deck.push({ rank: r, suit: s });
+            deck.sort(() => Math.random() - 0.5);
+        }
+
+        function isRed(suit) { return suit === '♥' || suit === '♦'; }
+
+        function renderCard(card, small = false) {
+            const w = small ? 'style="width:35px;height:50px;font-size:0.7em"' : '';
+            return `<div class="card ${isRed(card.suit) ? 'red' : 'black'}" ${w}>
+                <span>${card.rank}</span><span class="suit">${card.suit}</span>
+            </div>`;
+        }
+
+        function init() {
+            createDeck();
+            playerHand = deck.splice(0, 10);
+            aiHand = deck.splice(0, 10);
+            discard = [deck.pop()];
+            phase = 'draw';
+            gameOver = false;
+            gameStarted = false;
+            selectedCard = null;
+            render();
+        }
+
+        function render() {
+            document.getElementById('aiCount').textContent = aiHand.length;
+            
+            if (discard.length > 0) {
+                document.getElementById('discard').innerHTML = renderCard(discard[discard.length - 1]);
+                document.getElementById('discard').onclick = () => drawFromDiscard();
+            }
+            
+            const handEl = document.getElementById('hand');
+            handEl.innerHTML = playerHand.sort((a, b) => {
+                const suitDiff = suits.indexOf(a.suit) - suits.indexOf(b.suit);
+                if (suitDiff !== 0) return suitDiff;
+                return ranks.indexOf(a.rank) - ranks.indexOf(b.rank);
+            }).map((card, i) => {
+                const sel = selectedCard === i ? 'selected' : '';
+                return `<div class="card ${isRed(card.suit) ? 'red' : 'black'} ${sel}" onclick="selectCard(${i})">
+                    <span>${card.rank}</span><span class="suit">${card.suit}</span>
+                </div>`;
+            }).join('');
+            
+            // Show melds
+            const melds = findMelds(playerHand);
+            document.getElementById('melds').innerHTML = melds.map(m => 
+                `<div class="meld">${m.map(c => renderCard(c, true)).join('')}</div>`
+            ).join('');
+            
+            // Check knock/gin
+            const deadwood = calcDeadwood(playerHand);
+            document.getElementById('knockBtn').disabled = phase !== 'discard' || deadwood > 10;
+            document.getElementById('ginBtn').disabled = phase !== 'discard' || deadwood > 0;
+            
+            document.getElementById('score0').textContent = scores[0];
+            document.getElementById('score1').textContent = scores[1];
+        }
+
+        function selectCard(index) {
+            if (phase !== 'discard' || gameOver) return;
+            if (selectedCard === index) {
+                // Discard this card
+                discard.push(playerHand.splice(index, 1)[0]);
+                selectedCard = null;
+                phase = 'draw';
+                render();
+                
+                if (deck.length === 0) {
+                    document.getElementById('status').textContent = 'Deck empty - reshuffling...';
+                    setTimeout(() => {
+                        deck = discard.splice(0, discard.length - 1);
+                        deck.sort(() => Math.random() - 0.5);
+                        render();
+                    }, 500);
+                }
+                
+                document.getElementById('status').textContent = 'AI thinking...';
+                setTimeout(aiTurn, 800);
+            } else {
+                selectedCard = index;
+                document.getElementById('status').textContent = 'Click again to discard';
+                render();
+            }
+        }
+
+        function drawFromDeck() {
+            if (phase !== 'draw' || gameOver || deck.length === 0) return;
+            gameStarted = true;
+            playerHand.push(deck.pop());
+            phase = 'discard';
+            document.getElementById('status').textContent = 'Select a card to discard';
+            render();
+        }
+
+        function drawFromDiscard() {
+            if (phase !== 'draw' || gameOver || discard.length === 0) return;
+            gameStarted = true;
+            playerHand.push(discard.pop());
+            phase = 'discard';
+            document.getElementById('status').textContent = 'Select a card to discard';
+            render();
+        }
+
+        function findMelds(hand) {
+            const sorted = [...hand].sort((a, b) => ranks.indexOf(a.rank) - ranks.indexOf(b.rank));
+            const melds = [];
+            const used = new Set();
+            
+            // Find sets (3-4 of same rank)
+            const rankGroups = {};
+            sorted.forEach((c, i) => {
+                if (!rankGroups[c.rank]) rankGroups[c.rank] = [];
+                rankGroups[c.rank].push({ card: c, index: i });
+            });
+            
+            for (const [rank, cards] of Object.entries(rankGroups)) {
+                if (cards.length >= 3) {
+                    melds.push(cards.map(x => x.card));
+                    cards.forEach(x => used.add(x.index));
+                }
+            }
+            
+            // Find runs (3+ same suit consecutive)
+            const suitGroups = {};
+            sorted.forEach((c, i) => {
+                if (used.has(i)) return;
+                if (!suitGroups[c.suit]) suitGroups[c.suit] = [];
+                suitGroups[c.suit].push({ card: c, index: i });
+            });
+            
+            for (const [suit, cards] of Object.entries(suitGroups)) {
+                cards.sort((a, b) => ranks.indexOf(a.card.rank) - ranks.indexOf(b.card.rank));
+                let run = [cards[0]];
+                for (let i = 1; i < cards.length; i++) {
+                    const prevRank = ranks.indexOf(run[run.length - 1].card.rank);
+                    const currRank = ranks.indexOf(cards[i].card.rank);
+                    if (currRank === prevRank + 1) {
+                        run.push(cards[i]);
+                    } else {
+                        if (run.length >= 3) {
+                            melds.push(run.map(x => x.card));
+                            run.forEach(x => used.add(x.index));
+                        }
+                        run = [cards[i]];
+                    }
+                }
+                if (run.length >= 3) {
+                    melds.push(run.map(x => x.card));
+                }
+            }
+            
+            return melds;
+        }
+
+        function calcDeadwood(hand) {
+            const melds = findMelds(hand);
+            const meldCards = new Set(melds.flat().map(c => c.rank + c.suit));
+            return hand.filter(c => !meldCards.has(c.rank + c.suit))
+                .reduce((sum, c) => sum + getCardValue(c.rank), 0);
+        }
+
+        function knock() {
+            if (calcDeadwood(playerHand) > 10) return;
+            endRound(0);
+        }
+
+        function gin() {
+            if (calcDeadwood(playerHand) > 0) return;
+            scores[0] += 25 + calcDeadwood(aiHand);
+            document.getElementById('status').textContent = '🎉 Gin! You win the round!';
+            gameOver = true;
+            render();
+        }
+
+        function endRound(knocker) {
+            const pDead = calcDeadwood(playerHand);
+            const aDead = calcDeadwood(aiHand);
+            
+            if (knocker === 0) {
+                if (pDead <= aDead) {
+                    scores[0] += aDead - pDead;
+                    document.getElementById('status').textContent = `You win! +${aDead - pDead}`;
+                } else {
+                    scores[1] += pDead - aDead + 25;
+                    document.getElementById('status').textContent = 'Undercut! AI wins round';
+                }
+            } else {
+                if (aDead <= pDead) {
+                    scores[1] += pDead - aDead;
+                    document.getElementById('status').textContent = 'AI wins round';
+                } else {
+                    scores[0] += aDead - pDead + 25;
+                    document.getElementById('status').textContent = `Undercut! You win! +${aDead - pDead + 25}`;
+                }
+            }
+            gameOver = true;
+            render();
+        }
+
+        function aiTurn() {
+            if (gameOver) return;
+            
+            // Draw
+            if (deck.length > 0) aiHand.push(deck.pop());
+            
+            // Find worst card to discard
+            let worstIdx = 0, worstVal = 0;
+            aiHand.forEach((c, i) => {
+                const val = getCardValue(c.rank);
+                if (val > worstVal) { worstVal = val; worstIdx = i; }
+            });
+            
+            discard.push(aiHand.splice(worstIdx, 1)[0]);
+            
+            // Check knock
+            if (calcDeadwood(aiHand) <= 10) {
+                endRound(1);
+                return;
+            }
+            
+            phase = 'draw';
+            document.getElementById('status').textContent = 'Your turn - Draw a card';
+            render();
+        }
+
+        function newGame() {
+            if (gameStarted && !confirm('Game is in progress. Start a new game? Current progress will be lost.')) return;
+            init();
+        }
+        init();
+    </script>
+</body>
+</html>

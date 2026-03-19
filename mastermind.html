@@ -31,11 +31,16 @@
     <div class="board" id="board"></div>
     <div class="colors" id="colors"></div>
     <button onclick="check()">✓ Check</button>
-    <button onclick="init()">🔄 New</button>
+    <button onclick="newGame()">🔄 New</button>
 
     <script>
         const COLORS = ['#e74c3c', '#3498db', '#27ae60', '#f1c40f', '#9b59b6', '#e67e22'];
-        let secret, guesses, current, selectedColor, over;
+        let secret, guesses, current, selectedColor, over, gameStarted = false;
+
+        function newGame() {
+            if (gameStarted && !confirm('Game is in progress. Start a new game? Current progress will be lost.')) return;
+            init();
+        }
 
         function init() {
             secret = [];
@@ -44,6 +49,7 @@
             current = [null, null, null, null];
             selectedColor = 0;
             over = false;
+            gameStarted = false;
             render();
         }
 
@@ -98,7 +104,8 @@
 
         function check() {
             if (over || current.includes(null)) return;
-            
+
+            gameStarted = true;
             const guess = [...current];
             let black = 0, white = 0;
             const sCopy = [...secret];

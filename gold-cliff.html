@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Gold Cliff - Game & Watch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a1a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', monospace;
+            overflow: hidden; touch-action: none;
+        }
+
+        .game-device {
+            background: linear-gradient(145deg, #8b7355, #6b5344);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow:
+                0 10px 30px rgba(0,0,0,0.5),
+                inset 0 2px 5px rgba(255,255,255,0.1);
+        }
+
+        .game-screen {
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: inset 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .title-bar {
+            color: #9bbc0f;
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 5px #9bbc0f;
+            letter-spacing: 3px;
+        }
+
+        canvas {
+            display: block;
+            background: #2a2a2a;
+            border: 3px solid #1a1a1a;
+            image-rendering: pixelated;
+         touch-action: none; }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            color: #9bbc0f;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 0 5px #9bbc0f;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #4a4a4a, #2a2a2a);
+            border: 3px solid #1a1a1a;
+            color: #9bbc0f;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow:
+                0 5px 10px rgba(0,0,0,0.3),
+                inset 0 1px 3px rgba(255,255,255,0.1);
+            transition: transform 0.1s, box-shadow 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow:
+                0 2px 5px rgba(0,0,0,0.3),
+                inset 0 1px 3px rgba(255,255,255,0.1);
+        }
+
+        .btn-dig {
+            width: 80px;
+            height: 80px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .overlay.hidden {
+            display: none;
+        }
+
+        .overlay-content {
+            background: #2a2a2a;
+            border: 4px solid #9bbc0f;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            color: #9bbc0f;
+            max-width: 90%;
+        }
+
+        .overlay-content h2 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #9bbc0f;
+        }
+
+        .overlay-content p {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .overlay-content .score-display {
+            font-size: 32px;
+            margin: 20px 0;
+            text-shadow: 0 0 10px #9bbc0f;
+        }
+
+        .start-btn {
+            margin-top: 20px;
+            padding: 15px 40px;
+            font-size: 18px;
+            background: #9bbc0f;
+            color: #2a2a2a;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .lives-display {
+            display: flex;
+            gap: 5px;
+        }
+
+        .life-icon {
+            width: 20px;
+            height: 20px;
+            background: #9bbc0f;
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            opacity: 0.3;
+        }
+
+        .life-icon.active {
+            opacity: 1;
+            box-shadow: 0 0 5px #9bbc0f;
+        }
+
+        .level-indicator {
+            font-size: 12px;
+            color: #9bbc0f;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 8px;
+            left: 8px;
+            color: #9bbc0f;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-decoration: none;
+            z-index: 1000;
+            opacity: 0.7;
+            padding: 4px 8px;
+            border: 1px solid #9bbc0f;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.5);
+        }
+        .back-btn:hover { opacity: 1; }
+        .how-btn {
+            position: fixed;
+            top: 8px;
+            right: 8px;
+            color: #9bbc0f;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            z-index: 1000;
+            opacity: 0.7;
+            padding: 4px 8px;
+            border: 1px solid #9bbc0f;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.5);
+            cursor: pointer;
+        }
+        .how-btn:hover { opacity: 1; }
+        .how-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .how-overlay.show { display: flex; }
+        .how-box {
+            background: #1a1a1a;
+            border: 2px solid #9bbc0f;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 320px;
+            color: #9bbc0f;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            position: relative;
+        }
+        .how-box h3 { font-size: 18px; margin-bottom: 12px; text-align: center; }
+        .how-box p { margin: 8px 0; line-height: 1.5; color: #c8c8c8; }
+        .how-box .close-how {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            color: #9bbc0f;
+            font-size: 20px;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+    
+.back-btn{position:fixed;top:8px;left:8px;color:#9bbc0f;font-family:'Courier New',monospace;font-size:12px;text-decoration:none;z-index:1000;opacity:.7;padding:4px 8px;border:1px solid #9bbc0f;border-radius:4px;background:rgba(0,0,0,.5)}.back-btn:hover{opacity:1}
+.how-btn{position:fixed;top:8px;right:8px;color:#9bbc0f;font-family:'Courier New',monospace;font-size:12px;z-index:1000;opacity:.7;padding:4px 8px;border:1px solid #9bbc0f;border-radius:4px;background:rgba(0,0,0,.5);cursor:pointer}.how-btn:hover{opacity:1}
+.how-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:2000;justify-content:center;align-items:center}
+.how-overlay.show{display:flex}
+.how-box{background:#1a1a1a;border:2px solid #9bbc0f;border-radius:12px;padding:24px;max-width:320px;width:90%;color:#9bbc0f;font-family:'Courier New',monospace;font-size:14px;position:relative}
+.how-box h3{font-size:18px;margin-bottom:12px;text-align:center}
+.how-box p{margin:8px 0;line-height:1.5;color:#c8c8c8}
+.how-box .close-how{position:absolute;top:8px;right:12px;color:#9bbc0f;font-size:20px;cursor:pointer;background:none;border:none}
+</style>
+
+    <style>
+        @media (max-width: 500px) {
+            .game-shell { transform: scale(var(--shell-scale, 1)); transform-origin: top center; }
+        }
+    </style>
+    <script>
+    function scaleGame() {
+        const shell = document.querySelector('.game-shell');
+        if (!shell) return;
+        const vw = window.innerWidth;
+        const shellW = shell.offsetWidth;
+        if (shellW > vw - 16) {
+            const s = (vw - 16) / shellW;
+            shell.style.setProperty('--shell-scale', s);
+            shell.style.transform = 'scale(' + s + ')';
+            shell.style.transformOrigin = 'top center';
+            shell.style.marginBottom = '-' + (shell.offsetHeight * (1 - s)) + 'px';
+        } else {
+            shell.style.transform = '';
+            shell.style.marginBottom = '';
+        }
+    }
+    window.addEventListener('resize', scaleGame);
+    window.addEventListener('load', function() { setTimeout(scaleGame, 100); });
+    document.addEventListener('DOMContentLoaded', function() { setTimeout(scaleGame, 200); });
+    
+    document.body.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+    document.body.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+    // Ensure all buttons work with touch
+    document.querySelectorAll('button, .btn, .control-btn').forEach(function(btn) {
+        if (!btn._touchFixed) {
+            btn._touchFixed = true;
+            var handlers = btn.onclick;
+            if (handlers) {
+                btn.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    btn.click();
+                }, { passive: false });
+            }
+        }
+    });
+</script>
+    
+</head>
+<body>
+    <a href="index.html" class="back-btn">← Back to Games</a>
+    <div class="how-btn" id="howBtn">?</div>
+    <div class="how-overlay" id="howOverlay">
+        <div class="how-box">
+            <button class="close-how" id="closeHow">×</button>
+            <h3>How to Play</h3>
+            <p><strong>Objective:</strong> Dig for gold while avoiding dynamite!</p>
+            <p><strong>Controls:</strong></p>
+            <p>• Arrow Keys ← → to select column</p>
+            <p>• Space or DIG button to dig</p>
+            <p><strong>Scoring:</strong></p>
+            <p>• Points increase with level</p>
+            <p>• Memorize dynamite locations during reveal</p>
+            <p>• 3 lives = Game Over</p>
+        </div>
+    </div>
+    <div class="game-device">
+        <div class="game-screen">
+            <div class="title-bar">GOLD CLIFF</div>
+            <canvas id="gameCanvas" width="320" height="280"></canvas>
+            <div class="info-bar">
+                <div class="score">SCORE: <span id="score">0</span></div>
+                <div class="lives-display" id="lives"></div>
+                <div class="hi-score">HI: <span id="hiScore">0</span></div>
+            </div>
+            <div class="level-indicator">LEVEL <span id="level">1</span></div>
+        </div>
+        <div class="controls">
+            <button class="btn" id="btnLeft">◀</button>
+            <button class="btn btn-dig" id="btnDig">DIG</button>
+            <button class="btn" id="btnRight">▶</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="startOverlay">
+        <div class="overlay-content">
+            <h2>GOLD CLIFF</h2>
+            <p>Nintendo Game & Watch</p>
+            <br>
+            <p>Mine for gold, avoid dynamite!</p>
+            <p>Watch the grid reveal, then dig.</p>
+            <p>Remember where the gold is!</p>
+            <br>
+            <p>◀ ▶ : Move | SPACE : Dig</p>
+            <br>
+            <button class="start-btn" id="startBtn">START GAME</button>
+        </div>
+    </div>
+
+    <div class="overlay hidden" id="gameOverOverlay">
+        <div class="overlay-content">
+            <h2>GAME OVER</h2>
+            <div class="score-display">SCORE: <span id="finalScore">0</span></div>
+            <p>Level Reached: <span id="finalLevel">1</span></p>
+            <br>
+            <button class="start-btn" id="restartBtn">PLAY AGAIN</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Colors
+        const LCD_OFF = '#2a2a2a';
+        const LCD_ON = '#9bbc0f';
+        const LCD_DIM = '#4a6a1a';
+
+        // Game state
+        let gameState = {
+            grid: [],
+            gridWidth: 4,
+            gridHeight: 4,
+            cellSize: 50,
+            playerX: 0,
+            score: 0,
+            hiScore: parseInt(localStorage.getItem('goldCliffHiScore')) || 0,
+            lives: 3,
+            level: 1,
+            phase: 'reveal', // reveal, play, hit
+            revealTimer: 0,
+            revealDuration: 2000,
+            flashTimer: 0,
+            flashDuration: 500,
+            hitCell: null,
+            animations: [],
+            particles: []
+        };
+
+        // LCD-style pixel patterns
+        const pixelPatterns = {
+            player: [
+                '..XX..',
+                '.XXXX.',
+                '..XX..',
+                '.XXXX.',
+                '..XX..',
+                '.X..X.'
+            ],
+            gold: [
+                '.XXXX.',
+                'XXXXXX',
+                'XXXXXX',
+                'XXXXXX',
+                'XXXXXX',
+                '.XXXX.'
+            ],
+            dynamite: [
+                '..XX..',
+                '.XXXX.',
+                'XXXXXX',
+                'XXXXXX',
+                '.XXXX.',
+                '..XX..'
+            ],
+            dug: [
+                '......',
+                '..XX..',
+                '......',
+                '..XX..',
+                '......',
+                '......'
+            ]
+        };
+
+        function drawPixelArt(x, y, pattern, size = 6, alpha = 1) {
+            ctx.globalAlpha = alpha;
+            pattern.forEach((row, py) => {
+                [...row].forEach((pixel, px) => {
+                    if (pixel === 'X') {
+                        ctx.fillRect(x + px * size, y + py * size, size, size);
+                    }
+                });
+            });
+            ctx.globalAlpha = 1;
+        }
+
+        function initGrid() {
+            const levelSettings = [
+                { width: 4, height: 4, reveal: 2500, dynamite: 3 },
+                { width: 4, height: 5, reveal: 2200, dynamite: 4 },
+                { width: 5, height: 5, reveal: 2000, dynamite: 5 },
+                { width: 5, height: 6, reveal: 1800, dynamite: 6 },
+                { width: 6, height: 6, reveal: 1600, dynamite: 7 },
+                { width: 6, height: 7, reveal: 1400, dynamite: 8 },
+                { width: 7, height: 7, reveal: 1200, dynamite: 9 },
+                { width: 7, height: 8, reveal: 1000, dynamite: 10 }
+            ];
+
+            const settings = levelSettings[Math.min(gameState.level - 1, levelSettings.length - 1)];
+            gameState.gridWidth = settings.width;
+            gameState.gridHeight = settings.height;
+            gameState.revealDuration = settings.reveal;
+
+            // Calculate cell size to fit canvas
+            const maxWidth = 300;
+            const maxHeight = 220;
+            gameState.cellSize = Math.min(
+                Math.floor(maxWidth / gameState.gridWidth),
+                Math.floor(maxHeight / gameState.gridHeight)
+            );
+
+            // Center the grid
+            gameState.gridOffsetX = (canvas.width - gameState.gridWidth * gameState.cellSize) / 2;
+            gameState.gridOffsetY = 30;
+
+            // Create grid
+            gameState.grid = [];
+            const totalCells = gameState.gridWidth * gameState.gridHeight;
+
+            for (let i = 0; i < totalCells; i++) {
+                gameState.grid.push({
+                    content: 'gold', // Will be overwritten
+                    revealed: false,
+                    dug: false
+                });
+            }
+
+            // Place dynamite
+            const dynamitePositions = [];
+            while (dynamitePositions.length < settings.dynamite) {
+                const pos = Math.floor(Math.random() * totalCells);
+                if (!dynamitePositions.includes(pos)) {
+                    dynamitePositions.push(pos);
+                    gameState.grid[pos].content = 'dynamite';
+                }
+            }
+
+            // Remaining cells are gold
+            gameState.grid.forEach((cell, i) => {
+                if (cell.content !== 'dynamite') {
+                    cell.content = 'gold';
+                }
+            });
+
+            // Reset player position
+            gameState.playerX = Math.floor(gameState.gridWidth / 2);
+            gameState.phase = 'reveal';
+            gameState.revealTimer = gameState.revealDuration;
+            gameState.hitCell = null;
+        }
+
+        function drawGrid() {
+            const offsetX = gameState.gridOffsetX || 10;
+            const offsetY = gameState.gridOffsetY || 30;
+            const cellSize = gameState.cellSize;
+
+            // Draw mine shaft frame
+            ctx.strokeStyle = LCD_DIM;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(offsetX - 5, offsetY - 5,
+                gameState.gridWidth * cellSize + 10,
+                gameState.gridHeight * cellSize + 10);
+
+            gameState.grid.forEach((cell, index) => {
+                const x = (index % gameState.gridWidth) * cellSize + offsetX;
+                const y = Math.floor(index / gameState.gridWidth) * cellSize + offsetY;
+
+                // Cell background
+                ctx.fillStyle = LCD_OFF;
+                ctx.fillRect(x, y, cellSize, cellSize);
+
+                // Cell border
+                ctx.strokeStyle = LCD_DIM;
+                ctx.lineWidth = 1;
+                ctx.strokeRect(x, y, cellSize, cellSize);
+
+                const centerX = x + cellSize / 2 - 18;
+                const centerY = y + cellSize / 2 - 18;
+
+                if (cell.dug) {
+                    // Show dug marker
+                    ctx.fillStyle = LCD_DIM;
+                    drawPixelArt(centerX, centerY, pixelPatterns.dug, 6);
+                } else if (gameState.phase === 'reveal' || gameState.phase === 'hit') {
+                    // Show content during reveal or hit phase
+                    const alpha = gameState.phase === 'hit' && index === gameState.hitCell ?
+                        (Math.sin(Date.now() / 100) + 1) / 2 : 1;
+                    ctx.fillStyle = cell.content === 'gold' ? LCD_ON : LCD_ON;
+                    drawPixelArt(centerX, centerY,
+                        cell.content === 'gold' ? pixelPatterns.gold : pixelPatterns.dynamite,
+                        6, alpha);
+                } else {
+                    // Hidden cell - show dirt pattern
+                    ctx.fillStyle = LCD_DIM;
+                    for (let i = 0; i < 3; i++) {
+                        const dx = x + 10 + (i * 15) + Math.sin(index + i) * 5;
+                        const dy = y + 15 + Math.cos(index + i) * 10;
+                        ctx.fillRect(dx, dy, 8, 8);
+                    }
+                }
+            });
+
+            // Draw player
+            const playerX = offsetX + gameState.playerX * cellSize + cellSize / 2 - 18;
+            const playerY = offsetY + gameState.gridHeight * cellSize + 5;
+
+            ctx.fillStyle = LCD_ON;
+            drawPixelArt(playerX, playerY, pixelPatterns.player, 6);
+        }
+
+        function drawPlayer() {
+            const offsetX = gameState.gridOffsetX || 10;
+            const offsetY = gameState.gridOffsetY || 30;
+            const cellSize = gameState.cellSize;
+
+            const playerX = offsetX + gameState.playerX * cellSize + cellSize / 2 - 18;
+            const playerY = offsetY + gameState.gridHeight * cellSize + 5;
+
+            // Player glow effect
+            ctx.shadowColor = LCD_ON;
+            ctx.shadowBlur = 10;
+
+            ctx.fillStyle = LCD_ON;
+            drawPixelArt(playerX, playerY, pixelPatterns.player, 6);
+
+            ctx.shadowBlur = 0;
+
+            // Draw dig indicator
+            const indicatorX = offsetX + gameState.playerX * cellSize + cellSize / 2;
+            const indicatorY = offsetY + gameState.gridHeight * cellSize - 5;
+
+            ctx.fillStyle = LCD_DIM;
+            ctx.beginPath();
+            ctx.moveTo(indicatorX, indicatorY);
+            ctx.lineTo(indicatorX - 8, indicatorY + 10);
+            ctx.lineTo(indicatorX + 8, indicatorY + 10);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawParticles() {
+            gameState.particles = gameState.particles.filter(p => {
+                p.life -= 0.02;
+                if (p.life <= 0) return false;
+
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.1;
+
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+                ctx.globalAlpha = 1;
+
+                return true;
+            });
+        }
+
+        function createParticles(x, y, color, count = 10) {
+            for (let i = 0; i < count; i++) {
+                gameState.particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: (Math.random() - 0.5) * 4 - 2,
+                    size: Math.random() * 4 + 2,
+                    life: 1,
+                    color: color
+                });
+            }
+        }
+
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = LCD_OFF;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw phase indicator
+            ctx.fillStyle = LCD_DIM;
+            ctx.font = '10px monospace';
+            ctx.textAlign = 'center';
+
+            if (gameState.phase === 'reveal') {
+                ctx.fillStyle = LCD_ON;
+                ctx.fillText('MEMORIZE!', canvas.width / 2, 20);
+
+                // Timer bar
+                const barWidth = 200;
+                const progress = gameState.revealTimer / gameState.revealDuration;
+                ctx.fillStyle = LCD_DIM;
+                ctx.fillRect((canvas.width - barWidth) / 2, canvas.height - 15, barWidth, 8);
+                ctx.fillStyle = LCD_ON;
+                ctx.fillRect((canvas.width - barWidth) / 2, canvas.height - 15, barWidth * progress, 8);
+            } else if (gameState.phase === 'play') {
+                ctx.fillText('DIG!', canvas.width / 2, 20);
+            } else if (gameState.phase === 'hit') {
+                ctx.fillStyle = LCD_ON;
+                ctx.fillText('BOOM!', canvas.width / 2, 20);
+            }
+
+            drawGrid();
+            drawPlayer();
+            drawParticles();
+        }
+
+        function update(deltaTime) {
+            if (gameState.phase === 'reveal') {
+                gameState.revealTimer -= deltaTime;
+                if (gameState.revealTimer <= 0) {
+                    gameState.phase = 'play';
+                }
+            } else if (gameState.phase === 'hit') {
+                gameState.flashTimer -= deltaTime;
+                if (gameState.flashTimer <= 0) {
+                    if (gameState.lives <= 0) {
+                        endGame();
+                    } else {
+                        initGrid();
+                    }
+                }
+            }
+        }
+
+        function dig() {
+            if (gameState.phase !== 'play') return;
+
+            // Find the lowest undug cell in the current column
+            let targetCell = -1;
+            for (let y = gameState.gridHeight - 1; y >= 0; y--) {
+                const index = y * gameState.gridWidth + gameState.playerX;
+                if (!gameState.grid[index].dug) {
+                    targetCell = index;
+                    break;
+                }
+            }
+
+            if (targetCell === -1) return; // Column fully dug
+
+            const cell = gameState.grid[targetCell];
+            const offsetX = gameState.gridOffsetX || 10;
+            const offsetY = gameState.gridOffsetY || 30;
+            const cellSize = gameState.cellSize;
+
+            const cellX = (targetCell % gameState.gridWidth) * cellSize + offsetX + cellSize / 2;
+            const cellY = Math.floor(targetCell / gameState.gridWidth) * cellSize + offsetY + cellSize / 2;
+
+            cell.dug = true;
+
+            if (cell.content === 'gold') {
+                // Success!
+                gameState.score += 10 * gameState.level;
+                updateUI();
+                createParticles(cellX, cellY, LCD_ON, 15);
+
+                // Check if all gold collected
+                const remainingGold = gameState.grid.filter(c => !c.dug && c.content === 'gold').length;
+                if (remainingGold === 0) {
+                    nextLevel();
+                }
+            } else {
+                // Hit dynamite!
+                gameState.lives--;
+                gameState.phase = 'hit';
+                gameState.hitCell = targetCell;
+                gameState.flashTimer = gameState.flashDuration;
+                updateUI();
+                createParticles(cellX, cellY, '#ff0000', 20);
+            }
+        }
+
+        function nextLevel() {
+            gameState.level++;
+            gameState.score += 50 * gameState.level; // Bonus for completing level
+            updateUI();
+            initGrid();
+        }
+
+        function moveLeft() {
+            if (gameState.playerX > 0) {
+                gameState.playerX--;
+            }
+        }
+
+        function moveRight() {
+            if (gameState.playerX < gameState.gridWidth - 1) {
+                gameState.playerX++;
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('hiScore').textContent = gameState.hiScore;
+            document.getElementById('level').textContent = gameState.level;
+
+            // Update lives display
+            const livesEl = document.getElementById('lives');
+            livesEl.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const life = document.createElement('div');
+                life.className = 'life-icon' + (i < gameState.lives ? ' active' : '');
+                livesEl.appendChild(life);
+            }
+        }
+
+        function startGame() {
+            gameState.score = 0;
+            gameState.lives = 3;
+            gameState.level = 1;
+            gameState.particles = [];
+
+            document.getElementById('startOverlay').classList.add('hidden');
+            document.getElementById('gameOverOverlay').classList.add('hidden');
+
+            updateUI();
+            initGrid();
+        }
+
+        function endGame() {
+            if (gameState.score > gameState.hiScore) {
+                gameState.hiScore = gameState.score;
+                localStorage.setItem('goldCliffHiScore', gameState.hiScore);
+            }
+
+            document.getElementById('finalScore').textContent = gameState.score;
+            document.getElementById('finalLevel').textContent = gameState.level;
+            document.getElementById('gameOverOverlay').classList.remove('hidden');
+        }
+
+        // Event listeners
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'ArrowLeft') {
+                e.preventDefault();
+                moveLeft();
+            } else if (e.code === 'ArrowRight') {
+                e.preventDefault();
+                moveRight();
+            } else if (e.code === 'Space') {
+                e.preventDefault();
+                dig();
+            }
+        });
+
+        document.getElementById('btnLeft').addEventListener('click', moveLeft);
+        document.getElementById('btnRight').addEventListener('click', moveRight);
+        document.getElementById('btnDig').addEventListener('click', dig);
+
+        // Touch handlers for buttons
+        document.getElementById('btnLeft').addEventListener('touchstart', (e) => { e.preventDefault(); moveLeft(); }, { passive: false });
+        document.getElementById('btnRight').addEventListener('touchstart', (e) => { e.preventDefault(); moveRight(); }, { passive: false });
+        document.getElementById('btnDig').addEventListener('touchstart', (e) => { e.preventDefault(); dig(); }, { passive: false });
+
+        // Touch controls with preventDefault
+        let touchStartX = 0;
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            touchStartX = e.touches[0].clientX;
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            const touchEndX = e.changedTouches[0].clientX;
+            const diff = touchEndX - touchStartX;
+
+            if (Math.abs(diff) < 30) {
+                // Tap - dig
+                dig();
+            } else if (diff > 30) {
+                moveRight();
+            } else if (diff < -30) {
+                moveLeft();
+            }
+        }, { passive: false });
+
+        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('restartBtn').addEventListener('click', startGame);
+        document.getElementById('startBtn').addEventListener('touchstart', (e) => { e.preventDefault(); startGame(); }, { passive: false });
+        document.getElementById('restartBtn').addEventListener('touchstart', (e) => { e.preventDefault(); startGame(); }, { passive: false });
+
+        // Initialize hi-score display
+        document.getElementById('hiScore').textContent = gameState.hiScore;
+
+        // Game loop
+        let lastTime = 0;
+        function gameLoop(timestamp) {
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+
+            update(deltaTime);
+            draw();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        requestAnimationFrame(gameLoop);
+
+        // How to Play toggle
+        document.getElementById('howBtn').addEventListener('click', function() {
+            document.getElementById('howOverlay').classList.add('show');
+        });
+        document.getElementById('closeHow').addEventListener('click', function() {
+            document.getElementById('howOverlay').classList.remove('show');
+        });
+        document.getElementById('howOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -51,17 +51,18 @@
         const SR = {'♣':0,'♦':1,'♥':2,'♠':3};
         const TR = {single:1,pair:2,triple:3,straight:4,flush:5,fullhouse:6,four:7,sflush:8};
         
-        let deck, pHand, cHand, last, lastBy, turn, over, round=0, wins=0, losses=0;
-        
+        let deck, pHand, cHand, last, lastBy, turn, over, round=0, wins=0, losses=0, gameStarted=false;
+
         function rank(c){ return VALUES.indexOf(c.value)*4+SR[c.suit]; }
         function sort(h){ h.sort((a,b)=>rank(a)-rank(b)); }
-        
+
         function newGame(){
+            if (gameStarted && !confirm('Game is in progress. Start a new game? Current progress will be lost.')) return;
             deck=[]; SUITS.forEach(s=>VALUES.forEach(v=>deck.push({suit:s,value:v})));
             for(let i=deck.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
             pHand=deck.slice(0,13); cHand=deck.slice(13,26);
             sort(pHand); sort(cHand);
-            last=null; lastBy=null; over=false; round++;
+            last=null; lastBy=null; over=false; round++; gameStarted=false;
             turn = pHand.some(c=>c.suit==='♣'&&c.value==='3') ? 'p' : 'c';
             render();
             msg(turn==='p'?'你有♣3，點牌選擇後出牌':'電腦先出牌');
@@ -137,6 +138,7 @@
             if(over||turn!=='p') return msg('還沒輪到你');
             const sel=getSelected();
             if(!sel.length) return msg('請先點選卡牌');
+            gameStarted=true;
             const cards=sel.map(i=>pHand[i]);
             const combo=getCombo(cards);
             if(!combo) return msg('無效牌型');
