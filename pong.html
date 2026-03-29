@@ -42,7 +42,7 @@
         <button class="touch-btn" id="up" aria-label="Move up">⬆️</button>
         <button class="touch-btn" id="down" aria-label="Move down">⬇️</button>
     </div>
-    <div class="controls"><button onclick="restart()" aria-label="Restart">🔄 Restart</button></div>
+    <div class="controls"><button onclick="startGame()" aria-label="Start game" id="startBtn">▶️ Start</button><button onclick="restart()" aria-label="Restart">🔄 Restart</button></div>
     <div class="info">First to 11 wins · Arrow keys or touch</div>
     <script>
         const canvas = document.getElementById('game');
@@ -111,7 +111,7 @@
             ctx.fill();
             ctx.shadowBlur = 0;
 
-            // Ball with trail
+            // Ball
             ctx.shadowBlur = 12;
             ctx.shadowColor = '#fff';
             ctx.fillStyle = '#fff';
@@ -119,6 +119,19 @@
             ctx.arc(ballX, ballY, ballR, 0, Math.PI * 2);
             ctx.fill();
             ctx.shadowBlur = 0;
+
+            // Start message
+            if (!running && !gameOver) {
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 24px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('▶ Press Start', canvas.width/2, canvas.height/2 - 10);
+                ctx.font = '14px sans-serif';
+                ctx.fillStyle = '#888';
+                ctx.fillText('or press any arrow key', canvas.width/2, canvas.height/2 + 20);
+            }
         }
 
         function update() {
@@ -193,6 +206,14 @@
             overlay.classList.add('show');
         }
 
+        function startGame() {
+            if (running) return;
+            running = true;
+            gameOver = false;
+            overlay.classList.remove('show');
+            animId = requestAnimationFrame(update);
+        }
+
         function restart() { cancelAnimationFrame(animId); reset(); }
 
         // Keyboard
@@ -200,7 +221,7 @@
         document.addEventListener('keydown', e => {
             keys[e.key] = true;
             if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'w' || e.key === 's') e.preventDefault();
-            if (!running && !gameOver) { running = true; animId = requestAnimationFrame(update); }
+            if (!running && !gameOver) startGame();
         });
         document.addEventListener('keyup', e => { keys[e.key] = false; });
 
