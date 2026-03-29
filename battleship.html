@@ -6,7 +6,7 @@
     <title>Battleship</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: sans-serif; background: linear-gradient(135deg, #1a3a5c 0%, #0d1f30 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; color: #fff; }
+        body { font-family: sans-serif; background: linear-gradient(135deg, #1a3a5c 0%, #0d1f30 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; color: #fff; overflow-x:hidden;}
         h1 { margin: 10px 0; }
         .info { margin-bottom: 10px; font-size: 1.1em; }
         .boards { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
@@ -17,12 +17,12 @@
         .cell.hit { background: #e74c3c; }
         .cell.miss { background: #7f8c8d; }
         .cell.ship { background: #2c3e50; }
-        button { margin-top: 15px; padding: 10px 25px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #e74c3c; color: white; font-weight: bold; }
+        button { margin-top: 15px; padding: 10px 25px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #e74c3c; color: white; font-weight: bold; outline:none;}}
         .status { margin-top: 10px; font-size: 1.1em; }
-    </style>
+    button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
 </head>
 <body>
-    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;" aria-label="Back to games">← Back</a>
     <h1>🚢 Battleship</h1>
     <div class="info">Your fleet: <b id="yourShips">5</b> | AI fleet: <b id="aiShips">5</b></div>
     <div class="status" id="status">Your turn - Click enemy board to fire!</div>

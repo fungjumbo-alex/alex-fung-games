@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gomoku</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #0f0f23 100%); min-height: 100vh; color: #fff; padding: 50px 10px 10px; display: flex; flex-direction: column; align-items: center; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #0f0f23 100%); min-height: 100vh; color: #fff; padding: 50px 10px 10px; display: flex; flex-direction: column; align-items: center; overflow-x:hidden;}
         h1 { font-size: 1.3em; margin-bottom: 10px; }
         .status { margin-bottom: 10px; font-size: 1em; color: #4a90d9; }
         .board { display: grid; grid-template-columns: repeat(15, 1fr); gap: 0; background: #d4a86a; padding: 5px; border-radius: 5px; max-width: 95vw; }
@@ -18,15 +18,15 @@
         .stone.black { background: radial-gradient(circle at 30% 30%, #555, #000); }
         .stone.white { background: radial-gradient(circle at 30% 30%, #fff, #ccc); }
         .stone.last { box-shadow: 0 0 0 2px #e74c3c; }
-        button { margin-top: 15px; padding: 10px 25px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #4a90d9; color: white; }
+        button { margin-top: 15px; padding: 10px 25px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #4a90d9; color: white; outline:none;}}
         @media (min-width: 400px) {
             .cell { width: 24px; height: 24px; }
             .stone { width: 20px; height: 20px; }
         }
-    </style>
+    button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
 </head>
 <body>
-    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;" aria-label="Back to games">← Back</a>
     <h1>⚫ Gomoku (Five in a Row)</h1>
     <div class="status" id="status">Your turn (Black)</div>
     <div class="board" id="board"></div>

@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hearts</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #0f0f23 100%); min-height: 100vh; color: #fff; padding: 50px 5px 10px; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #0f0f23 100%); min-height: 100vh; color: #fff; padding: 50px 5px 10px; overflow-x:hidden;}
         .container { max-width: 400px; margin: 0 auto; text-align: center; }
         h1 { font-size: 1.3em; margin-bottom: 5px; }
         .status { margin-bottom: 10px; color: #4a90d9; font-size: 0.9em; }
@@ -32,12 +32,12 @@
         .hand { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; margin: 10px 0; }
         .pass-area { margin: 10px 0; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; }
         .pass-cards { display: flex; gap: 5px; justify-content: center; min-height: 70px; }
-        button { padding: 10px 20px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #4a90d9; color: white; }
+        button { padding: 10px 20px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #4a90d9; color: white; outline:none;}}
         button:disabled { background: #555; }
-    </style>
+    button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
 </head>
 <body>
-    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;" aria-label="Back to games">← Back</a>
     <div class="container">
         <h1>♥️ Hearts</h1>
         <div class="scores">

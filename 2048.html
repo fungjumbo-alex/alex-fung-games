@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>2048 Game</title>
     <style>
         * {
@@ -20,7 +20,7 @@
             min-height: 100vh;
             touch-action: none;
             padding: 10px;
-        }
+        overflow-x:hidden;}
 
         .container {
             text-align: center;
@@ -262,7 +262,7 @@
                 font-size: 25px;
             }
         }
-    </style>
+    button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
 </head>
 <body>
     <div class="container">
@@ -324,7 +324,7 @@
                 this.gridSize = 4;
                 this.grid = [];
                 this.score = 0;
-                this.bestScore = parseInt(localStorage.getItem('bestScore2048')) || 0;
+                this.bestScore = parseInt((function(k){try{return localStorage.getItem(k)}catch(e){return null}})('bestScore2048')) || 0;
                 this.gameOver = false;
                 this.won = false;
                 this.keepPlaying = false;
@@ -566,7 +566,7 @@
                 
                 if (this.score > this.bestScore) {
                     this.bestScore = this.score;
-                    localStorage.setItem('bestScore2048', this.bestScore);
+                    (function(k,v){try{localStorage.setItem(k,v)}catch(e){}})('bestScore2048', this.bestScore);
                 }
                 document.getElementById('best-score').textContent = this.bestScore;
             }
@@ -641,5 +641,5 @@
 
         const game = new Game2048();
     </script>
-<a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a></body>
+<a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;" aria-label="Back to games">← Back</a></body>
 </html>

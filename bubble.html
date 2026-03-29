@@ -6,18 +6,18 @@
     <title>Bubble Shooter</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: sans-serif; background: linear-gradient(180deg, #1a1a3e 0%, #0f0f23 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; color: #fff; }
+        body { font-family: sans-serif; background: linear-gradient(180deg, #1a1a3e 0%, #0f0f23 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; color: #fff; overflow-x:hidden;}
         h1 { margin: 10px 0; }
         .info { margin-bottom: 10px; font-size: 1.2em; }
-        canvas { border-radius: 10px; background: linear-gradient(180deg, #2a2a5a 0%, #1a1a3e 100%); }
-        button { margin-top: 15px; padding: 10px 25px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; background: #e74c3c; color: white; font-weight: bold; }
-    </style>
+        canvas { border-radius: 10px; background: linear-gradient(180deg, #2a2a5a 0%, #1a1a3e 100%); max-width:100%;height:auto;}
+        button { margin-top: 15px; padding: 10px 25px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; background: #e74c3c; color: white; font-weight: bold; outline:none;}}
+    button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
 </head>
 <body>
-    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;" aria-label="Back to games">← Back</a>
     <h1>🫧 Bubble Shooter</h1>
     <div class="info">Score: <b id="score">0</b></div>
-    <canvas id="game" width="320" height="480"></canvas>
+    <canvas style="touch-action:none;" id="game" width="320" height="480"></canvas>
     <button onclick="newGame()">🔄 New Game</button>
     <script>
         const canvas = document.getElementById('game');
@@ -179,6 +179,9 @@
         });
 
         init();
-    </script>
+    
+// Swipe support
+let _tx=0,_ty=0;document.addEventListener("touchstart",e=>{_tx=e.touches[0].clientX;_ty=e.touches[0].clientY},{passive:true});document.addEventListener("touchend",e=>{const dx=e.changedTouches[0].clientX-_tx,dy=e.changedTouches[0].clientY-_ty;if(Math.abs(dx)>Math.abs(dy)</script></script>Math.abs(dx)>30){const ev=new KeyboardEvent("keydown",{key:dx>0?"ArrowRight":"ArrowLeft"});document.dispatchEvent(ev);}else if(Math.abs(dy)>30){const ev=new KeyboardEvent("keydown",{key:dy>0?"ArrowDown":"ArrowUp"});document.dispatchEvent(ev);)}},{passive:true});
+</script>
 </body>
 </html>

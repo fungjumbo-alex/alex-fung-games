@@ -22,7 +22,7 @@
             font-family: 'Courier New', monospace;
             touch-action: none;
             padding: 10px;
-        }
+        overflow-x:hidden;}
 
         .game-container {
             background: #2a2a2a;
@@ -261,13 +261,13 @@
 .how-box h3{font-size:18px;margin-bottom:12px;text-align:center}
 .how-box p{margin:8px 0;line-height:1.5;color:#c8c8c8}
 .how-box .close-how{position:absolute;top:8px;right:12px;color:#9bbc0f;font-size:20px;cursor:pointer;background:none;border:none}
-</style>
+button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
 
     <style>
         @media (max-width: 500px) {
             .game-shell { transform: scale(var(--shell-scale, 1)); transform-origin: top center; }
         }
-    </style>
+    button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
     <script>
     function scaleGame() {
         const shell = document.querySelector('.game-shell');
@@ -375,7 +375,7 @@
             running: false,
             paused: false,
             score: 0,
-            highScore: parseInt(localStorage.getItem('fireAttackHighScore')) || 0,
+            highScore: parseInt((function(k){try{return localStorage.getItem(k)}catch(e){return null}})('fireAttackHighScore')) || 0,
             misses: 0,
             player: {
                 floor: 1,
@@ -679,7 +679,7 @@
             if (gameState.score > gameState.highScore) {
                 gameState.highScore = gameState.score;
                 document.getElementById('highScore').textContent = gameState.highScore;
-                localStorage.setItem('fireAttackHighScore', gameState.highScore);
+                (function(k,v){try{localStorage.setItem(k,v)}catch(e){}})('fireAttackHighScore', gameState.highScore);
             }
         }
 

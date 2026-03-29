@@ -7,14 +7,14 @@
     <title>🐍 Snakes & Ladders</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; overflow-x:hidden;}
         a.back-link { color: #888; text-decoration: none; font-size: 14px; margin-bottom: 5px; }
         h1 { font-size: 1.5em; margin-bottom: 5px; }
         .info { display: flex; gap: 15px; margin-bottom: 8px; font-size: 0.9em; flex-wrap: wrap; justify-content: center; }
         .info span { background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 8px; }
         .info .p1 { border: 2px solid #e74c3c; }
         .info .p2 { border: 2px solid #3498db; }
-        canvas { border-radius: 10px; touch-action: none; max-width: 95vw; max-height: 52vh; }
+        canvas { border-radius: 10px; touch-action: none; max-width: 95vw; max-height: 52vh; max-width:100%;height:auto;}
         .btn { padding: 14px 40px; border: none; border-radius: 12px; font-size: 1.1em; font-weight: bold; background: #4a90d9; color: #fff; touch-action: manipulation; cursor: pointer; margin-top: 12px; }
         .btn:active { background: #357abd; transform: scale(0.95); }
         .msg { margin-top: 8px; font-size: 1em; color: #f1c40f; min-height: 24px; }
@@ -25,7 +25,7 @@
     </style>
 </head>
 <body>
-    <a href="index.html" class="back-link">← Back</a>
+    <a href="index.html" class="back-link" aria-label="Back to games">← Back</a>
     <h1>🐍 Snakes & Ladders</h1>
     <div class="info">
         <span class="p1">🔴 You: <b id="p1pos">0</b></span>

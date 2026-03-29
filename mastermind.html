@@ -6,7 +6,7 @@
     <title>Mastermind</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: sans-serif; background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; color: #fff; }
+        body { font-family: sans-serif; background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; color: #fff; overflow-x:hidden;}
         h1 { margin: 10px 0; }
         .info { margin-bottom: 10px; font-size: 1.1em; }
         .board { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
@@ -21,11 +21,11 @@
         .color { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; }
         .color:hover { transform: scale(1.1); }
         .color.selected { border-color: #fff; }
-        button { margin-top: 10px; padding: 10px 25px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #e74c3c; color: white; font-weight: bold; }
-    </style>
+        button { margin-top: 10px; padding: 10px 25px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #e74c3c; color: white; font-weight: bold; outline:none;}}
+    button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
 </head>
 <body>
-    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;" aria-label="Back to games">← Back</a>
     <h1>🔐 Mastermind</h1>
     <div class="info">Guess the 4-color code in 10 tries</div>
     <div class="board" id="board"></div>

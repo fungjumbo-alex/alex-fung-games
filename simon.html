@@ -6,7 +6,7 @@
     <title>Simon Says</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; color: #fff; }
+        body { font-family: sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; color: #fff; overflow-x:hidden;}
         h1 { margin-bottom: 15px; text-shadow: 0 0 20px rgba(255,255,255,0.3); }
         .info { margin-bottom: 15px; font-size: 1.3em; background: rgba(255,255,255,0.1); padding: 8px 25px; border-radius: 20px; }
         .game { display: grid; grid-template-columns: repeat(2, 110px); gap: 12px; padding: 20px; background: #111; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.5); }
@@ -18,12 +18,12 @@
         #btn2 { background: radial-gradient(circle at 30% 30%, #f1c40f, #f39c12); color: #f1c40f; }
         #btn3 { background: radial-gradient(circle at 30% 30%, #3498db, #2980b9); color: #3498db; }
         .controls { margin-top: 15px; }
-        button { padding: 12px 30px; font-size: 16px; border: none; border-radius: 10px; cursor: pointer; background: linear-gradient(145deg, #fff, #eee); color: #1a1a2e; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        button { padding: 12px 30px; font-size: 16px; border: none; border-radius: 10px; cursor: pointer; background: linear-gradient(145deg, #fff, #eee); color: #1a1a2e; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.2); outline:none;}}
         #message { margin-top: 10px; min-height: 24px; font-size: 1.1em; }
-    </style>
+    button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
 </head>
 <body>
-    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;" aria-label="Back to games">← Back</a>
     <h1>🎵 Simon Says</h1>
     <div class="info">Level: <b id="level">0</b></div>
     <div class="game">

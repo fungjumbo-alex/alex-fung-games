@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Tower Defence</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -15,7 +15,7 @@ body {
   align-items: center;
   min-height: 100vh;
   padding: 10px;
-}
+overflow-x:hidden;}
 h1 {
   font-size: 28px;
   margin-bottom: 8px;
@@ -45,7 +45,7 @@ canvas {
   border-radius: 6px;
   cursor: crosshair;
   background: #0f3460;
-}
+max-width:100%;height:auto;}
 #sidebar {
   width: 180px;
   background: #16213e;
@@ -123,9 +123,10 @@ button.action-btn {
 }
 #game-over-box h2 { color: #e94560; font-size: 32px; margin-bottom: 10px; }
 #game-over-box p { color: #ccc; font-size: 18px; margin-bottom: 20px; }
-</style>
+button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
 </head>
 <body>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;" aria-label="Back to games">← Back</a>
 <h1>TOWER DEFENCE</h1>
 <div id="hud">
   <span class="hud-wave">Wave: <span id="wave-num">0</span></span>
@@ -133,7 +134,7 @@ button.action-btn {
   <span class="hud-lives">Lives: <span id="lives-num">20</span></span>
 </div>
 <div id="game-area">
-  <canvas id="canvas" width="800" height="560"></canvas>
+  <canvas style="touch-action:none;" id="canvas" width="800" height="560"></canvas>
   <div id="sidebar">
     <h3>TOWERS</h3>
     <div class="tower-btn selected" data-type="basic" onclick="selectTower('basic')">

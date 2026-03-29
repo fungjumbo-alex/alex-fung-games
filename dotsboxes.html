@@ -6,7 +6,7 @@
     <title>Dots & Boxes</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: sans-serif; background: linear-gradient(135deg, #fff8dc 0%, #f5deb3 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; color: #333; }
+        body { font-family: sans-serif; background: linear-gradient(135deg, #fff8dc 0%, #f5deb3 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; color: #333; overflow-x:hidden;}
         h1 { margin: 10px 0; }
         .info { margin-bottom: 10px; font-size: 1.2em; }
         .info span { margin: 0 10px; }
@@ -23,11 +23,11 @@
         .box { width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; }
         .box.p1 { background: rgba(231,76,60,0.3); color: #e74c3c; }
         .box.p2 { background: rgba(52,152,219,0.3); color: #3498db; }
-        button { margin-top: 15px; padding: 10px 25px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #8b4513; color: white; font-weight: bold; }
-    </style>
+        button { margin-top: 15px; padding: 10px 25px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #8b4513; color: white; font-weight: bold; outline:none;}}
+    button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
 </head>
 <body>
-    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;" aria-label="Back to games">← Back</a>
     <h1>📦 Dots & Boxes</h1>
     <div class="info">
         <span style="color:#e74c3c">You: <b id="p1">0</b></span>

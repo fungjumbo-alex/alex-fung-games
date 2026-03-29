@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Blackjack</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -15,7 +15,7 @@
             align-items: center;
             padding: 20px;
             color: #fff;
-        }
+        overflow-x:hidden;}
         h1 { margin-bottom: 10px; font-size: 2em; }
         .info { display: flex; gap: 30px; margin-bottom: 20px; font-size: 1.2em; }
         .info span { background: rgba(0,0,0,0.3); padding: 10px 20px; border-radius: 10px; }
@@ -68,14 +68,14 @@
             color: #1a1a1a;
             font-weight: bold;
             transition: all 0.2s;
-        }
+        outline:none;}}
         button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         button:disabled { background: #666; cursor: not-allowed; transform: none; }
         .message { margin-top: 15px; font-size: 1.5em; font-weight: bold; min-height: 40px; }
         .win { color: #2ecc71; }
         .lose { color: #e74c3c; }
         .push { color: #f39c12; }
-    </style>
+    button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
 </head>
 <body>
     <h1>🃏 Blackjack</h1>
@@ -289,5 +289,5 @@
         gameOver = true;
         createDeck();
     </script>
-<a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a></body>
+<a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;" aria-label="Back to games">← Back</a></body>
 </html>

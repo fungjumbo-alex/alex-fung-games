@@ -16,7 +16,7 @@
             padding: 10px;
             color: #fff;
             touch-action: manipulation;
-        }
+        overflow-x:hidden;}
         h1 { margin-bottom: 10px; font-size: 1.8em; }
         .controls {
             display: flex;
@@ -34,7 +34,7 @@
             background: #4a90d9;
             color: white;
             transition: all 0.2s;
-        }
+        outline:none;}}
         button:hover { background: #357abd; }
         button:active { transform: scale(0.95); }
         button.active { background: #28a745; }
@@ -100,7 +100,7 @@
         }
         .mode-flag { color: #f39c12; }
         .mode-reveal { color: #4a90d9; }
-    </style>
+    button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
 </head>
 <body>
     <h1>💣 Minesweeper</h1>
@@ -361,5 +361,5 @@
 
         setDifficulty('easy');
     </script>
-<a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a></body>
+<a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;" aria-label="Back to games">← Back</a></body>
 </html>

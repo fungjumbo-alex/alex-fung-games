@@ -20,7 +20,7 @@
             justify-content: center;
             font-family: 'Courier New', monospace;
             overflow: hidden; touch-action: none;
-        }
+        overflow-x:hidden;}
 
         .game-device {
             background: linear-gradient(145deg, #8b7355, #6b5344);
@@ -52,7 +52,7 @@
             background: #2a2a2a;
             border: 3px solid #1a1a1a;
             image-rendering: pixelated;
-         touch-action: none; }
+         touch-action: none; max-width:100%;height:auto;}
 
         .info-bar {
             display: flex;
@@ -266,13 +266,13 @@
 .how-box h3{font-size:18px;margin-bottom:12px;text-align:center}
 .how-box p{margin:8px 0;line-height:1.5;color:#c8c8c8}
 .how-box .close-how{position:absolute;top:8px;right:12px;color:#9bbc0f;font-size:20px;cursor:pointer;background:none;border:none}
-</style>
+button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
 
     <style>
         @media (max-width: 500px) {
             .game-shell { transform: scale(var(--shell-scale, 1)); transform-origin: top center; }
         }
-    </style>
+    button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
     <script>
     function scaleGame() {
         const shell = document.querySelector('.game-shell');
@@ -390,7 +390,7 @@
             cellSize: 50,
             playerX: 0,
             score: 0,
-            hiScore: parseInt(localStorage.getItem('goldCliffHiScore')) || 0,
+            hiScore: parseInt((function(k){try{return localStorage.getItem(k)}catch(e){return null}})('goldCliffHiScore')) || 0,
             lives: 3,
             level: 1,
             phase: 'reveal', // reveal, play, hit
@@ -785,7 +785,7 @@
         function endGame() {
             if (gameState.score > gameState.hiScore) {
                 gameState.hiScore = gameState.score;
-                localStorage.setItem('goldCliffHiScore', gameState.hiScore);
+                (function(k,v){try{localStorage.setItem(k,v)}catch(e){}})('goldCliffHiScore', gameState.hiScore);
             }
 
             document.getElementById('finalScore').textContent = gameState.score;

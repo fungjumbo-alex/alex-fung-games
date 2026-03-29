@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Crazy Eights</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #0f0f23 100%); min-height: 100vh; color: #fff; padding: 50px 5px 10px; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #0f0f23 100%); min-height: 100vh; color: #fff; padding: 50px 5px 10px; overflow-x:hidden;}
         .container { max-width: 400px; margin: 0 auto; text-align: center; }
         h1 { font-size: 1.3em; margin-bottom: 10px; }
         .status { margin-bottom: 10px; color: #4a90d9; }
@@ -26,11 +26,11 @@
         .suit-btn { font-size: 1.5em; padding: 10px 15px; background: rgba(255,255,255,0.1); border: none; border-radius: 8px; cursor: pointer; }
         .suit-btn:hover { background: rgba(255,255,255,0.2); }
         .info { display: flex; justify-content: center; gap: 15px; margin: 10px 0; font-size: 0.8em; color: #888; }
-        button { padding: 10px 20px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #4a90d9; color: white; }
-    </style>
+        button { padding: 10px 20px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #4a90d9; color: white; outline:none;}}
+    button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
 </head>
 <body>
-    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;" aria-label="Back to games">← Back</a>
     <div class="container">
         <h1>🃏 Crazy Eights</h1>
         <div class="status" id="status">Your turn</div>

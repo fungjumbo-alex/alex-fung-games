@@ -6,18 +6,18 @@
     <title>Flappy Bird</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: sans-serif; background: linear-gradient(180deg, #87CEEB 0%, #98D8C8 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; }
+        body { font-family: sans-serif; background: linear-gradient(180deg, #87CEEB 0%, #98D8C8 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; overflow-x:hidden;}
         h1 { color: #2c3e50; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(255,255,255,0.5); }
         .score { font-size: 1.5em; color: #2c3e50; margin-bottom: 10px; background: rgba(255,255,255,0.7); padding: 5px 20px; border-radius: 20px; }
-        canvas { border-radius: 15px; box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
-        button { margin-top: 15px; padding: 15px 35px; font-size: 18px; border: none; border-radius: 30px; background: linear-gradient(145deg, #27ae60, #1e8449); color: white; font-weight: bold; cursor: pointer; box-shadow: 0 5px 20px rgba(39,174,96,0.4); }
-    </style>
+        canvas { border-radius: 15px; box-shadow: 0 15px 40px rgba(0,0,0,0.3); max-width:100%;height:auto;}
+        button { margin-top: 15px; padding: 15px 35px; font-size: 18px; border: none; border-radius: 30px; background: linear-gradient(145deg, #27ae60, #1e8449); color: white; font-weight: bold; cursor: pointer; box-shadow: 0 5px 20px rgba(39,174,96,0.4); outline:none;}}
+    button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
 </head>
 <body>
-    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;" aria-label="Back to games">← Back</a>
     <h1>🐦 Flappy Bird</h1>
     <div class="score">Score: <b id="score">0</b></div>
-    <canvas id="game" width="320" height="480"></canvas>
+    <canvas style="touch-action:none;" id="game" width="320" height="480"></canvas>
     <button onclick="start()">Tap to Start</button>
     <script>
         const canvas = document.getElementById('game');

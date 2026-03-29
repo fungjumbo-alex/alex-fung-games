@@ -7,9 +7,9 @@
     <title>🚀 Asteroids</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #000; color: #fff; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; touch-action: none; }
+        body { font-family: 'Segoe UI', sans-serif; background: #000; color: #fff; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; touch-action: none; overflow-x:hidden;}
         a.back-link { color: #888; text-decoration: none; font-size: 14px; position: absolute; top: 10px; left: 10px; z-index: 5; }
-        canvas { display: block; }
+        canvas { display: block; max-width:100%;height:auto;}
         .hud { position: absolute; top: 10px; right: 10px; text-align: right; font-size: 14px; }
         .controls { position: absolute; bottom: 20px; display: flex; gap: 20px; z-index: 5; }
         .joy { width: 120px; height: 120px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); position: relative; }
@@ -24,7 +24,7 @@
     </style>
 </head>
 <body>
-    <a href="index.html" class="back-link">← Back</a>
+    <a href="index.html" class="back-link" aria-label="Back to games">← Back</a>
     <div class="hud">
         <div>Score: <span id="score">0</span></div>
         <div>Lives: <span id="lives">3</span></div>

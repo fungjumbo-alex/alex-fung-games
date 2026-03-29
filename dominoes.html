@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dominoes</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -28,14 +28,14 @@
         .hand .domino.disabled { opacity: 0.4; cursor: not-allowed; }
         .ai-hand { color: #888; font-size: 0.9em; margin-bottom: 10px; }
         .buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-        button { padding: 10px 20px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #4a90d9; color: white; }
+        button { padding: 10px 20px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #4a90d9; color: white; outline:none;}}
         button:disabled { background: #555; cursor: not-allowed; }
         .place-btns { display: none; gap: 5px; margin-top: 10px; }
         .place-btns.show { display: flex; }
-    </style>
+    button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
 </head>
 <body>
-    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;" aria-label="Back to games">← Back</a>
     <div class="container">
         <h1>🁣 Dominoes</h1>
         <div class="status" id="status">Your turn</div>

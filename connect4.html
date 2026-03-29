@@ -6,7 +6,7 @@
     <title>Connect Four</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; color: #fff; }
+        body { font-family: sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; color: #fff; overflow-x:hidden;}
         h1 { margin-bottom: 10px; }
         .info { font-size: 1.2em; margin-bottom: 10px; }
         .board-container { background: linear-gradient(145deg, #2980b9, #1a5276); padding: 15px; border-radius: 15px; box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
@@ -17,12 +17,12 @@
         .cell.yellow { background: radial-gradient(circle at 30% 30%, #ffe66d, #f39c12); }
         .cell.winning { animation: pulse 0.5s infinite alternate; }
         @keyframes pulse { to { transform: scale(1.1); box-shadow: 0 0 20px #fff; } }
-        button { margin-top: 15px; padding: 10px 20px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #4a90d9; color: white; font-weight: bold; }
+        button { margin-top: 15px; padding: 10px 20px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #4a90d9; color: white; font-weight: bold; outline:none;}}
         .score { margin-top: 10px; gap: 20px; font-size: 1em; }
-    </style>
+    button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
 </head>
 <body>
-    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;" aria-label="Back to games">← Back</a>
     <h1>🔴 Connect Four 🟡</h1>
     <div class="info" id="info">Your turn</div>
     <div class="board-container"><div class="board" id="board"></div></div>

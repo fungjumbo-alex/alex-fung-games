@@ -6,7 +6,7 @@
     <title>Reversi / Othello</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; color: #fff; }
+        body { font-family: sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; color: #fff; overflow-x:hidden;}
         h1 { margin-bottom: 10px; }
         .info { margin-bottom: 10px; display: flex; gap: 20px; align-items: center; }
         .piece-sm { width: 20px; height: 20px; border-radius: 50%; display: inline-block; }
@@ -18,11 +18,11 @@
         .piece { width: 34px; height: 34px; border-radius: 50%; box-shadow: 0 3px 8px rgba(0,0,0,0.4); }
         .black { background: radial-gradient(circle at 30% 30%, #555, #111); }
         .white { background: radial-gradient(circle at 30% 30%, #fff, #bbb); }
-        button { margin-top: 15px; padding: 10px 25px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #fff; color: #1a1a2e; font-weight: bold; }
-    </style>
+        button { margin-top: 15px; padding: 10px 25px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: #fff; color: #1a1a2e; font-weight: bold; outline:none;}}
+    button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
 </head>
 <body>
-    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a>
+    <a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;" aria-label="Back to games">← Back</a>
     <h1>⚫ Reversi ⚪</h1>
     <div class="info">
         <span><span class="piece-sm black-sm"></span> <b id="black">2</b></span>

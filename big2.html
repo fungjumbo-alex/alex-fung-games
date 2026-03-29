@@ -6,7 +6,7 @@
     <title>鋤大D (Big 2)</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: sans-serif; background: #0d4f2c; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; color: #fff; }
+        body { font-family: sans-serif; background: #0d4f2c; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; color: #fff; overflow-x:hidden;}
         .container { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 400px; }
         h1 { margin: 10px 0; font-size: 1.4em; }
         .info { display: flex; gap: 10px; margin-bottom: 10px; font-size: 0.85em; }
@@ -22,9 +22,9 @@
         .card.back::after { content: '🂠'; font-size: 1.5em; color: #5a7a9a; }
         .label { font-size: 0.8em; color: rgba(255,255,255,0.6); margin: 5px 0 3px; }
         .controls { display: flex; gap: 8px; margin-top: 10px; }
-        button { padding: 10px 18px; font-size: 14px; border: none; border-radius: 6px; cursor: pointer; background: #d4af37; color: #1a1a1a; font-weight: bold; }
+        button { padding: 10px 18px; font-size: 14px; border: none; border-radius: 6px; cursor: pointer; background: #d4af37; color: #1a1a1a; font-weight: bold; outline:none;}}
         button:disabled { background: #666; color: #999; cursor: not-allowed; }
-    </style>
+    button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
 </head>
 <body>
     <h1>🃏 鋤大D</h1>
@@ -191,5 +191,5 @@
         
         newGame();
     </script>
-<a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;">← Back</a></body>
+<a href="index.html" style="position:fixed;top:10px;left:10px;background:#4a90d9;color:#fff;padding:8px 15px;border-radius:5px;text-decoration:none;font-size:14px;z-index:9999;" aria-label="Back to games">← Back</a></body>
 </html>

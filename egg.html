@@ -22,7 +22,7 @@
             overflow: hidden;
             touch-action: none;
             padding: 10px;
-        }
+        overflow-x:hidden;}
 
         .game-device {
             background: linear-gradient(145deg, #3d3d3d 0%, #2a2a2a 50%, #1f1f1f 100%);
@@ -255,13 +255,13 @@
 .how-box h3{font-size:18px;margin-bottom:12px;text-align:center}
 .how-box p{margin:8px 0;line-height:1.5;color:#c8c8c8}
 .how-box .close-how{position:absolute;top:8px;right:12px;color:#9bbc0f;font-size:20px;cursor:pointer;background:none;border:none}
-</style>
+button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
 
     <style>
         @media (max-width: 500px) {
             .game-shell { transform: scale(var(--shell-scale, 1)); transform-origin: top center; }
         }
-    </style>
+    button:focus-visible{outline:2px solid #fff;outline-offset:2px;}</style>
     <script>
     function scaleGame() {
         const shell = document.querySelector('.game-shell');
@@ -352,7 +352,7 @@
         // Game state
         let gameRunning = false;
         let score = 0;
-        let highScore = localStorage.getItem('eggHighScore') || 0;
+        let highScore = (function(k){try{return localStorage.getItem(k)}catch(e){return null}})('eggHighScore') || 0;
         let misses = 0;
         let eggs = [];
         let speedMultiplier = 1;
@@ -610,7 +610,7 @@
 
             if (score > highScore) {
                 highScore = score;
-                localStorage.setItem('eggHighScore', highScore);
+                (function(k,v){try{localStorage.setItem(k,v)}catch(e){}})('eggHighScore', highScore);
                 document.getElementById('highScore').textContent = highScore;
             }
 
